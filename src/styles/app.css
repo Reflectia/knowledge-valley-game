@@ -34,6 +34,6 @@ body {
   inset: 0;
   padding: var(--space-16, 32px);
   display: flex;
-  align-items: flex-start;
-  justify-content: flex-start;
+  align-items: flex-end;
+  justify-content: flex-end;
 }

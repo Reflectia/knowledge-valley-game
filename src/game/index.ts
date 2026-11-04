@@ -25,5 +25,8 @@ export function startGame(parent: HTMLElement): Phaser.Game {
   game.registry.set('tileSize', TILE_SIZE);
   game.registry.set('worldScale', worldScaleFor(window.innerWidth, window.innerHeight));
 
+  // Dev-only handle for automated checks (scripts/dev/drive.mjs).
+  if (import.meta.env.DEV) (window as unknown as { __game: Phaser.Game }).__game = game;
+
   return game;
 }

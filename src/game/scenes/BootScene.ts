@@ -2,9 +2,14 @@ import Phaser from 'phaser';
 
 import { preloadAll } from '../assets/loader';
 import { ENEMIES, ITEMS, TEMP_FRAMES } from '../assets/manifest';
-import { createHeroineAnimations, createHeroineTexture, heroineAnim, type Facing } from '../assets/heroine';
+import { ensureHeroine, heroineAnim, type Facing } from '../assets/heroine';
 import { DEFAULT_APPEARANCE, type Appearance, type HeroinePalettes, type Role } from '../assets/recolor';
 import { TILE_SIZE } from '../constants';
+import { LIGHT, LIGHT_RADIUS } from '../lighting/lightmap';
+import { NightLayer, createGlowOverlay } from '../lighting/NightLayer';
+
+/** Lantern glass color in lamp-post.png (set by scripts/assets/build_sprites.py). */
+const LAMP_GLASS_RGB: [number, number, number] = [58, 66, 78];
 
 const T = TILE_SIZE;
 
@@ -16,9 +21,10 @@ const T = TILE_SIZE;
 export class BootScene extends Phaser.Scene {
   private appearance: Appearance = { ...DEFAULT_APPEARANCE };
   private heroine!: Phaser.GameObjects.Sprite;
+  private heroineKey = '';
   private facing: Facing = 'down';
-  private night!: Phaser.GameObjects.Rectangle;
-  private windowLit!: Phaser.GameObjects.Image;
+  private night!: NightLayer;
+  private nightOverlays: Phaser.GameObjects.Image[] = [];
 
   constructor() {
     super('boot');
@@ -45,13 +51,33 @@ export class BootScene extends Phaser.Scene {
     const houseY = path * T;
     const house = this.add.image(houseX, houseY, 'homestead-house').setOrigin(0, 1);
     const meta = this.cache.json.get('homestead-meta') as { 'window-lit': { x: number; y: number } };
-    this.windowLit = this.add
+    const windowLit = this.add
       .image(house.x + meta['window-lit'].x, house.y - house.height + meta['window-lit'].y, 'homestead-window-lit')
-      .setOrigin(0)
-      .setVisible(false);
+      .setOrigin(0);
     this.add.image(houseX + house.width + 8, houseY - 40, 'tree-blossom-a').setOrigin(0.5, 1);
     this.add.image(houseX + house.width + 30, houseY, 'tree-blossom-b').setOrigin(0.5, 1);
-    this.add.image(houseX + house.width + 6, houseY, 'lamp-post').setOrigin(0.5, 1);
+    const lamp = this.add.image(houseX + house.width + 6, houseY, 'lamp-post').setOrigin(0.5, 1);
+
+    // Night: lantern glass glows; window and lantern cast warm dithered light.
+    const glass = createGlowOverlay(this, 'lamp-post', 'lamp-post-lit', LAMP_GLASS_RGB, LIGHT.warm);
+    const lampLit = this.add.image(lamp.x, lamp.y, 'lamp-post-lit').setOrigin(0.5, 1);
+    this.nightOverlays = [windowLit, lampLit];
+    const lampLeft = lamp.x - lamp.width / 2;
+    const lampTop = lamp.y - lamp.height;
+    const lights = [
+      {
+        x: windowLit.x + windowLit.width / 2,
+        y: windowLit.y + windowLit.height / 2,
+        radius: LIGHT_RADIUS.window,
+        color: LIGHT.window,
+      },
+      {
+        x: lampLeft + (glass ? glass.x + glass.w / 2 : lamp.width / 2),
+        y: lampTop + (glass ? glass.y + glass.h / 2 : 8),
+        radius: LIGHT_RADIUS.lamp,
+        color: LIGHT.warm,
+      },
+    ];
 
     // Garden bed with every growth stage of the first crops (temporary pack).
     for (let crop = 0; crop < 4; crop++) {
@@ -71,17 +97,13 @@ export class BootScene extends Phaser.Scene {
     const tools = [TEMP_FRAMES.wateringCan, TEMP_FRAMES.hoe, TEMP_FRAMES.axe];
     tools.forEach((f, i) => this.add.image((22 + i * 2) * T, 2 * T, 'temp-farm', f).setOrigin(0));
 
-    this.buildHeroine();
-    this.heroine = this.add.sprite(12 * T, (path + 1) * T, 'heroine-custom', 0).setOrigin(0.5, 1);
-    this.heroine.play(heroineAnim('heroine-custom', 'down', false).anim);
+    this.heroineKey = ensureHeroine(this, this.appearance);
+    this.heroine = this.add.sprite(12 * T, (path + 1) * T, this.heroineKey, 0).setOrigin(0.5, 1);
+    this.heroine.play(heroineAnim(this.heroineKey, 'down', false).anim);
 
-    this.night = this.add
-      .rectangle(0, 0, cols * T, rows * T, 0x4a5788) // light-night
-      .setOrigin(0)
-      .setBlendMode(Phaser.BlendModes.MULTIPLY)
-      .setVisible(false);
-    this.windowLit.setDepth(1);
-    this.night.setDepth(0.5);
+    this.night = new NightLayer(this, cols * T, rows * T).setDepth(10).setVisible(false);
+    this.night.setLights(lights);
+    for (const o of this.nightOverlays) o.setDepth(11).setVisible(false);
 
     const camera = this.cameras.main;
     camera.setZoom(this.registry.get('worldScale') as number);
@@ -93,26 +115,21 @@ export class BootScene extends Phaser.Scene {
     kb.on('keydown-S', () => this.cycle('skin'));
     kb.on('keydown-C', () => this.cycle('shirt'));
     kb.on('keydown-N', () => {
-      const on = !this.night.visible;
+      const on = !this.night.image.visible;
       this.night.setVisible(on);
-      this.windowLit.setVisible(on);
+      for (const o of this.nightOverlays) o.setVisible(on);
     });
 
     const cursors = kb.createCursorKeys();
     this.events.on(Phaser.Scenes.Events.UPDATE, (_t: number, dt: number) => this.move(cursors, dt));
   }
 
-  private buildHeroine(): void {
-    createHeroineTexture(this, 'heroine-custom', this.appearance);
-    createHeroineAnimations(this, 'heroine-custom');
-  }
-
   private cycle(role: Role): void {
     const options = Object.keys((this.cache.json.get('heroine-palettes') as HeroinePalettes)[role].options);
     this.appearance[role] = options[(options.indexOf(this.appearance[role]) + 1) % options.length];
-    this.buildHeroine();
-    this.heroine.setTexture('heroine-custom', 0);
-    this.heroine.play(heroineAnim('heroine-custom', this.facing, false).anim);
+    this.heroineKey = ensureHeroine(this, this.appearance);
+    // Switch texture and animation together; the previous texture stays cached.
+    this.heroine.play(heroineAnim(this.heroineKey, this.facing, false).anim);
   }
 
   private move(cursors: Phaser.Types.Input.Keyboard.CursorKeys, dt: number): void {
@@ -130,7 +147,7 @@ export class BootScene extends Phaser.Scene {
       this.heroine.x += (dx / len) * step;
       this.heroine.y += (dy / len) * step;
     }
-    const { anim, flipX } = heroineAnim('heroine-custom', this.facing, moving);
+    const { anim, flipX } = heroineAnim(this.heroineKey, this.facing, moving);
     this.heroine.setFlipX(flipX);
     if (this.heroine.anims.currentAnim?.key !== anim) this.heroine.play(anim);
   }
