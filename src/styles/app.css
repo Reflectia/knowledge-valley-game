@@ -191,6 +191,8 @@ body {
   justify-self: center;
   max-width: 100%;
   margin-bottom: var(--space-2);
+  /* Room between the text and the frame's bevelled corners (6 px border). */
+  padding: var(--space-2) var(--space-6);
   text-align: center;
   overflow: hidden;
   text-overflow: ellipsis;
