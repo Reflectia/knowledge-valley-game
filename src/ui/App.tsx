@@ -5,7 +5,9 @@ import { needsExportReminder } from '@/core/rules';
 import type { RewardEvent, UiScale } from '@/core/types';
 
 import { Overlay } from './components/common';
+import { HoverTip } from './components/HoverTip';
 import { Toasts, showToast } from './components/Toasts';
+import { itemCursor } from './itemCursor';
 import { useGame, useGameApi } from './GameContext';
 import { CreateCharacter } from './screens/CreateCharacter';
 import { GameMenu } from './screens/GameMenu';
@@ -48,6 +50,8 @@ export function App() {
   const selectSlot = useGame((s) => s.selectSlot);
   const sleepRequest = useGame((s) => s.sleepRequest);
   const uiRequest = useGame((s) => s.uiRequest);
+  const blocking = useGame((s) => s.uiBlocking);
+  const selectedItem = useGame((s) => s.world.state.toolbar[s.selectedSlot] ?? null);
 
   const [screen, setScreen] = useState<Screen>('start');
   const [modal, setModal] = useState<Modal>(null);
@@ -57,6 +61,24 @@ export function App() {
   const rewards: RewardEvent[] = screen === 'game' ? pending : [];
   const showRewards = rewards.length > 0;
   const showSleep = screen === 'game' && sleepRequest !== null && !showRewards;
+
+  // Over the world the cursor shows the selected toolbar item; menus keep the sword.
+  useEffect(() => {
+    const canvas = document.querySelector<HTMLCanvasElement>('#game canvas');
+    if (!canvas) return;
+    const id = screen === 'game' && !blocking ? selectedItem : null;
+    if (!id) {
+      canvas.style.cursor = '';
+      return;
+    }
+    let live = true;
+    void itemCursor(id).then((c) => {
+      if (live) canvas.style.cursor = c ?? '';
+    });
+    return () => {
+      live = false;
+    };
+  }, [screen, blocking, selectedItem]);
 
   // The world asks for windows (clicking the journal on the desk).
   useEffect(() => {
@@ -193,6 +215,7 @@ export function App() {
         />
       )}
       <Toasts />
+      <HoverTip />
     </div>
   );
 }

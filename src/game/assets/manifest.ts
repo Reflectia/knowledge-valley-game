@@ -125,6 +125,7 @@ export const ASSETS: Record<string, Asset> = {
 /** Tileset name inside the Tiled maps → texture key of its image. */
 export const TILESET_TEXTURES: Record<string, string> = {
   homestead: 'homestead-tiles',
+  town: 'temp-town',
   interior: 'temp-interior',
   ...Object.fromEntries(BIOMES.map((id) => [id, `tiles-${id}`])),
 };

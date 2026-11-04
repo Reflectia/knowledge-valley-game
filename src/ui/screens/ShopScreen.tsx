@@ -42,7 +42,7 @@ export function ShopScreen({ onClose }: { onClose: () => void }) {
               const item = ITEMS[id];
               return (
                 <li key={id} className="shop__row">
-                  <span className="dv-slot">
+                  <span className="dv-slot" data-tip={item.name}>
                     <ItemIcon id={id} />
                   </span>
                   <span className="shop__name">
@@ -78,7 +78,7 @@ export function ShopScreen({ onClose }: { onClose: () => void }) {
               };
               return (
                 <li key={id} className="shop__row">
-                  <span className="dv-slot">
+                  <span className="dv-slot" data-tip={item.name}>
                     <ItemIcon id={id} />
                     <span className="dv-slot__count">{n}</span>
                   </span>

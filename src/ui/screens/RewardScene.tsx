@@ -33,7 +33,7 @@ function ItemSlot({ itemId, rarity, large = false }: { itemId: string; rarity: R
   const item = uniqueItem(itemId);
   const icon = item ? assetUrl(item.pack.uniqueIcon) : assetUrl('item-book');
   return (
-    <span className={`dv-slot dv-slot--${rarity}${large ? ' dv-slot--lg' : ''}`} title={item?.name.uk}>
+    <span className={`dv-slot dv-slot--${rarity}${large ? ' dv-slot--lg' : ''}`} data-tip={item?.name.uk} data-tip-rarity={rarity}>
       <img src={icon} alt={item?.name.uk ?? ''} />
       <span className="dv-slot__badge">
         <Ico name={`r-${rarity}`} />

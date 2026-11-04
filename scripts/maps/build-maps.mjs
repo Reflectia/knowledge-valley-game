@@ -141,6 +141,12 @@ function homestead() {
   const H = 30;
   const m = new MapBuilder(W, H, { title: 'Садиба', kind: 'homestead' });
   m.tilesets.push(tileset({ firstgid: 1, name: 'homestead', image: '../homestead/homestead-tiles-16.png', w: 48, h: 16, columns: 3, tilecount: 3 }));
+  // Kenney Tiny Town (temporary) for the garden fence. Fence pieces block walking.
+  const FENCE = { tl: 44, tr: 46, bl: 80, br: 82, h: 81, left: 56, right: 58 };
+  const TOWN = 4;
+  m.tilesets.push(
+    tileset({ firstgid: TOWN, name: 'town', image: '../_temp/kenney-tiny-town/tilemap.png', w: 192, h: 176, columns: 12, tilecount: 132, collides: Object.values(FENCE) }),
+  );
   const GRASS = 1;
   const FLOWERS = 2;
   const PATH = 3;
@@ -183,6 +189,23 @@ function homestead() {
   // Garden east of the north road, between the tower branch and the main road.
   for (let y = 9; y <= 12; y++) for (let x = 27; x <= 37; x++) ground.set(x, y, GRASS);
   m.obj('garden', 'garden', 27 * T, 9 * T, 11 * T, 4 * T);
+  // A fence one tile around the garden shows its borders; gates face the road and the path.
+  const decor = m.layer('decor');
+  const [fx0, fy0, fx1, fy1] = [26, 8, 38, 13];
+  const gates = new Set(['31,13', '32,13', '26,10', '26,11']);
+  const fence = (x, y, id) => !gates.has(`${x},${y}`) && decor.set(x, y, TOWN + id);
+  for (let x = fx0 + 1; x < fx1; x++) {
+    fence(x, fy0, FENCE.h);
+    fence(x, fy1, FENCE.h);
+  }
+  for (let y = fy0 + 1; y < fy1; y++) {
+    fence(fx0, y, FENCE.left);
+    fence(fx1, y, FENCE.right);
+  }
+  fence(fx0, fy0, FENCE.tl);
+  fence(fx1, fy0, FENCE.tr);
+  fence(fx0, fy1, FENCE.bl);
+  fence(fx1, fy1, FENCE.br);
 
   // Five plots for the discipline buildings, south of the main road (5×5 tiles each).
   const plots = [

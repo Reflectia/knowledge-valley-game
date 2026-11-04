@@ -131,7 +131,8 @@ export function Hud({ onJournal, onMenu, onInventory }: { onJournal: () => void;
               key={i}
               type="button"
               className={`dv-slot hud__slot${selected === i ? ' is-selected' : ''}`}
-              title={item ? `${item.name} (${i + 1})` : t('hud.emptySlot', { n: i + 1 })}
+              aria-label={item ? `${item.name} (${i + 1})` : t('hud.emptySlot', { n: i + 1 })}
+              data-tip={item?.name}
               aria-pressed={selected === i}
               onClick={() => selectSlot(i)}
             >

@@ -298,6 +298,17 @@ body {
 
 /* ------------------------------------------------------------ toasts */
 
+/* Tooltip next to the cursor (design system: Tooltip). */
+.hover-tip {
+  position: fixed;
+  z-index: 50;
+  pointer-events: none;
+  max-width: 352px;
+}
+.hover-tip p {
+  margin: 0;
+}
+
 .toasts {
   position: absolute;
   top: 72px;

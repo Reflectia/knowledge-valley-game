@@ -53,7 +53,8 @@ export function InventoryScreen({ onClose }: { onClose: () => void }) {
                       key={id}
                       type="button"
                       className={`dv-slot${picked === id ? ' is-selected' : ''}`}
-                      title={ITEMS[id].name}
+                      aria-label={ITEMS[id].name}
+                      data-tip={ITEMS[id].name}
                       onClick={() => setPicked(picked === id ? null : id)}
                       onMouseEnter={() => setHover(id)}
                       onMouseLeave={() => setHover(null)}
@@ -78,7 +79,9 @@ export function InventoryScreen({ onClose }: { onClose: () => void }) {
                     <span
                       key={u.labKey}
                       className={`dv-slot dv-slot--${u.rarity}`}
-                      title={info?.name.uk}
+                      aria-label={info?.name.uk}
+                      data-tip={info?.name.uk}
+                      data-tip-rarity={u.rarity}
                       onMouseEnter={() => setHover(`u:${u.labKey}`)}
                       onMouseLeave={() => setHover(null)}
                     >
@@ -132,7 +135,8 @@ export function InventoryScreen({ onClose }: { onClose: () => void }) {
             key={i}
             type="button"
             className={`dv-slot${picked ? ' is-target' : ''}`}
-            title={id ? ITEMS[id]?.name : t('hud.emptySlot', { n: i + 1 })}
+            aria-label={id ? ITEMS[id]?.name : t('hud.emptySlot', { n: i + 1 })}
+            data-tip={id ? ITEMS[id]?.name : undefined}
             onClick={() => {
               if (picked) {
                 editWorld((w) => setToolbarSlot(w, i, picked));
