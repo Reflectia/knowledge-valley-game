@@ -116,8 +116,10 @@ body {
   max-width: 50%;
   text-align: right;
 }
+/* Between the tower (left) and the observatory (right), over the river valley. */
 .start-screen .dv-start__menu {
   top: 58%;
+  right: 22%;
 }
 .start-screen__file {
   display: grid;
@@ -279,6 +281,8 @@ body {
 }
 .journal__page {
   overflow: auto;
+  /* The ruled lines scroll with the text, so writing always stands on a line. */
+  background-attachment: local;
   max-height: 512px;
   min-height: 384px;
 }
