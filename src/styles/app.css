@@ -191,8 +191,9 @@ body {
   justify-self: center;
   max-width: 100%;
   margin-bottom: var(--space-2);
-  /* Room between the text and the frame's bevelled corners (6 px border). */
-  padding: var(--space-2) var(--space-6);
+  /* Same frame colors (wood-900 outline, wood-300 line, wood-700 fill), but a straight
+     inner line without the bevelled corners, which overlapped the name. */
+  border-image-source: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAARUlEQVR4nGNkYGBg0JMW+g+i0cGlp+8YGUGS3UnG2OQZSuedZWCBcRZuv40iGe+pCqaZsGpFApQrgLsBZic6YAQR+LwJAPmZEDm7pEYwAAAAAElFTkSuQmCC);
   text-align: center;
   overflow: hidden;
   text-overflow: ellipsis;
