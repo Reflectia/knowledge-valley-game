@@ -2,7 +2,7 @@ import * as XLSX from 'xlsx';
 
 import { BALANCE } from './content';
 import { EMPTY_CURRICULUM, setScore } from './curriculum';
-import { mergePlan, parseCsv, parseFile, parseJsonRows, templateCsv, validateRows, COLUMNS } from './importPlan';
+import { mergePlan, normalizeHeader, parseCsv, parseFile, parseJsonRows, templateCsv, validateRows, COLUMNS } from './importPlan';
 import { deriveProgress, reconcile } from './rewards';
 import { newWorld } from './save';
 
@@ -141,13 +141,16 @@ describe('errors are shown before applying', () => {
   });
 
   it('missing columns and empty files', () => {
-    expect(parseCsv('semester,lab_no\n1,1').errors.map((e) => e.column)).toEqual([
+    const errs = parseCsv('semester,lab_no\n1,1').errors;
+    expect(errs.filter((e) => e.code === 'missingColumn').map((e) => e.column)).toEqual([
       'discipline_id',
       'discipline_name',
       'theme_pack',
       'has_exam',
       'max_score',
     ]);
+    // The player sees which headers the file really has.
+    expect(errs.at(-1)).toEqual({ code: 'foundColumns', row: 1, params: { columns: 'semester, lab_no' } });
     expect(parseCsv('').errors[0].code).toBe('emptyFile');
     expect(parseJsonRows('{nope').errors[0].code).toBe('badFile');
   });
@@ -188,7 +191,7 @@ describe('formats', () => {
 
   it('the template has every column and parses back without header errors', () => {
     const t = templateCsv();
-    expect(t.startsWith('﻿')).toBe(true);
+    expect(t.startsWith('\uFEFF')).toBe(true);
     expect(parseCsv(t + '1,a,A,forest,no,,1,,10,,,').errors).toEqual([]);
   });
 });
@@ -214,5 +217,60 @@ describe('acceptance: a 24-lab semester plan', () => {
       [3, 'badDate'],
       [4, 'scoreOutOfRange'],
     ]);
+  });
+});
+
+describe('files saved by Excel in other formats', () => {
+  const csv = SPEC_CSV;
+  const expectSpecPlan = async (name: string, bytes: Uint8Array) => {
+    const parsed = await parseFile(name, bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer);
+    expect(parsed.errors).toEqual([]);
+    const { plan, errors } = validateRows(parsed.rows);
+    expect(errors).toEqual([]);
+    expect(plan!.labs).toHaveLength(7);
+    expect(plan!.disciplines[0].name).toBe('Методологія та процеси моделювання у ШІ');
+  };
+
+  function utf16le(text: string, bom: boolean): Uint8Array {
+    const out = new Uint8Array((bom ? 2 : 0) + text.length * 2);
+    let o = 0;
+    if (bom) {
+      out[o++] = 0xff;
+      out[o++] = 0xfe;
+    }
+    for (let i = 0; i < text.length; i++) {
+      const c = text.charCodeAt(i);
+      out[o++] = c & 255;
+      out[o++] = c >> 8;
+    }
+    return out;
+  }
+
+  /** Windows-1251 for the letters used here. */
+  function cp1251(text: string): Uint8Array {
+    const special: Record<string, number> = { і: 0xb3, І: 0xb2, ї: 0xbf, Ї: 0xaf, є: 0xba, Є: 0xaa, ґ: 0xb4, Ґ: 0xa5 };
+    return Uint8Array.from([...text].map((ch) => {
+      const c = ch.charCodeAt(0);
+      if (c < 128) return c;
+      if (special[ch]) return special[ch];
+      if (c >= 0x410 && c <= 0x44f) return c - 0x410 + 0xc0;
+      throw new Error(`no cp1251 for ${ch}`);
+    }));
+  }
+
+  it('UTF-8 with BOM (Excel "CSV UTF-8")', () => expectSpecPlan('a.csv', new TextEncoder().encode('\uFEFF' + csv)));
+  it('"Unicode text": UTF-16 LE with BOM, tab-separated', () =>
+    expectSpecPlan('a.csv', utf16le(csv.replaceAll(',', '\t'), true)));
+  it('UTF-16 LE without BOM', () => expectSpecPlan('a.csv', utf16le(csv, false)));
+  it('plain "CSV" in Windows-1251 with semicolons', () => expectSpecPlan('a.csv', cp1251(csv.replaceAll(',', ';'))));
+  it('quoted headers', () => {
+    const quoted = csv.replace(/^[^\n]+/, (h) => h.split(',').map((c) => `"${c}"`).join(','));
+    return expectSpecPlan('a.csv', new TextEncoder().encode(quoted));
+  });
+
+  it('tolerates spaces, case and invisible characters in headers', () => {
+    expect(normalizeHeader('\u00A0Discipline ID ')).toBe('discipline_id');
+    expect(normalizeHeader('\u200Bmax_score')).toBe('max_score');
+    expect(normalizeHeader('"LAB_NO"')).toBe('lab_no');
   });
 });

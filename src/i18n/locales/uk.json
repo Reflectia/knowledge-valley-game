@@ -62,7 +62,8 @@
       "scoreOutOfRange": "Бал {{value}} не вміщується в 0–{{max}}",
       "scoreWithoutDone": "Бал без дати виконання — додай done_date",
       "duplicateLab": "Лабораторна №{{labNo}} дисципліни {{id}} уже була вище",
-      "disciplineMismatch": "Дані дисципліни {{id}} відрізняються від рядка {{firstRow}}"
+      "disciplineMismatch": "Дані дисципліни {{id}} відрізняються від рядка {{firstRow}}",
+      "foundColumns": "У файлі знайдено колонки: {{columns}}. Можливо, це не той файл або Excel зберіг його в іншому форматі — збережи як \"CSV UTF-8\" чи XLSX"
     }
   }
 }

@@ -40,6 +40,7 @@ export type ImportErrorCode =
   | 'emptyFile'
   | 'badFile'
   | 'missingColumn'
+  | 'foundColumns'
   | 'required'
   | 'notInteger'
   | 'notNumber'
@@ -64,8 +65,19 @@ export interface ImportError {
 
 // ------------------------------------------------------------------ parsing
 
-function normalizeHeader(h: string): string {
-  return h.replace(/^﻿/, '').trim().toLowerCase();
+/**
+ * Header cell → column name. Tolerates what spreadsheets add: BOM, zero-width and
+ * non-breaking spaces, surrounding quotes, upper case, spaces instead of underscores.
+ */
+export function normalizeHeader(h: string): string {
+  return h
+    .replace(/[\uFEFF\u200B-\u200D\u2060]/g, '')
+    .replace(/\u00A0/g, ' ')
+    .trim()
+    .replace(/^["'«“]+|["'»”]+$/g, '')
+    .trim()
+    .toLowerCase()
+    .replace(/[\s-]+/g, '_');
 }
 
 function toRows(objects: Record<string, unknown>[]): RawRow[] {
@@ -90,7 +102,12 @@ function cellToString(v: unknown): string {
 
 function headerErrors(headers: string[]): ImportError[] {
   const have = new Set(headers.map(normalizeHeader));
-  return REQUIRED.filter((c) => !have.has(c)).map((column) => ({ code: 'missingColumn' as const, row: 1, column }));
+  const missing = REQUIRED.filter((c) => !have.has(c)).map((column) => ({ code: 'missingColumn' as const, row: 1, column }));
+  if (missing.length === 0) return [];
+  // Show what the file really has, so a wrong file or format is easy to spot.
+  const found = headers.map((h) => h.trim()).filter(Boolean).slice(0, 8);
+  const shown = found.map((h) => (h.length > 24 ? h.slice(0, 24) + '…' : h)).join(', ');
+  return [...missing, { code: 'foundColumns', row: 1, params: { columns: shown || '—' } }];
 }
 
 export interface ParseResult {
@@ -98,9 +115,26 @@ export interface ParseResult {
   errors: ImportError[];
 }
 
+/** Delimiter from the header line: the most frequent of , ; tab | outside quotes. */
+export function detectDelimiter(text: string): string {
+  const line = text.split(/\r?\n/, 1)[0].replace(/"[^"]*"/g, '');
+  let best = ',';
+  let max = 0;
+  for (const d of [',', ';', '\t', '|']) {
+    const n = line.split(d).length - 1;
+    if (n > max) {
+      max = n;
+      best = d;
+    }
+  }
+  return best;
+}
+
 export function parseCsv(text: string): ParseResult {
-  const res = Papa.parse<Record<string, string>>(text.replace(/^﻿/, ''), {
+  const clean = text.replace(/^\uFEFF/, '');
+  const res = Papa.parse<Record<string, string>>(clean, {
     header: true,
+    delimiter: detectDelimiter(clean),
     skipEmptyLines: 'greedy',
     transformHeader: normalizeHeader,
   });
@@ -141,10 +175,33 @@ export function parseJsonRows(text: string): ParseResult {
   return { rows: toRows(list as Record<string, unknown>[]), errors: headerErrors(headers) };
 }
 
+/**
+ * Bytes → text for CSV/JSON. Excel saves CSV as UTF-8 (with or without BOM),
+ * "Unicode text" as UTF-16, and plain "CSV" in the Windows code page
+ * (Windows-1251 for Ukrainian), so all three are recognized.
+ */
+export function decodeText(data: ArrayBuffer): string {
+  const b = new Uint8Array(data);
+  if (b[0] === 0xff && b[1] === 0xfe) return new TextDecoder('utf-16le').decode(b.subarray(2));
+  if (b[0] === 0xfe && b[1] === 0xff) return new TextDecoder('utf-16be').decode(b.subarray(2));
+  // UTF-16 without a BOM: every other byte of ASCII text is zero.
+  const sample = b.subarray(0, 200);
+  let zeroOdd = 0;
+  let zeroEven = 0;
+  sample.forEach((v, i) => v === 0 && (i % 2 ? zeroOdd++ : zeroEven++));
+  if (zeroOdd > sample.length / 4) return new TextDecoder('utf-16le').decode(b);
+  if (zeroEven > sample.length / 4) return new TextDecoder('utf-16be').decode(b);
+  try {
+    return new TextDecoder('utf-8', { fatal: true }).decode(b);
+  } catch {
+    return new TextDecoder('windows-1251').decode(b);
+  }
+}
+
 export async function parseFile(name: string, data: ArrayBuffer): Promise<ParseResult> {
   const ext = name.toLowerCase().split('.').pop();
   if (ext === 'xlsx' || ext === 'xls') return parseXlsx(data);
-  const text = new TextDecoder('utf-8').decode(data);
+  const text = decodeText(data);
   if (ext === 'json') return parseJsonRows(text);
   return parseCsv(text);
 }
@@ -343,5 +400,5 @@ export function mergePlan(current: Curriculum, plan: ValidatedPlan): { curriculu
 
 /** «Завантажити шаблон»: CSV with the headers (UTF-8 BOM so Excel reads Cyrillic). */
 export function templateCsv(): string {
-  return '﻿' + COLUMNS.join(',') + '\r\n';
+  return '\uFEFF' + COLUMNS.join(',') + '\r\n';
 }
