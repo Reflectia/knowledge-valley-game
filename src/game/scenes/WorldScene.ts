@@ -60,6 +60,7 @@ export class WorldScene extends Phaser.Scene {
   private revivalFx: Phaser.FX.ColorMatrix | null = null;
   private leaving = false;
   private lastNotice = 0;
+  private lastInset = 0;
   private unsubscribe: (() => void)[] = [];
 
   constructor() {
@@ -77,6 +78,7 @@ export class WorldScene extends Phaser.Scene {
     this.nightOverlays = [];
     this.fireflies = [];
     this.lastAmbient = -1;
+    this.lastLightPaint = -Infinity; // paint the new map's light layer on the first frame
     this.revivalFx = null;
 
     this.map = this.make.tilemap({ key: `map-${data.map}` });
@@ -164,6 +166,8 @@ export class WorldScene extends Phaser.Scene {
     cam.setBackgroundColor('#2e1b12');
     this.fitCamera();
     this.scale.on(Phaser.Scale.Events.RESIZE, this.fitCamera, this);
+    // The HUD may appear or change size (UI scale, ceiling hint): keep the heroine in the free area.
+    this.time.addEvent({ delay: 500, loop: true, callback: () => this.hudInset() !== this.lastInset && this.fitCamera() });
     cam.fadeIn(250, 46, 27, 18);
 
     this.cursors = this.input.keyboard!.createCursorKeys();
@@ -307,25 +311,37 @@ export class WorldScene extends Phaser.Scene {
     }
   }
 
+  /** Width of the screen covered by the HUD status panel on the left (screen px). */
+  private hudInset(): number {
+    const hud = document.querySelector('.hud__status')?.getBoundingClientRect();
+    if (!hud) return 0;
+    const canvas = this.game.canvas.getBoundingClientRect();
+    return Math.max(0, Math.round(hud.right - canvas.left));
+  }
+
+  /**
+   * Small rooms are centered, large maps followed; either way the heroine sits in
+   * the middle of the free part of the screen, right of the HUD panel.
+   */
   private fitCamera(): void {
     const cam = this.cameras.main;
     const W = this.map.widthInPixels;
     const H = this.map.heightInPixels;
     const viewW = cam.width / cam.zoom;
     const viewH = cam.height / cam.zoom;
+    const inset = this.hudInset();
+    this.lastInset = inset;
+    const shift = inset / 2 / cam.zoom;
     cam.stopFollow();
     if (W <= viewW && H <= viewH) {
-      // Small rooms: center in the free part of the screen, right of the HUD panel.
-      const hud = document.querySelector('.hud__status')?.getBoundingClientRect();
-      const canvas = this.game.canvas.getBoundingClientRect();
-      const inset = hud ? Math.max(0, hud.right - canvas.left) : 0;
-      const free = cam.width - inset;
-      const shift = free >= W * cam.zoom ? inset / 2 / cam.zoom : 0;
+      const fits = cam.width - inset >= W * cam.zoom;
       cam.removeBounds();
-      cam.centerOn(W / 2 - shift, H / 2);
+      cam.centerOn(W / 2 - (fits ? shift : 0), H / 2);
     } else {
       cam.setBounds(0, 0, W, H, true);
       cam.startFollow(this.heroine, true);
+      // Follow offset is subtracted from the target: a positive x puts her right of center.
+      cam.setFollowOffset(shift, 0);
     }
   }
 

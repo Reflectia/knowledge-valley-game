@@ -50,8 +50,8 @@ export function Hud({ onJournal, onMenu }: { onJournal: () => void; onMenu: () =
   const title = (progress.topBranch && packByBranch(progress.topBranch)?.title) || DEFAULT_TITLE;
 
   // Level pips: a short window around the current level, the ceiling plate before the first locked one.
-  const first = Math.max(1, player.level - 3);
-  const last = Math.min(progress.ceiling + 2, first + 9);
+  const first = Math.max(1, player.level - 2);
+  const last = Math.min(progress.ceiling + 1, first + 5);
   const pips = [];
   for (let lv = first; lv <= last; lv++) {
     if (lv === progress.ceiling + 1) {
@@ -73,15 +73,15 @@ export function Hud({ onJournal, onMenu }: { onJournal: () => void; onMenu: () =
   return (
     <div className="hud">
       <section className="dv-panel hud__status" aria-label={player.name}>
-        <span className="dv-nameplate">{player.name}</span>
+        <span className="dv-nameplate hud__name">{player.name}</span>
         <p className="hud__title">{title.uk}</p>
         <p className="hud__line">
-          <Ico name="clock" />
-          {t('hud.day', { day })} · {clock(minutes)} · {t(`hud.phase.${phaseOf(minutes)}`)}
-        </p>
-        <p className="hud__line">
-          <Ico name="coin" />
-          <span className="hud__stat" aria-label={t('hud.coins')}>
+          <span className="hud__time">
+            <Ico name="clock" />
+            {t('hud.day', { day })} · {clock(minutes)} · {t(`hud.phase.${phaseOf(minutes)}`)}
+          </span>
+          <span className="hud__coins" aria-label={t('hud.coins')} title={t('hud.coins')}>
+            <Ico name="coin" />
             {player.coins}
           </span>
         </p>

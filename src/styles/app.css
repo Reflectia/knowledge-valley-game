@@ -179,40 +179,79 @@ body {
 }
 .hud__status {
   position: absolute;
-  top: var(--space-8);
-  left: var(--space-8);
-  width: 384px;
+  top: var(--space-6);
+  left: var(--space-6);
+  width: 300px;
   display: grid;
   gap: 0;
-  padding-top: var(--space-6);
+  padding: var(--space-4) var(--space-6) var(--space-6);
+}
+/* The name plate fits the name and sits centered (not stretched by the grid). */
+.hud__name {
+  justify-self: center;
+  max-width: 100%;
+  margin-bottom: var(--space-2);
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .hud__title {
   margin: 0;
+  text-align: center;
+  font-size: 16px;
+  line-height: 24px;
   font-weight: 700;
-  line-height: 28px;
+  color: var(--ink-muted);
 }
 .hud__line {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: var(--space-4);
   margin: 0;
-  line-height: 32px;
+  font-size: 16px;
+  line-height: 28px;
 }
-.hud__stat {
-  font: 16px/32px var(--font-display);
+.hud__time,
+.hud__coins {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.hud__coins {
+  font: 16px/28px var(--font-display);
+}
+.hud__status .dv-bar {
+  min-width: 0;
+  gap: var(--space-4);
+}
+.hud__status .dv-bar__track {
+  height: 14px;
+}
+.hud__status .dv-bar__value {
+  min-width: 64px;
+  font-size: 16px;
+  line-height: 28px;
 }
 .hud__levels {
   display: flex;
   align-items: center;
   gap: var(--space-4);
-  min-height: 32px;
+  min-height: 28px;
   flex-wrap: wrap;
 }
 .hud__level {
-  font: 16px/32px var(--font-display);
+  font: 16px/28px var(--font-display);
+}
+.hud__status .dv-levels__ceiling {
+  height: 24px;
+  font-size: 16px;
 }
 .hud__hint {
   margin: 0;
+  font-size: 16px;
+  line-height: 24px;
 }
 .hud__buttons {
   position: absolute;
