@@ -1,0 +1,4 @@
+﻿semester,discipline_id,discipline_name,theme_pack,has_exam,exam_date,lab_no,lab_title,max_score,deadline,done_date,score
+1,mpm_ai,Методологія та процеси моделювання у ШІ,jungle,yes,2027-01-15,1,,10,2026-09-25,,
+1,mpm_ai,Методологія та процеси моделювання у ШІ,forest,yes,2027-01-15,2,,10,06.11.2026,,
+1,ai_iit,Штучний інтелект та інноваційні ІТ,tower,no,,1,,8,2026-10-02,2026-10-01,12
