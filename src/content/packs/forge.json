@@ -1,0 +1,68 @@
+{
+  "_draft": "Names of the resource and unique items are drafts for the owner to edit.",
+  "id": "forge",
+  "season": "late-autumn",
+  "location": {
+    "name": {
+      "uk": "Гірська кузня"
+    }
+  },
+  "mentor": {
+    "name": {
+      "uk": "Гном-зодчий"
+    },
+    "portrait": "portrait-forge"
+  },
+  "building": {
+    "name": {
+      "uk": "Майстерня"
+    }
+  },
+  "branch": {
+    "id": "architecture",
+    "name": {
+      "uk": "Архітектура"
+    },
+    "effect": {
+      "uk": "Розширення садиби, нові креслення, краща зброя"
+    }
+  },
+  "resource": {
+    "id": "forge-ore",
+    "name": {
+      "uk": "Руда креслень"
+    }
+  },
+  "uniques": [
+    {
+      "id": "forge-unique-1",
+      "name": {
+        "uk": "Молоток модульності"
+      }
+    },
+    {
+      "id": "forge-unique-2",
+      "name": {
+        "uk": "Ковадло інтерфейсів"
+      }
+    },
+    {
+      "id": "forge-unique-3",
+      "name": {
+        "uk": "Креслення фундаменту"
+      }
+    },
+    {
+      "id": "forge-unique-4",
+      "name": {
+        "uk": "Ключ залежностей"
+      }
+    },
+    {
+      "id": "forge-unique-5",
+      "name": {
+        "uk": "Корона архітектора"
+      }
+    }
+  ]
+}

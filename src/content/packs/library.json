@@ -1,0 +1,68 @@
+{
+  "_draft": "Names of the resource and unique items are drafts for the owner to edit.",
+  "id": "library",
+  "season": "autumn",
+  "location": {
+    "name": {
+      "uk": "Бібліотека-обсерваторія"
+    }
+  },
+  "mentor": {
+    "name": {
+      "uk": "Стара зоречителька"
+    },
+    "portrait": "portrait-library"
+  },
+  "building": {
+    "name": {
+      "uk": "Алхімічна лабораторія"
+    }
+  },
+  "branch": {
+    "id": "science",
+    "name": {
+      "uk": "Наука"
+    },
+    "effect": {
+      "uk": "Алхімія: зілля, нові рецепти, заклинання"
+    }
+  },
+  "resource": {
+    "id": "library-stardust",
+    "name": {
+      "uk": "Зоряний пил"
+    }
+  },
+  "uniques": [
+    {
+      "id": "library-unique-1",
+      "name": {
+        "uk": "Перо гіпотези"
+      }
+    },
+    {
+      "id": "library-unique-2",
+      "name": {
+        "uk": "Карта сузір'їв"
+      }
+    },
+    {
+      "id": "library-unique-3",
+      "name": {
+        "uk": "Підзорна труба огляду літератури"
+      }
+    },
+    {
+      "id": "library-unique-4",
+      "name": {
+        "uk": "Колба експерименту"
+      }
+    },
+    {
+      "id": "library-unique-5",
+      "name": {
+        "uk": "Зоряний атлас"
+      }
+    }
+  ]
+}

@@ -1,0 +1,68 @@
+{
+  "_draft": "Names of the resource and unique items are drafts for the owner to edit.",
+  "id": "forest",
+  "season": "eternal-spring",
+  "location": {
+    "name": {
+      "uk": "Зачарований ліс"
+    }
+  },
+  "mentor": {
+    "name": {
+      "uk": "Друїдка-ельфійка"
+    },
+    "portrait": "portrait-forest"
+  },
+  "building": {
+    "name": {
+      "uk": "Оранжерея моделей"
+    }
+  },
+  "branch": {
+    "id": "modeling",
+    "name": {
+      "uk": "Моделювання"
+    },
+    "effect": {
+      "uk": "Магія росту: швидше ростуть рослини, рідкісне насіння"
+    }
+  },
+  "resource": {
+    "id": "forest-moss",
+    "name": {
+      "uk": "Росяний мох"
+    }
+  },
+  "uniques": [
+    {
+      "id": "forest-unique-1",
+      "name": {
+        "uk": "Жолудь першої гіпотези"
+      }
+    },
+    {
+      "id": "forest-unique-2",
+      "name": {
+        "uk": "Листок валідації"
+      }
+    },
+    {
+      "id": "forest-unique-3",
+      "name": {
+        "uk": "Корінь регресії"
+      }
+    },
+    {
+      "id": "forest-unique-4",
+      "name": {
+        "uk": "Квітка градієнта"
+      }
+    },
+    {
+      "id": "forest-unique-5",
+      "name": {
+        "uk": "Насінина нейромережі"
+      }
+    }
+  ]
+}

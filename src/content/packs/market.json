@@ -1,0 +1,68 @@
+{
+  "_draft": "Names of the resource and unique items are drafts for the owner to edit.",
+  "id": "market",
+  "season": "summer",
+  "location": {
+    "name": {
+      "uk": "Ярмаркова площа"
+    }
+  },
+  "mentor": {
+    "name": {
+      "uk": "Лис-купець"
+    },
+    "portrait": "portrait-market"
+  },
+  "building": {
+    "name": {
+      "uk": "Крамниця"
+    }
+  },
+  "branch": {
+    "id": "management",
+    "name": {
+      "uk": "Менеджмент"
+    },
+    "effect": {
+      "uk": "+енергія на день, знижки в крамниці"
+    }
+  },
+  "resource": {
+    "id": "market-token",
+    "name": {
+      "uk": "Ярмарковий жетон"
+    }
+  },
+  "uniques": [
+    {
+      "id": "market-unique-1",
+      "name": {
+        "uk": "Пісочний годинник дедлайну"
+      }
+    },
+    {
+      "id": "market-unique-2",
+      "name": {
+        "uk": "Сувій плану"
+      }
+    },
+    {
+      "id": "market-unique-3",
+      "name": {
+        "uk": "Монета пріоритету"
+      }
+    },
+    {
+      "id": "market-unique-4",
+      "name": {
+        "uk": "Терези компромісу"
+      }
+    },
+    {
+      "id": "market-unique-5",
+      "name": {
+        "uk": "Ліхтар команди"
+      }
+    }
+  ]
+}
