@@ -3,7 +3,11 @@ import Phaser from 'phaser';
 import { preloadAll } from '../assets/loader';
 import { ENEMIES, ITEMS, TEMP_FRAMES } from '../assets/manifest';
 import { ensureHeroine, heroineAnim, type Facing } from '../assets/heroine';
-import { DEFAULT_APPEARANCE, type Appearance, type HeroinePalettes, type Role } from '../assets/recolor';
+import type { StoreApi } from 'zustand/vanilla';
+
+import type { GameState } from '@/state/store';
+
+import type { Appearance } from '../assets/recolor';
 import { TILE_SIZE } from '../constants';
 import { LIGHT, LIGHT_RADIUS } from '../lighting/lightmap';
 import { NightLayer, createGlowOverlay } from '../lighting/NightLayer';
@@ -14,12 +18,12 @@ const LAMP_GLASS_RGB: [number, number, number] = [58, 66, 78];
 const T = TILE_SIZE;
 
 /**
- * Stage 1 asset preview: the prepared sprites on a small homestead patch.
- * Arrows walk; H / S / C cycle hair / skin / shirt; N toggles night.
- * Replaced by the real homestead scene in stage 5.
+ * Temporary homestead patch with the prepared sprites (the real homestead map
+ * comes in stage 5). Arrows walk; N toggles night (dev). The heroine's look
+ * follows the player's appearance in the game store.
  */
 export class BootScene extends Phaser.Scene {
-  private appearance: Appearance = { ...DEFAULT_APPEARANCE };
+  private store!: StoreApi<GameState>;
   private heroine!: Phaser.GameObjects.Sprite;
   private heroineKey = '';
   private facing: Facing = 'down';
@@ -97,7 +101,8 @@ export class BootScene extends Phaser.Scene {
     const tools = [TEMP_FRAMES.wateringCan, TEMP_FRAMES.hoe, TEMP_FRAMES.axe];
     tools.forEach((f, i) => this.add.image((22 + i * 2) * T, 2 * T, 'temp-farm', f).setOrigin(0));
 
-    this.heroineKey = ensureHeroine(this, this.appearance);
+    this.store = this.registry.get('store') as StoreApi<GameState>;
+    this.heroineKey = ensureHeroine(this, this.store.getState().world.state.player.appearance);
     this.heroine = this.add.sprite(12 * T, (path + 1) * T, this.heroineKey, 0).setOrigin(0.5, 1);
     this.heroine.play(heroineAnim(this.heroineKey, 'down', false).anim);
 
@@ -111,9 +116,11 @@ export class BootScene extends Phaser.Scene {
     camera.startFollow(this.heroine, true);
 
     const kb = this.input.keyboard!;
-    kb.on('keydown-H', () => this.cycle('hair'));
-    kb.on('keydown-S', () => this.cycle('skin'));
-    kb.on('keydown-C', () => this.cycle('shirt'));
+    const unsubscribe = this.store.subscribe((st, prev) => {
+      const a = st.world.state.player.appearance;
+      if (a !== prev.world.state.player.appearance) this.setAppearance(a);
+    });
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, unsubscribe);
     kb.on('keydown-N', () => {
       const on = !this.night.image.visible;
       this.night.setVisible(on);
@@ -124,10 +131,8 @@ export class BootScene extends Phaser.Scene {
     this.events.on(Phaser.Scenes.Events.UPDATE, (_t: number, dt: number) => this.move(cursors, dt));
   }
 
-  private cycle(role: Role): void {
-    const options = Object.keys((this.cache.json.get('heroine-palettes') as HeroinePalettes)[role].options);
-    this.appearance[role] = options[(options.indexOf(this.appearance[role]) + 1) % options.length];
-    this.heroineKey = ensureHeroine(this, this.appearance);
+  private setAppearance(appearance: Appearance): void {
+    this.heroineKey = ensureHeroine(this, appearance);
     // Switch texture and animation together; the previous texture stays cached.
     this.heroine.play(heroineAnim(this.heroineKey, this.facing, false).anim);
   }

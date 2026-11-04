@@ -7,6 +7,8 @@ body {
   height: 100%;
   overflow: hidden;
   background: var(--wood-900);
+  /* Sword cursor from the start-menu art; hotspot at the tip (top-left). */
+  cursor: url('/assets/ui/cursor-sword-32.png') 0 0, default;
 }
 
 #game,
@@ -25,25 +27,376 @@ body {
   pointer-events: none;
 }
 
-#ui .dv-ui > * {
-  pointer-events: auto;
+/* The design system scales the UI with `zoom` on .dv-ui (×3, ×4). Percentages are
+   not zoomed, so the root still covers exactly the window; px sizes inside grow. */
+.app-ui {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
 }
 
-/* Modal screens: centered over the world, the world stays visible around them. */
+.dv-ui,
+.dv-ui * {
+  cursor: inherit;
+}
+.dv-ui input[type='text'],
+.dv-ui input:not([type]),
+.dv-ui input[type='number'] {
+  cursor: text;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.sheet-icon {
+  display: block;
+  flex: none;
+}
+
+/* ------------------------------------------------------------ overlays */
+
 .screen-overlay {
-  position: fixed;
+  position: absolute;
   inset: 0;
+  z-index: 10;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: var(--space-16);
   pointer-events: auto;
 }
+/* Dim the world behind blocking dialogs: a solid pixel-free tint, not a blur. */
+.screen-overlay.is-dim {
+  background: color-mix(in srgb, var(--wood-900) 55%, transparent);
+}
 
-/* Plan import */
+.small-dialog {
+  width: min(560px, 100%);
+}
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-4);
+  margin-top: var(--space-6);
+}
+
+/* ------------------------------------------------------------ start menu */
+
+.start-screen {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: var(--wood-900);
+  pointer-events: auto;
+}
+.start-screen .dv-start {
+  width: min(100%, calc((100cqh) * 16 / 9));
+  max-height: 100%;
+}
+.start-screen {
+  container-type: size;
+}
+.start-screen .dv-start__bg {
+  image-rendering: pixelated;
+}
+/* The tower stands top-left in this backdrop, so the title sits in the calmer sky. */
+.start-screen .dv-start__logo {
+  left: auto;
+  right: 6%;
+  top: 7%;
+  max-width: 50%;
+  text-align: right;
+}
+.start-screen .dv-start__menu {
+  top: 58%;
+}
+.start-screen__file {
+  display: grid;
+}
+.start-screen__file .dv-btn {
+  width: 100%;
+  justify-content: flex-start;
+}
+
+/* ------------------------------------------------------------ character creation */
+
+.create {
+  width: min(880px, 100%);
+}
+.create__body {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-12);
+  align-items: start;
+}
+.create__preview {
+  display: grid;
+  place-items: center;
+  padding: var(--space-12) var(--space-16);
+}
+.heroine-preview {
+  display: block;
+  image-rendering: pixelated;
+}
+.create__form {
+  display: grid;
+  gap: var(--space-6);
+}
+.create__choice {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  display: grid;
+  gap: var(--space-2);
+}
+.create__choice .dv-lang__group {
+  flex-wrap: wrap;
+}
+.create .dv-input {
+  width: 100%;
+}
+
+/* ------------------------------------------------------------ HUD */
+
+#ui .hud {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.hud > * {
+  pointer-events: auto;
+}
+.hud__status {
+  position: absolute;
+  top: var(--space-8);
+  left: var(--space-8);
+  width: 384px;
+  display: grid;
+  gap: 0;
+  padding-top: var(--space-6);
+}
+.hud__title {
+  margin: 0;
+  font-weight: 700;
+  line-height: 28px;
+}
+.hud__line {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin: 0;
+  line-height: 32px;
+}
+.hud__stat {
+  font: 16px/32px var(--font-display);
+}
+.hud__levels {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  min-height: 32px;
+  flex-wrap: wrap;
+}
+.hud__level {
+  font: 16px/32px var(--font-display);
+}
+.hud__hint {
+  margin: 0;
+}
+.hud__buttons {
+  position: absolute;
+  top: var(--space-8);
+  right: var(--space-8);
+  display: flex;
+  gap: var(--space-4);
+}
+.hud__toolbar {
+  position: absolute;
+  bottom: var(--space-8);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: var(--space-2);
+  padding: var(--space-4);
+}
+.hud__slot {
+  appearance: none;
+  margin: 0;
+  padding: 0;
+  background-color: transparent;
+}
+.hud__key {
+  position: absolute;
+  top: 0;
+  left: 4px;
+  font: 700 16px/16px var(--font-body);
+  color: var(--ink-muted);
+}
+
+/* ------------------------------------------------------------ toasts */
+
+.toasts {
+  position: absolute;
+  top: 72px;
+  right: var(--space-8);
+  display: grid;
+  justify-items: end;
+  gap: var(--space-4);
+  pointer-events: none;
+}
+.toasts .dv-toast {
+  pointer-events: auto;
+}
+.dv-toast.is-clickable:hover .dv-toast__title {
+  text-decoration: underline;
+}
+
+/* ------------------------------------------------------------ journal */
+
+.journal-wrap {
+  width: min(1120px, 100%);
+  display: flex;
+  flex-direction: column;
+  max-height: 100%;
+}
+.journal {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.journal .dv-book {
+  min-height: 0;
+  flex: 1;
+}
+.journal__page {
+  overflow: auto;
+  max-height: 512px;
+  min-height: 384px;
+}
+.journal__empty {
+  grid-column: 1 / -1;
+  display: grid;
+  justify-items: start;
+  gap: var(--space-8);
+  padding-top: var(--space-8);
+}
+.journal__semesters {
+  margin-bottom: var(--space-6);
+}
+.journal__form {
+  grid-column: 1 / -1;
+}
+.journal__max {
+  font: 16px/28px var(--font-display);
+  color: var(--ink-muted);
+}
+/* Status chips get the full width; actions sit beside the name and deadline rows. */
+.journal .dv-lab__status {
+  grid-column: 1 / -1;
+}
+.journal .dv-lab__actions {
+  grid-row: 1 / span 2;
+  flex-direction: row;
+  align-items: flex-start;
+}
+.journal .dv-chip {
+  white-space: nowrap;
+}
+.dv-tab {
+  max-width: 220px;
+}
+
+/* ------------------------------------------------------------ reward */
+
+.dv-reward {
+  max-width: 100%;
+}
+.reward--batch {
+  width: min(560px, 100%);
+}
+.reward__lines {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0;
+  justify-items: start;
+  text-align: left;
+  line-height: 32px;
+}
+.reward__lines li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+.reward__ontime {
+  color: var(--moss-600);
+}
+.dv-slot--lg .reward__portrait {
+  width: 64px;
+  height: 64px;
+}
+
+/* ------------------------------------------------------------ menu & settings */
+
+.game-menu {
+  width: min(400px, 100%);
+}
+.game-menu__list {
+  display: grid;
+  gap: var(--space-4);
+}
+.settings-wrap {
+  width: min(760px, 100%);
+}
+.settings__section {
+  display: grid;
+  gap: var(--space-12);
+  min-height: 320px;
+  align-content: start;
+}
+.settings__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  flex-wrap: wrap;
+}
+.settings__row > .dv-field__label {
+  min-width: 200px;
+}
+.settings__rarity {
+  flex-wrap: wrap;
+  gap: var(--space-8);
+}
+.settings__threshold {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-4);
+  font-weight: 700;
+}
+.settings__block {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-2);
+}
+.settings__block p {
+  margin: 0;
+}
+
+/* ------------------------------------------------------------ plan import */
+
 .import {
   width: min(1040px, 100%);
-  max-height: calc(100vh - 2 * var(--space-16));
+  max-height: 100%;
   display: flex;
   flex-direction: column;
   gap: var(--space-6);
@@ -89,13 +442,4 @@ body {
 }
 .import__spacer {
   flex: 1;
-}
-
-.app-ui {
-  position: absolute;
-  inset: 0;
-  padding: var(--space-16, 32px);
-  display: flex;
-  align-items: flex-end;
-  justify-content: flex-end;
 }

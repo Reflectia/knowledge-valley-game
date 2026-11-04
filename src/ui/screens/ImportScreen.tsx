@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type DragEvent } from 'react';
+import { useRef, useState, type DragEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { getPack } from '@/core/content';
@@ -35,11 +35,6 @@ export function ImportScreen({ onClose }: { onClose: () => void }) {
   const [over, setOver] = useState(false);
   const input = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [onClose]);
 
   async function read(file: File) {
     setStep({ kind: 'reading', name: file.name });

@@ -35,4 +35,8 @@ All in `public/assets/_temp/`, each folder with its license. Frame numbers are a
 | Sword, staffs | `_temp/kenney-tiny-dungeon/tilemap.png` | 103–107, 129–131 |
 | House furniture and decor | `_temp/kenney-roguelike-indoor/spritesheet.png` | 16×16 with 1 px spacing |
 
+Unique items (5 per pack) have no art of their own yet: the game shows one item sprite per pack
+(`uniqueIcon` in `src/content/packs/*.json`: forest → seed, tower → staff, market → potion,
+forge → staff, library → book) inside the rarity frame. 25 item sprites 16×16 are needed.
+
 Still missing, no placeholder yet: music and sound effects (planned for stage 9), exam bosses 32×32 (v0.2), house interior tiles.

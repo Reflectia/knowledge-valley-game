@@ -19,6 +19,8 @@ export const SAVE_VERSION = 1;
 export interface LabsRecord {
   curriculum: Curriculum;
   settings: Settings;
+  /** Reward moments the player has already seen (see rewards.rewardKey). */
+  shownRewards?: string[];
 }
 
 export interface WorldRecord {
@@ -52,11 +54,18 @@ export function newWorld(name = ''): WorldState {
   };
 }
 
-export function newLabs(now = new Date()): LabsRecord {
+export function defaultSettings(now = new Date()): Settings {
   return {
-    curriculum: EMPTY_CURRICULUM,
-    settings: { rarityThresholds: { ...BALANCE.rarityThresholds }, createdAt: now.toISOString() },
+    rarityThresholds: { ...BALANCE.rarityThresholds },
+    volume: { master: 80, music: 70, sfx: 80 },
+    uiScale: 'auto',
+    language: 'uk',
+    createdAt: now.toISOString(),
   };
+}
+
+export function newLabs(now = new Date()): LabsRecord {
+  return { curriculum: EMPTY_CURRICULUM, settings: defaultSettings(now) };
 }
 
 // ----------------------------------------------------------------- migrations
@@ -90,6 +99,10 @@ export function migrate(
   if (!file.labs?.curriculum || !file.labs.settings || !file.world?.state?.player || !file.world.ledger) {
     throw new SaveError('Save file is incomplete');
   }
+  // Settings added within a version get their defaults (additive fields only).
+  const d = defaultSettings();
+  const s = file.labs.settings;
+  file.labs.settings = { ...d, ...s, volume: { ...d.volume, ...s.volume } };
   return file;
 }
 

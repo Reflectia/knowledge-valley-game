@@ -199,3 +199,26 @@ export function reconcile(
     events,
   };
 }
+
+// ------------------------------------------------------------------ shown rewards
+
+/**
+ * Key of a reward moment. Shown keys are saved with the labs, so the reward scene
+ * is not repeated after a reload (rewards are re-paid into the world from the
+ * ledger, but the player has already seen them).
+ */
+export function rewardKey(e: RewardEvent): string {
+  return e.kind === 'done' ? `done:${e.labKey}` : `graded:${e.labKey}:${e.rarity}`;
+}
+
+/** Drop keys that no longer describe the lab (undone, re-graded), so a new moment can show again. */
+export function pruneShown(shown: string[], curriculum: Curriculum, thresholds: RarityThresholds): string[] {
+  return shown.filter((key) => {
+    const [kind, ...rest] = key.split(':');
+    const rarity = kind === 'graded' ? rest.pop() : undefined;
+    const lab = curriculum.labs[rest.join(':')];
+    if (!lab) return false;
+    const w = labWorth(curriculum, lab.key, thresholds);
+    return kind === 'done' ? w.done : w.rarity === rarity;
+  });
+}

@@ -11,11 +11,10 @@ import { getGameStore } from './state/store';
 import { App } from './ui/App';
 import { GameProvider } from './ui/GameContext';
 
-startGame(document.getElementById('game')!);
-
 void getGameStore().then((store) => {
-  // Load the saved game (IndexedDB); screens wait for `ready`.
+  // Load the saved game (IndexedDB); the start menu waits for `ready`.
   void store.getState().init();
+  startGame(document.getElementById('game')!, store);
   if (import.meta.env.DEV) (window as unknown as { __store: typeof store }).__store = store;
 
   createRoot(document.getElementById('ui')!).render(

@@ -1,5 +1,5 @@
 {
-  "_draft": "Names of the resource and unique items are drafts for the owner to edit.",
+  "_draft": "Names of the resource, unique items and the title are drafts for the owner to edit. uniqueIcon is a placeholder sprite until unique items get their own art.",
   "id": "forest",
   "season": "eternal-spring",
   "location": {
@@ -64,5 +64,9 @@
         "uk": "Насінина нейромережі"
       }
     }
-  ]
+  ],
+  "title": {
+    "uk": "Травниця-моделювальниця"
+  },
+  "uniqueIcon": "item-seed"
 }

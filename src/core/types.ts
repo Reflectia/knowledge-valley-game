@@ -66,8 +66,20 @@ export interface RarityThresholds {
   legendary: number;
 }
 
+export type UiScale = 'auto' | 2 | 3 | 4;
+
+export interface Volume {
+  /** 0..100 */
+  master: number;
+  music: number;
+  sfx: number;
+}
+
 export interface Settings {
   rarityThresholds: RarityThresholds;
+  volume: Volume;
+  uiScale: UiScale;
+  language: 'uk' | 'en';
   /** ISO timestamp of the last .json export; drives the weekly reminder. */
   lastExportAt?: string;
   /** When this save was started; the first reminder counts from here. */

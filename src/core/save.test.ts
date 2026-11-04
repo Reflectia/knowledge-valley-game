@@ -44,7 +44,7 @@ describe('game store with storage', () => {
   it('starts without a save, then a new game is saved', async () => {
     const { store, kv } = await started();
     expect(store.getState().hasSave).toBe(false);
-    await store.getState().newGame('Надійка');
+    await store.getState().newGame('Надійка', { hair: 'red', skin: 'light', shirt: 'green' });
     const again = await started(kv);
     expect(again.store.getState().hasSave).toBe(true);
     expect(again.store.getState().world.state.player.name).toBe('Надійка');
@@ -52,7 +52,7 @@ describe('game store with storage', () => {
 
   it('closing the tab mid-day keeps lab data and pays its rewards exactly once', async () => {
     const { store, kv } = await started();
-    await store.getState().newGame('Н');
+    await store.getState().newGame('Н', { hair: 'red', skin: 'light', shirt: 'green' });
     await store.getState().setCurriculum(sampleCurriculum());
     await store.getState().markLabDone('1:mpm_ai:1', '2026-09-23');
     expect(store.getState().world.state.player.coins).toBe(R.done.coins + R.onTime.coins);
@@ -74,7 +74,7 @@ describe('game store with storage', () => {
 
   it('export then import restores the game completely', async () => {
     const { store } = await started();
-    await store.getState().newGame('Н');
+    await store.getState().newGame('Н', { hair: 'red', skin: 'light', shirt: 'green' });
     await store.getState().setCurriculum(sampleCurriculum());
     await store.getState().markLabDone('1:mpm_ai:1', '2026-09-23');
     await store.getState().setLabScore('1:mpm_ai:1', 8);
@@ -108,5 +108,39 @@ describe('game store with storage', () => {
     await store.getState().setCurriculum(sampleCurriculum());
     expect(store.getState().saveError).toBe('quota exceeded');
     expect(Object.keys(store.getState().labs.curriculum.labs)).toHaveLength(9);
+  });
+
+  it('does not show a taken reward again after a reload, but keeps paying it', async () => {
+    const { store, kv } = await started();
+    await store.getState().newGame('Н', { hair: 'red', skin: 'light', shirt: 'green' });
+    await store.getState().setCurriculum(sampleCurriculum());
+    await store.getState().markLabDone('1:mpm_ai:1', '2026-09-23');
+    expect(store.getState().takeRewards()).toHaveLength(1);
+    const reopened = (await started(kv)).store.getState();
+    expect(reopened.pendingRewards).toEqual([]);
+    expect(reopened.world.state.player.coins).toBe(R.done.coins + R.onTime.coins);
+  });
+
+  it('shows the scene again when a lab is undone and done again', async () => {
+    const { store } = await started();
+    await store.getState().setCurriculum(sampleCurriculum());
+    await store.getState().markLabDone('1:mpm_ai:1', '2026-09-23');
+    store.getState().takeRewards();
+    await store.getState().unmarkLab('1:mpm_ai:1');
+    await store.getState().markLabDone('1:mpm_ai:1', '2026-09-24');
+    expect(store.getState().pendingRewards.map((e) => e.kind)).toEqual(['done']);
+  });
+
+  it('new rarity thresholds re-grade items silently', async () => {
+    const { store, kv } = await started();
+    await store.getState().setCurriculum(sampleCurriculum());
+    await store.getState().markLabDone('1:mpm_ai:1', '2026-09-23');
+    await store.getState().setLabScore('1:mpm_ai:1', 8);
+    store.getState().takeRewards();
+    expect(store.getState().progress.uniques[0].rarity).toBe('epic');
+    await store.getState().updateSettings({ rarityThresholds: { rare: 0.5, epic: 0.6, legendary: 0.8 } });
+    expect(store.getState().progress.uniques[0].rarity).toBe('legendary');
+    expect(store.getState().pendingRewards).toEqual([]);
+    expect((await started(kv)).store.getState().pendingRewards).toEqual([]);
   });
 });
