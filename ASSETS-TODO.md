@@ -1,0 +1,38 @@
+# Asset status
+
+What the game uses now, where it comes from, and what still needs a proper replacement.
+Visual check: `docs/assets-preview.png` (old design-system PNG next to the new cut, ×4).
+
+## From the owner's new images (cut by `scripts/assets/`)
+
+| In game | File | Source | Notes |
+| --- | --- | --- | --- |
+| Heroine, 4 walk frames × down/up/right | `public/assets/characters/heroine.png` | `characters/heroine-variants-new.jpg` (red hair, green shirt) | Walk frames drawn from the idle poses. Left = mirrored right. |
+| Heroine palettes (4 hair, 4 skin, 4 shirt) | `public/assets/characters/heroine-palettes.json` | colors matched to the variants on the same sheet | Recolored at runtime. |
+| Enemies ×8 | `public/assets/enemies/*.png` | `enemies/enemies_new.jpg` | |
+| Items ×4 | `public/assets/items/*.png` | `items/items-new.jpg` | **staff** is thin at 14 px — worth redrawing. |
+| Mentor portraits ×5 + emblem | `public/assets/portraits/*.png` | `portraits/Gemini_Generated_Image_*.jpg` | Cut with frames; frames are 58–60 px wide inside the 64×64 canvas. |
+| Start menu backdrop 640×360 | `public/assets/ui/start-bg-640x360.png` | `backdrops/start-menu-cursor-new.jpg` (left panel) | Sampled on the art grid (320×180) then ×2. Some sky above the tower and the lowest garden row are cropped to fit 16:9. |
+| Mouse cursor (sword) | `public/assets/ui/cursor-sword-16.png`, `-32.png` | same file, right panel | Thin at 16 px; the gold guard is barely visible. |
+| Homestead house, 2 blossom trees, lamp post | `public/assets/homestead/*.png` | `lighting/homestead-day-night-new.jpg` (day half) | Cut at 1/8 so the door matches the heroine's height. |
+| Lit window (night overlay) | `public/assets/homestead/window-lit.png` | same file, night half | The rest of the night look comes from lighting. |
+| Homestead tiles: grass, grass with flowers, path | `public/assets/homestead/homestead-tiles-16.png` | same file | Cut from the scene; **not seamless** — replace with drawn tiles. |
+
+Biome tiles (`images/tiles/*-tileset-16.png`) stay from the design system: the new biome images are in `images/previews/` and are previews only.
+
+## Temporary third-party placeholders — to replace
+
+All in `public/assets/_temp/`, each folder with its license. Frame numbers are also in `src/game/assets/manifest.ts` (`TEMP_FRAMES`).
+
+| Needed for | Placeholder | Frames |
+| --- | --- | --- |
+| Crops with 5 growth stages (20 crops) | `_temp/josehzz-farming-crops/crops.png` | 6 per crop: 0 = harvest item, 5→1 = seed → mature |
+| Tilled soil / garden beds | `_temp/kenney-tiny-farm/tilemap.png` | 0, 1, 12, 13, 24, 25, 36, 37, 48–51, 60–63 |
+| Tools: watering can, sickle, axe | `_temp/kenney-tiny-farm/tilemap.png` | 84, 88, 87 |
+| Tools: pickaxe; bow | `_temp/kenney-tiny-town/tilemap.png` | 115; 118 |
+| Fences | `_temp/kenney-tiny-town/tilemap.png` | 44–47, 56–59, 68–71, 80–82 |
+| Discipline buildings ×5 (5 upgrade levels each) | `_temp/kenney-tiny-town/tilemap.png` | walls, roofs, doors 48–91 — assembled in the maps (stage 5–6) |
+| Sword, staffs | `_temp/kenney-tiny-dungeon/tilemap.png` | 103–107, 129–131 |
+| House furniture and decor | `_temp/kenney-roguelike-indoor/spritesheet.png` | 16×16 with 1 px spacing |
+
+Still missing, no placeholder yet: music and sound effects (planned for stage 9), exam bosses 32×32 (v0.2), house interior tiles.

@@ -1,0 +1,31 @@
+{
+  "house": {
+    "w": 90,
+    "h": 118
+  },
+  "tree-blossom-a": {
+    "w": 36,
+    "h": 43
+  },
+  "tree-blossom-b": {
+    "w": 36,
+    "h": 42
+  },
+  "lamp-post": {
+    "w": 15,
+    "h": 57
+  },
+  "tiles": {
+    "order": [
+      "grass",
+      "grass-flowers",
+      "path"
+    ]
+  },
+  "window-lit": {
+    "w": 19,
+    "h": 20,
+    "x": 18,
+    "y": 81
+  }
+}
