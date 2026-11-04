@@ -304,9 +304,17 @@ body {
   z-index: 50;
   pointer-events: none;
   max-width: 352px;
+  /* Compact: just the name (and rarity), close to the slot. */
+  padding: 0 4px;
+  /* Same colors as the design-system tooltip (wood-900 outline, wood-500 line,
+     parchment-50 fill) with a straight line and no bevelled corners. */
+  border-image-source: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAARUlEQVR4nGNkYGBg0JMW+g+i0cGlp+8YWUCSMVZy2OQZlhxj+M8C4xTOW4Mi2Z8UAqaZsGpFApQrgLsBZic6YAQR+LwJABqnENF+VItEAAAAAElFTkSuQmCC);
 }
 .hover-tip p {
   margin: 0;
+}
+.hover-tip .dv-tooltip__title {
+  line-height: 24px;
 }
 
 .toasts {

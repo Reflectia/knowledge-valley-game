@@ -44,8 +44,8 @@ export function HoverTip() {
   // The UI root is zoomed (×3, ×4): convert screen px to its CSS px.
   const root = document.querySelector<HTMLElement>('.app-ui');
   const zoom = root ? parseFloat(getComputedStyle(root).zoom || '1') || 1 : 1;
-  const x = tip.x / zoom + 16;
-  const y = tip.y / zoom + 16;
+  const x = tip.x / zoom + 12;
+  const y = tip.y / zoom + 12;
   const flip = tip.x + 360 * zoom > window.innerWidth;
   return (
     <div
