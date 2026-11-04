@@ -1,0 +1,39 @@
+/* App shell: Phaser canvas underneath, React UI layer on top.
+   Colors and sizes come only from design-system tokens. */
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: var(--wood-900);
+}
+
+#game,
+#ui {
+  position: fixed;
+  inset: 0;
+}
+
+#game canvas {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+/* The UI layer lets clicks through to the world except on actual UI elements. */
+#ui {
+  pointer-events: none;
+}
+
+#ui .dv-ui > * {
+  pointer-events: auto;
+}
+
+.app-ui {
+  position: absolute;
+  inset: 0;
+  padding: var(--space-16, 32px);
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
