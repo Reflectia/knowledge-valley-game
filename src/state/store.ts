@@ -3,6 +3,8 @@ import { useStore } from 'zustand';
 
 import { markDone, setScore, unmarkDone } from '@/core/curriculum';
 import { deriveProgress, pruneShown, reconcile, rewardKey, type DerivedProgress } from '@/core/rewards';
+import { BALANCE } from '@/core/content';
+import { growNight } from '@/core/homestead';
 import { gainXp, todayIso } from '@/core/rules';
 import {
   newLabs,
@@ -14,7 +16,7 @@ import {
   type WorldRecord,
 } from '@/core/save';
 import { DAY, dayOver, MINUTES_PER_SECOND } from '@/core/time';
-import type { Curriculum, ISODate, LabKey, PlayerState, RewardEvent, Settings } from '@/core/types';
+import type { Curriculum, ISODate, LabKey, PlayerState, RewardEvent, Settings, WorldState } from '@/core/types';
 
 /** Minutes since midnight when a game day starts (morning). */
 export const DAY_START_MINUTES = DAY.startMinutes;
@@ -22,8 +24,14 @@ export const DAY_START_MINUTES = DAY.startMinutes;
 /** Why the day is ending: the bed (asks first), 02:00, or no energy left. */
 export type SleepReason = 'bed' | 'late' | 'tired';
 
-/** A window the world asks the UI to open (e.g. clicking the journal on the desk). */
-export type UiRequest = 'journal';
+/** A window the world asks the UI to open (clicking the journal on the desk, the shop stall). */
+export type UiRequest = 'journal' | 'shop';
+
+/** Actions that cost energy and give experience (balance.json `actions`). */
+export type ActionKind = keyof typeof BALANCE.actions;
+
+/** Result of a world edit: the new state, or a reason code for a short notice. */
+export type EditResult = { ok: true; world: WorldState } | { ok: false; reason: string };
 
 /**
  * Shared game state for Phaser (world) and React (UI). A vanilla Zustand store,
@@ -66,6 +74,14 @@ export interface GameState {
   addXp(amount: number): void;
   /** Spend energy on an action; at zero the heroine is too tired and goes to sleep. */
   spendEnergy(amount: number): void;
+  /**
+   * Do a world action that costs energy and gives XP (till, water, chop…). `edit` gets the
+   * world state and returns the new one; nothing is spent when it fails. Returns the reason
+   * on failure ('tired' when energy is short).
+   */
+  act(kind: ActionKind, edit: (w: WorldState) => EditResult): string | null;
+  /** Free edits (shop, toolbar, decor). */
+  editWorld(edit: (w: WorldState) => EditResult | WorldState): string | null;
   /** Advance the clock by real milliseconds (paused while a window is open). */
   tickClock(realMs: number): void;
   requestSleep(reason: SleepReason): void;
@@ -192,6 +208,28 @@ export function createGameStore(saves: SaveStore, now: () => Date = () => new Da
         if (energy === 0 && !get().sleepRequest) set({ sleepRequest: 'tired' });
       },
 
+      act(kind, edit) {
+        const { world, progress } = get();
+        const cost = BALANCE.actions[kind];
+        if (world.state.player.energy < cost.energy) return 'tired';
+        const r = edit(world.state);
+        if (!r.ok) return r.reason;
+        const energy = r.world.player.energy - cost.energy;
+        const player = gainXp({ ...r.world.player, energy }, cost.xp, progress.ceiling);
+        set({ world: { ...world, state: { ...r.world, player } } });
+        if (energy <= 0 && !get().sleepRequest) set({ sleepRequest: 'tired' });
+        return null;
+      },
+
+      editWorld(edit) {
+        const { world } = get();
+        const r = edit(world.state);
+        if ('ok' in r && r.ok === false) return r.reason;
+        const next = 'ok' in r ? (r as { world: WorldState }).world : (r as WorldState);
+        set({ world: { ...world, state: next } });
+        return null;
+      },
+
       tickClock(realMs) {
         const s = get();
         if (s.uiBlocking || s.sleepRequest) return;
@@ -214,8 +252,10 @@ export function createGameStore(saves: SaveStore, now: () => Date = () => new Da
 
       async sleep() {
         const { world } = get();
+        // Night: watered crops grow, the soil dries.
+        const grown = growNight(world.state);
         const state = {
-          ...world.state,
+          ...grown,
           day: world.state.day + 1,
           player: { ...world.state.player, energy: newWorld().player.energy },
         };

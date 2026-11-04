@@ -12,9 +12,11 @@
  */
 import { BALANCE } from './content';
 import { EMPTY_CURRICULUM } from './curriculum';
+import { STARTER, TOOLBAR_SIZE } from './items';
 import type { Curriculum, RewardLedger, Settings, WorldState } from './types';
 
-export const SAVE_VERSION = 1;
+/** 1: first format. 2: toolbar, garden plots and decor in the world (stage 6). */
+export const SAVE_VERSION = 2;
 
 export interface LabsRecord {
   curriculum: Curriculum;
@@ -46,12 +48,19 @@ export function newWorld(name = ''): WorldState {
       appearance: { hair: 'red', skin: 'light', shirt: 'green' },
       level: p.startLevel,
       xp: 0,
-      coins: 0,
+      coins: STARTER.coins,
       energy: p.maxEnergy,
       health: p.maxHealth,
     },
-    inventory: {},
+    inventory: { ...STARTER.items },
+    toolbar: starterToolbar(),
+    plots: {},
+    decor: [],
   };
+}
+
+function starterToolbar(): (string | null)[] {
+  return Array.from({ length: TOOLBAR_SIZE }, (_, i) => STARTER.toolbar[i] ?? null);
 }
 
 export function defaultSettings(now = new Date()): Settings {
@@ -73,7 +82,18 @@ export function newLabs(now = new Date()): LabsRecord {
 /** Upgrades a save from version N to N + 1. Add one entry per format change. */
 export type Migration = (save: Record<string, unknown>) => Record<string, unknown>;
 export const MIGRATIONS: Record<number, Migration> = {
-  // 1: (save) => ({ ...save, version: 2, ... }),
+  // 1 → 2: the world gets a toolbar, garden plots and decor; old saves get the starter kit.
+  1: (save) => {
+    const world = save.world as { state?: Record<string, unknown>; ledger: unknown } | undefined;
+    const state = world?.state;
+    if (!world || !state) return { ...save, version: 2 }; // incomplete: rejected after migrating
+    const inventory = { ...STARTER.items, ...(state.inventory as Record<string, number>) };
+    return {
+      ...save,
+      version: 2,
+      world: { ...world, state: { ...state, inventory, toolbar: starterToolbar(), plots: {}, decor: [] } },
+    };
+  },
 };
 
 export class SaveError extends Error {}

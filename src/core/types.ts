@@ -97,11 +97,34 @@ export interface PlayerState {
   health: number;
 }
 
+/** A garden tile on the homestead: tilled soil, maybe with a crop. */
+export interface Plot {
+  crop?: string;
+  /** Watered days the crop has grown. */
+  growth: number;
+  wateredToday: boolean;
+}
+
+/** A placed piece of furniture or outdoor decor (tile coordinates on a map). */
+export interface Placed {
+  uid: number;
+  item: string;
+  map: string;
+  x: number;
+  y: number;
+}
+
 /** World state: saved every night when the heroine goes to sleep. */
 export interface WorldState {
   day: number;
   player: PlayerState;
+  /** Item id → count. */
   inventory: Record<string, number>;
+  /** Toolbar slots 1–9: item ids (or empty). */
+  toolbar: (string | null)[];
+  /** Garden tiles on the homestead by "x,y". */
+  plots: Record<string, Plot>;
+  decor: Placed[];
 }
 
 /** One reward moment for the reward scene (single or batched retroactive). */

@@ -6,6 +6,7 @@ import { sampleCurriculum } from './testing';
 
 const R = BALANCE.rewards;
 const NOW = () => new Date('2026-11-04T12:00:00Z');
+const START = newWorld().player.coins;
 
 describe('save file format', () => {
   it('round-trips through JSON', () => {
@@ -18,10 +19,32 @@ describe('save file format', () => {
       1: (s: Record<string, unknown>) => ({ ...s, version: 2, note: 'v2' }),
       2: (s: Record<string, unknown>) => ({ ...s, version: 3, note: `${s.note}+v3` }),
     };
-    const v1 = toSaveFile(newLabs(), { state: newWorld(), ledger: {} });
+    const v1 = { ...toSaveFile(newLabs(), { state: newWorld(), ledger: {} }), version: 1 };
     const out = migrate(v1, migrations, 3) as unknown as { version: number; note: string };
     expect(out.version).toBe(3);
     expect(out.note).toBe('v2+v3');
+  });
+
+  it('migrates a version-1 save: keeps progress, adds the starter kit and toolbar', () => {
+    const v1 = {
+      game: 'knowledge-valley',
+      version: 1,
+      savedAt: '2026-11-01T10:00:00.000Z',
+      labs: newLabs(),
+      world: {
+        state: { day: 5, player: { ...newWorld('Ніка').player, coins: 230 }, inventory: { 'forest-moss': 3 } },
+        ledger: {},
+      },
+    };
+    const file = migrate(v1);
+    expect(file.version).toBe(SAVE_VERSION);
+    expect(file.world.state.day).toBe(5);
+    expect(file.world.state.player.coins).toBe(230);
+    expect(file.world.state.inventory['forest-moss']).toBe(3);
+    expect(file.world.state.inventory.hoe).toBe(1);
+    expect(file.world.state.toolbar).toHaveLength(9);
+    expect(file.world.state.plots).toEqual({});
+    expect(file.world.state.decor).toEqual([]);
   });
 
   it('gives readable errors for bad files', () => {
@@ -55,19 +78,19 @@ describe('game store with storage', () => {
     await store.getState().newGame('Н', { hair: 'red', skin: 'light', shirt: 'green' });
     await store.getState().setCurriculum(sampleCurriculum());
     await store.getState().markLabDone('1:mpm_ai:1', '2026-09-23');
-    expect(store.getState().world.state.player.coins).toBe(R.done.coins + R.onTime.coins);
+    expect(store.getState().world.state.player.coins).toBe(START + R.done.coins + R.onTime.coins);
 
     // No sleep: the world was not saved, the labs were.
     const reopened = (await started(kv)).store;
     const s = reopened.getState();
     expect(s.labs.curriculum.labs['1:mpm_ai:1'].doneDate).toBe('2026-09-23');
-    expect(s.world.state.player.coins).toBe(R.done.coins + R.onTime.coins);
+    expect(s.world.state.player.coins).toBe(START + R.done.coins + R.onTime.coins);
     expect(s.progress.ceiling).toBe(BALANCE.ceiling.base + BALANCE.ceiling.perLab);
 
     // After sleeping and reopening, nothing is paid again.
     await reopened.getState().sleep();
     const third = (await started(kv)).store.getState();
-    expect(third.world.state.player.coins).toBe(R.done.coins + R.onTime.coins);
+    expect(third.world.state.player.coins).toBe(START + R.done.coins + R.onTime.coins);
     expect(third.world.state.day).toBe(2);
     expect(third.pendingRewards).toEqual([]);
   });
@@ -118,7 +141,7 @@ describe('game store with storage', () => {
     expect(store.getState().takeRewards()).toHaveLength(1);
     const reopened = (await started(kv)).store.getState();
     expect(reopened.pendingRewards).toEqual([]);
-    expect(reopened.world.state.player.coins).toBe(R.done.coins + R.onTime.coins);
+    expect(reopened.world.state.player.coins).toBe(START + R.done.coins + R.onTime.coins);
   });
 
   it('shows the scene again when a lab is undone and done again', async () => {
@@ -188,5 +211,44 @@ describe('day, energy and sleep', () => {
     expect(store.getState().sleepRequest).toBe('tired');
     await store.getState().sleep();
     expect(store.getState().world.state.player.energy).toBe(BALANCE.player.maxEnergy);
+  });
+});
+
+describe('world actions', () => {
+  async function playing() {
+    const store = createGameStore(new SaveStore(memoryStore()), NOW);
+    await store.getState().init();
+    await store.getState().newGame('Н', { hair: 'red', skin: 'light', shirt: 'green' });
+    return store;
+  }
+
+  it('an action spends energy and gives XP only when it succeeds', async () => {
+    const { till } = await import('./homestead');
+    const store = await playing();
+    const e0 = store.getState().world.state.player.energy;
+    expect(store.getState().act('till', (w) => till(w, '1,1'))).toBeNull();
+    const p = store.getState().world.state.player;
+    expect(p.energy).toBe(e0 - BALANCE.actions.till.energy);
+    expect(p.xp).toBe(BALANCE.actions.till.xp);
+    expect(store.getState().act('till', (w) => till(w, '1,1'))).toBe('alreadyTilled');
+    expect(store.getState().world.state.player.energy).toBe(e0 - BALANCE.actions.till.energy);
+  });
+
+  it('refuses an action without enough energy', async () => {
+    const { till } = await import('./homestead');
+    const store = await playing();
+    store.getState().spendEnergy(BALANCE.player.maxEnergy - 1);
+    expect(store.getState().act('till', (w) => till(w, '2,2'))).toBe('tired');
+  });
+
+  it('crops watered today grow overnight when the heroine sleeps', async () => {
+    const { till, plant, water } = await import('./homestead');
+    const store = await playing();
+    const s = store.getState();
+    s.act('till', (w) => till(w, '3,3'));
+    s.act('plant', (w) => plant(w, '3,3', 'seed-turnip'));
+    s.act('water', (w) => water(w, '3,3'));
+    await store.getState().sleep();
+    expect(store.getState().world.state.plots['3,3']).toMatchObject({ crop: 'turnip', growth: 1, wateredToday: false });
   });
 });

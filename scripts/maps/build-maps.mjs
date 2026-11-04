@@ -12,6 +12,9 @@
 //   interact   rect   action = sleep | journal
 //   gate       rect   minStage (fog zone, opens at that revival stage)
 //   mentor     point  where the mentor stands (stage 7)
+//   garden     rect   tiles that can be tilled with the hoe
+//   building   rect   plot for a discipline building (pack); the building grows with labs
+//   shop       rect   the shop stall (click to open the shop)
 import { mkdirSync, writeFileSync } from 'node:fs';
 
 const T = 16;
@@ -164,17 +167,39 @@ function homestead() {
   m.obj('light', 'window', hx + 27.5, hy - 118 + 90, 0, 0, { kind: 'window' });
 
   m.obj('sprite', 'lamp', hx + 100, hy + 4, 0, 0, { key: 'lamp-post', footW: 6, footH: 4, lamp: true });
+  // Trees on the edges, away from the garden and the building plots.
   const trees = [
     ['tree-blossom-a', 216, 112],
     ['tree-blossom-b', 44, 120],
-    ['tree-blossom-a', 300, 210],
-    ['tree-blossom-b', 560, 60],
-    ['tree-blossom-a', 470, 330],
-    ['tree-blossom-b', 120, 400],
-    ['tree-blossom-a', 330, 430],
-    ['tree-blossom-b', 600, 400],
+    ['tree-blossom-a', 330, 64],
+    ['tree-blossom-b', 600, 40],
+    ['tree-blossom-a', 360, 200],
+    ['tree-blossom-b', 30, 470],
+    ['tree-blossom-a', 360, 476],
+    ['tree-blossom-b', 620, 476],
   ];
   trees.forEach(([key, x, y], i) => m.obj('sprite', `tree-${i}`, x, y, 0, 0, { key, footW: 10, footH: 6 }));
+
+  // Garden east of the north road, between the tower branch and the main road.
+  for (let y = 9; y <= 12; y++) for (let x = 27; x <= 37; x++) ground.set(x, y, GRASS);
+  m.obj('garden', 'garden', 27 * T, 9 * T, 11 * T, 4 * T);
+
+  // Five plots for the discipline buildings, south of the main road (5×5 tiles each).
+  const plots = [
+    ['forest', 2],
+    ['tower', 8],
+    ['market', 14],
+    ['forge', 27],
+    ['library', 33],
+  ];
+  for (const [pack, x] of plots) {
+    m.obj('building', `building-${pack}`, x * T, 18 * T, 5 * T, 5 * T, { pack });
+    for (let yy = 23; yy < 24; yy++) for (let xx = x + 1; xx < x + 4; xx++) ground.set(xx, yy, PATH);
+  }
+
+  // Shop stall by the crossroads.
+  m.obj('shop', 'shop', 20 * T, 11 * T, 2 * T, 2 * T);
+  m.obj('sprite', 'shop-sign', 21 * T, 13 * T, 0, 0, { key: 'shop-stall', footW: 24, footH: 10 });
 
   // Exits to the five locations and the spawn points for coming back.
   m.obj('exit', 'to-forest', 24 * T, 0, 2 * T, 6, { target: 'forest', spawn: 'from-homestead', requiresPack: 'forest' });
@@ -199,7 +224,7 @@ function house() {
   // interior-16.png: 0 floor, 1 floor knot, 2 wall, 3 wall+baseboard, 4 window, 5 mat, 6 rug, 7 desk,
   // 8 bed head, 9 bed foot, 10 bookshelf, 11 chest
   m.tilesets.push(
-    tileset({ firstgid: 1, name: 'interior', image: '../_temp/interior/interior-16.png', w: 192, h: 16, columns: 12, tilecount: 12, collides: [2, 3, 4, 7, 8, 9, 10, 11] }),
+    tileset({ firstgid: 1, name: 'interior', image: '../_temp/interior/interior-16.png', w: 224, h: 16, columns: 14, tilecount: 14, collides: [2, 3, 4, 7, 8, 9, 10, 11] }),
   );
   const g = (i) => i + 1;
   const ground = m.layer('ground');

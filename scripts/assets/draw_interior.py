@@ -1,12 +1,13 @@
 """Draw temporary interior tiles for the heroine's house (16×16, design-system palette).
 
 Run from the repo root:  python scripts/assets/draw_interior.py
-Writes public/assets/_temp/interior/interior-16.png. Placeholder art, listed in ASSETS-TODO.md.
+Writes public/assets/_temp/interior/interior-16.png and shop-stall.png. Placeholder art, listed in ASSETS-TODO.md.
 
 Tile order (frame index):
   0 floor          1 floor (knot)    2 log wall        3 log wall + baseboard
   4 wall + window  5 door mat (exit) 6 rug             7 desk with the journal
   8 bed (head)     9 bed (foot)     10 bookshelf      11 chest
+ 12 garden soil   13 garden soil, watered
 """
 from __future__ import annotations
 
@@ -37,6 +38,12 @@ P = {
     "R": "#2c6670",  # river-600
     "r": "#7cc4c0",  # river-300
     "C": "#a3432c",  # clay-600
+    "s": "#6b4a2b",  # forest-earth (soil)
+    "S": "#4f3420",  # soil furrow (darker forest-earth)
+    "e": "#9a6b3f",  # forest-detail (soil highlight)
+    "u": "#4a3422",  # wet soil
+    "U": "#33231a",  # wet furrow
+    "v": "#6b4a2b",  # wet highlight
 }
 
 TILES: list[list[str]] = []
@@ -277,6 +284,45 @@ tile("""
 ................
 """)
 
+# 12 garden soil (tilled furrows)
+tile("""
+.SSSSSSSSSSSSSS.
+SseesssseessseeS
+SssssssssssssssS
+SSSSSSSSSSSSSSSS
+SsesssessssesssS
+SssssssssssssssS
+SSSSSSSSSSSSSSSS
+SssesssssessessS
+SssssssssssssssS
+SSSSSSSSSSSSSSSS
+SseessesssseessS
+SssssssssssssssS
+SSSSSSSSSSSSSSSS
+SsssesssesssessS
+SssssssssssssssS
+.SSSSSSSSSSSSSS.
+""")
+# 13 garden soil, watered (darker)
+tile("""
+.UUUUUUUUUUUUUU.
+UuvvuuuuvvuuuvvU
+UuuuuuuuuuuuuuuU
+UUUUUUUUUUUUUUUU
+UuvuuuvuuuuvuuuU
+UuuuuuuuuuuuuuuU
+UUUUUUUUUUUUUUUU
+UuuvuuuuuvuuvuuU
+UuuuuuuuuuuuuuuU
+UUUUUUUUUUUUUUUU
+UuvvuuvuuuuvvuuU
+UuuuuuuuuuuuuuuU
+UUUUUUUUUUUUUUUU
+UuuuvuuuvuuuvuuU
+UuuuuuuuuuuuuuuU
+.UUUUUUUUUUUUUU.
+""")
+
 
 def main() -> None:
     img = Image.new("RGBA", (16 * len(TILES), 16), (0, 0, 0, 0))
@@ -291,5 +337,51 @@ def main() -> None:
     print("wrote", OUT.relative_to(ROOT), img.size)
 
 
+# ------------------------------------------------------------------ shop stall (32×32)
+
+STALL_OUT = ROOT / "public/assets/_temp/interior/shop-stall.png"
+
+
+def hexrgb(h: str) -> tuple[int, int, int, int]:
+    return tuple(int(h[k : k + 2], 16) for k in (1, 3, 5)) + (255,)
+
+
+def draw_stall() -> None:
+    img = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
+    put = lambda x, y, c: img.putpixel((x, y), hexrgb(P[c]))
+    # Posts
+    for y in range(8, 32):
+        for x in (2, 3, 28, 29):
+            put(x, y, "D" if x in (2, 28) else "M")
+    # Striped awning with a scalloped edge (honey / parchment, outlined in wood)
+    for y in range(1, 9):
+        for x in range(0, 32):
+            put(x, y, "Y" if (x // 4) % 2 == 0 else "W")
+    for x in range(0, 32):
+        put(x, 0, "K")
+        if x % 4 in (1, 2):
+            put(x, 9, "Y" if (x // 4) % 2 == 0 else "W")
+        put(x, 8 if x % 4 in (0, 3) else 10, "K")  # scallop outline
+    # Counter
+    for y in range(20, 31):
+        for x in range(1, 31):
+            put(x, y, "M")
+    for x in range(1, 31):
+        put(x, 20, "L")
+        put(x, 31, "K")
+        put(x, 25, "D")
+    for y in range(20, 32):
+        put(0, y, "K")
+        put(31, y, "K")
+    # Goods on the counter: turnips, tomatoes, a seed bag
+    for x, c in ((6, "C"), (8, "C"), (12, "G"), (13, "g"), (18, "Y"), (19, "y"), (23, "C"), (25, "G")):
+        put(x, 19, c)
+        put(x, 18, c)
+        put(x + 1, 19, c)
+    img.save(STALL_OUT)
+    print("wrote", STALL_OUT.relative_to(ROOT))
+
+
 if __name__ == "__main__":
     main()
+    draw_stall()

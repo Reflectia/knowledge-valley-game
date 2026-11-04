@@ -11,14 +11,16 @@ import { CreateCharacter } from './screens/CreateCharacter';
 import { GameMenu } from './screens/GameMenu';
 import { Hud } from './screens/Hud';
 import { ImportScreen } from './screens/ImportScreen';
+import { InventoryScreen } from './screens/InventoryScreen';
 import { Journal } from './screens/Journal';
 import { RewardScene } from './screens/RewardScene';
 import { SettingsScreen } from './screens/SettingsScreen';
+import { ShopScreen } from './screens/ShopScreen';
 import { SleepDialog } from './screens/SleepDialog';
 import { StartMenu } from './screens/StartMenu';
 
 type Screen = 'start' | 'create' | 'game';
-type Modal = null | 'journal' | 'menu' | 'settings' | 'import';
+type Modal = null | 'journal' | 'menu' | 'settings' | 'import' | 'inventory' | 'shop';
 
 /** UI scale ×2 / ×3 / ×4 (design system: ui-scale-default / -1080 / -1440). */
 function resolveScale(setting: UiScale): 2 | 3 | 4 {
@@ -61,6 +63,7 @@ export function App() {
     if (uiRequest && screen === 'game') {
       const r = api.getState().takeUiRequest();
       if (r === 'journal') setModal('journal');
+      else if (r === 'shop') setModal('shop');
     }
   }, [uiRequest, screen, api]);
 
@@ -86,6 +89,7 @@ export function App() {
       if (screen !== 'game' || isTyping(e)) return;
       if (showRewards || showSleep) return;
       if (e.code === 'KeyJ') setModal((m) => (m === 'journal' ? null : m ?? 'journal'));
+      else if (e.code === 'KeyI') setModal((m) => (m === 'inventory' ? null : m ?? 'inventory'));
       else if (!modal && /^Digit[1-9]$/.test(e.code)) selectSlot(Number(e.code.slice(5)) - 1);
     };
     const onWheel = (e: WheelEvent) => {
@@ -132,7 +136,7 @@ export function App() {
           }}
         />
       )}
-      {screen === 'game' && ready && <Hud onJournal={() => setModal('journal')} onMenu={() => setModal('menu')} />}
+      {screen === 'game' && ready && <Hud onJournal={() => setModal('journal')} onMenu={() => setModal('menu')} onInventory={() => setModal('inventory')} />}
 
       {modal === 'journal' && (
         <Overlay>
@@ -159,6 +163,16 @@ export function App() {
         </Overlay>
       )}
       {modal === 'import' && <ImportScreen onClose={() => setModal(null)} />}
+      {modal === 'inventory' && (
+        <Overlay>
+          <InventoryScreen onClose={() => setModal(null)} />
+        </Overlay>
+      )}
+      {modal === 'shop' && (
+        <Overlay>
+          <ShopScreen onClose={() => setModal(null)} />
+        </Overlay>
+      )}
 
       {showRewards && (
         <RewardScene

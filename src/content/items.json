@@ -1,0 +1,458 @@
+{
+  "_comment": "Item catalog. icon = { sheet, frame } in a manifest sprite sheet, or { texture }. Names and prices are drafts for the owner to edit. Most art is temporary (ASSETS-TODO.md).",
+  "items": [
+    {
+      "id": "hoe",
+      "kind": "tool",
+      "tool": "hoe",
+      "name": "Сапка",
+      "text": "Розпушує землю на городі.",
+      "icon": {
+        "sheet": "temp-farm",
+        "frame": 88
+      }
+    },
+    {
+      "id": "watering-can",
+      "kind": "tool",
+      "tool": "water",
+      "name": "Лійка",
+      "text": "Політа рослина за ніч підросте.",
+      "icon": {
+        "sheet": "temp-farm",
+        "frame": 84
+      }
+    },
+    {
+      "id": "axe",
+      "kind": "tool",
+      "tool": "axe",
+      "name": "Сокира",
+      "text": "Для дерев і дерев'яного реквізиту.",
+      "icon": {
+        "sheet": "temp-farm",
+        "frame": 87
+      }
+    },
+    {
+      "id": "pickaxe",
+      "kind": "tool",
+      "tool": "pickaxe",
+      "name": "Кайло",
+      "text": "Для каменю, кристалів і металу.",
+      "icon": {
+        "sheet": "temp-town",
+        "frame": 115
+      }
+    },
+    {
+      "id": "sword",
+      "kind": "tool",
+      "tool": "sword",
+      "name": "Меч",
+      "text": "Знадобиться проти Монстра Дедлайну.",
+      "icon": {
+        "sheet": "temp-dungeon",
+        "frame": 104
+      }
+    },
+    {
+      "id": "seed-turnip",
+      "kind": "seed",
+      "crop": "turnip",
+      "name": "Насіння ріпи",
+      "text": "Росте 4 дні.",
+      "price": 10,
+      "icon": {
+        "texture": "item-seed"
+      },
+      "badge": {
+        "sheet": "temp-crops",
+        "frame": 0
+      }
+    },
+    {
+      "id": "seed-potato",
+      "kind": "seed",
+      "crop": "potato",
+      "name": "Насіння картоплі",
+      "text": "Росте 6 днів.",
+      "price": 15,
+      "icon": {
+        "texture": "item-seed"
+      },
+      "badge": {
+        "sheet": "temp-crops",
+        "frame": 84
+      }
+    },
+    {
+      "id": "seed-strawberry",
+      "kind": "seed",
+      "crop": "strawberry",
+      "name": "Насіння полуниці",
+      "text": "Росте 6 днів.",
+      "price": 20,
+      "icon": {
+        "texture": "item-seed"
+      },
+      "badge": {
+        "sheet": "temp-crops",
+        "frame": 72
+      }
+    },
+    {
+      "id": "seed-tomato",
+      "kind": "seed",
+      "crop": "tomato",
+      "name": "Насіння томата",
+      "text": "Росте 8 днів.",
+      "price": 25,
+      "icon": {
+        "texture": "item-seed"
+      },
+      "badge": {
+        "sheet": "temp-crops",
+        "frame": 24
+      }
+    },
+    {
+      "id": "seed-sunflower",
+      "kind": "seed",
+      "crop": "sunflower",
+      "name": "Насіння соняшника",
+      "text": "Росте 8 днів.",
+      "price": 30,
+      "icon": {
+        "texture": "item-seed"
+      },
+      "badge": {
+        "sheet": "temp-crops",
+        "frame": 114
+      }
+    },
+    {
+      "id": "turnip",
+      "kind": "crop",
+      "name": "Ріпа",
+      "text": "Скромна, але чесна.",
+      "sell": 25,
+      "icon": {
+        "sheet": "temp-crops",
+        "frame": 0
+      }
+    },
+    {
+      "id": "potato",
+      "kind": "crop",
+      "name": "Картопля",
+      "text": "Основа будь-якої сесії.",
+      "sell": 40,
+      "icon": {
+        "sheet": "temp-crops",
+        "frame": 84
+      }
+    },
+    {
+      "id": "strawberry",
+      "kind": "crop",
+      "name": "Полуниця",
+      "text": "Солодка, як здана вчасно лабораторна.",
+      "sell": 55,
+      "icon": {
+        "sheet": "temp-crops",
+        "frame": 72
+      }
+    },
+    {
+      "id": "tomato",
+      "kind": "crop",
+      "name": "Томат",
+      "text": "Червоний, як дедлайн у календарі.",
+      "sell": 70,
+      "icon": {
+        "sheet": "temp-crops",
+        "frame": 24
+      }
+    },
+    {
+      "id": "sunflower",
+      "kind": "crop",
+      "name": "Соняшник",
+      "text": "Завжди повертається до світла знань.",
+      "sell": 80,
+      "icon": {
+        "sheet": "temp-crops",
+        "frame": 114
+      }
+    },
+    {
+      "id": "wood",
+      "kind": "resource",
+      "name": "Деревина",
+      "text": "Пахне лісом і новими кресленнями.",
+      "sell": 4,
+      "icon": {
+        "sheet": "temp-farm",
+        "frame": 2
+      }
+    },
+    {
+      "id": "stone",
+      "kind": "resource",
+      "name": "Камінь",
+      "text": "Твердий, як аргумент у висновках.",
+      "sell": 4,
+      "icon": {
+        "sheet": "temp-farm",
+        "frame": 89
+      }
+    },
+    {
+      "id": "forest-moss",
+      "kind": "resource",
+      "name": "Росяний мох",
+      "text": "Ресурс Зачарованого лісу.",
+      "sell": 12,
+      "icon": {
+        "sheet": "tiles-forest",
+        "frame": 4
+      }
+    },
+    {
+      "id": "tower-crystal",
+      "kind": "resource",
+      "name": "Крижаний кристал",
+      "text": "Ресурс Кришталевої вежі.",
+      "sell": 12,
+      "icon": {
+        "sheet": "tiles-tower",
+        "frame": 4
+      }
+    },
+    {
+      "id": "market-token",
+      "kind": "resource",
+      "name": "Ярмарковий жетон",
+      "text": "Ресурс Ярмаркової площі.",
+      "sell": 12,
+      "icon": {
+        "sheet": "tiles-market",
+        "frame": 4
+      }
+    },
+    {
+      "id": "forge-ore",
+      "kind": "resource",
+      "name": "Руда креслень",
+      "text": "Ресурс Гірської кузні.",
+      "sell": 12,
+      "icon": {
+        "sheet": "tiles-forge",
+        "frame": 4
+      }
+    },
+    {
+      "id": "library-stardust",
+      "kind": "resource",
+      "name": "Зоряний пил",
+      "text": "Ресурс Бібліотеки-обсерваторії.",
+      "sell": 12,
+      "icon": {
+        "sheet": "tiles-library",
+        "frame": 4
+      }
+    },
+    {
+      "id": "plant-fern",
+      "kind": "furniture",
+      "place": "indoor",
+      "collides": true,
+      "name": "Папороть у вазоні",
+      "text": "Трохи зелені для затишку.",
+      "price": 40,
+      "icon": {
+        "sheet": "temp-indoor",
+        "frame": 16
+      }
+    },
+    {
+      "id": "plant-palm",
+      "kind": "furniture",
+      "place": "indoor",
+      "collides": true,
+      "name": "Пальма у вазоні",
+      "text": "Відпустка, що росте в кімнаті.",
+      "price": 45,
+      "icon": {
+        "sheet": "temp-indoor",
+        "frame": 17
+      }
+    },
+    {
+      "id": "lamp",
+      "kind": "furniture",
+      "place": "indoor",
+      "collides": true,
+      "name": "Світильник",
+      "text": "Тепле світло для довгих вечорів.",
+      "price": 60,
+      "icon": {
+        "sheet": "temp-indoor",
+        "frame": 122
+      }
+    },
+    {
+      "id": "bookshelf",
+      "kind": "furniture",
+      "place": "indoor",
+      "collides": true,
+      "name": "Книжкова полиця",
+      "text": "Конспекти знайдуть свій дім.",
+      "price": 80,
+      "icon": {
+        "sheet": "temp-interior",
+        "frame": 10
+      }
+    },
+    {
+      "id": "chest",
+      "kind": "furniture",
+      "place": "any",
+      "collides": true,
+      "name": "Скриня",
+      "text": "Для скарбів і зошитів.",
+      "price": 50,
+      "icon": {
+        "sheet": "temp-interior",
+        "frame": 11
+      }
+    },
+    {
+      "id": "rug",
+      "kind": "furniture",
+      "place": "indoor",
+      "collides": false,
+      "name": "Килимок",
+      "text": "По ньому приємно ходити босоніж.",
+      "price": 35,
+      "icon": {
+        "sheet": "temp-interior",
+        "frame": 6
+      }
+    },
+    {
+      "id": "fence",
+      "kind": "furniture",
+      "place": "outdoor",
+      "collides": true,
+      "name": "Паркан",
+      "text": "Охайна межа городу.",
+      "price": 5,
+      "icon": {
+        "sheet": "temp-town",
+        "frame": 81
+      }
+    },
+    {
+      "id": "path-stone",
+      "kind": "furniture",
+      "place": "outdoor",
+      "collides": false,
+      "name": "Кам'яна доріжка",
+      "text": "Щоб ноги знали дорогу.",
+      "price": 3,
+      "icon": {
+        "sheet": "homestead-tiles",
+        "frame": 2
+      }
+    },
+    {
+      "id": "flowers",
+      "kind": "furniture",
+      "place": "outdoor",
+      "collides": false,
+      "name": "Квітник",
+      "text": "Маленька радість біля ґанку.",
+      "price": 8,
+      "icon": {
+        "sheet": "homestead-tiles",
+        "frame": 1
+      }
+    }
+  ],
+  "crops": [
+    {
+      "id": "turnip",
+      "harvest": "turnip",
+      "days": 4,
+      "firstFrame": 0
+    },
+    {
+      "id": "potato",
+      "harvest": "potato",
+      "days": 6,
+      "firstFrame": 84
+    },
+    {
+      "id": "strawberry",
+      "harvest": "strawberry",
+      "days": 6,
+      "firstFrame": 72
+    },
+    {
+      "id": "tomato",
+      "harvest": "tomato",
+      "days": 8,
+      "firstFrame": 24
+    },
+    {
+      "id": "sunflower",
+      "harvest": "sunflower",
+      "days": 8,
+      "firstFrame": 114
+    }
+  ],
+  "starter": {
+    "coins": 50,
+    "items": {
+      "hoe": 1,
+      "watering-can": 1,
+      "axe": 1,
+      "pickaxe": 1,
+      "sword": 1,
+      "seed-turnip": 10,
+      "seed-potato": 4
+    },
+    "toolbar": [
+      "hoe",
+      "watering-can",
+      "seed-turnip",
+      "seed-potato",
+      "axe",
+      "pickaxe",
+      "sword",
+      null,
+      null
+    ]
+  },
+  "shop": {
+    "buy": [
+      "seed-turnip",
+      "seed-potato",
+      "seed-strawberry",
+      "seed-tomato",
+      "seed-sunflower",
+      "plant-fern",
+      "plant-palm",
+      "lamp",
+      "bookshelf",
+      "chest",
+      "rug",
+      "fence",
+      "path-stone",
+      "flowers"
+    ]
+  },
+  "_crops": "Crop sheet (josehzz): per crop 6 frames from firstFrame: +0 harvested item, +1 mature, +2, +3, +4 sprout, +5 seeds in soil. Growth shows +5 → +1 over `days` watered days."
+}

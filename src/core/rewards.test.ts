@@ -9,6 +9,7 @@ const T = BALANCE.rarityThresholds;
 const R = BALANCE.rewards;
 const L1 = '1:mpm_ai:1';
 const L2 = '1:mpm_ai:2';
+const START = newWorld().player.coins;
 
 function run(c: Curriculum, ledger: RewardLedger = {}, world: WorldState = newWorld()) {
   return reconcile(c, ledger, world, T);
@@ -34,7 +35,7 @@ describe('«Виконано» (acceptance: skill point, stage, building, ceilin
 
   it('pays coins and the pack resource once, with an on-time bonus', () => {
     const r = run(markDone(sampleCurriculum(), L1, '2026-09-23'));
-    expect(r.world.player.coins).toBe(R.done.coins + R.onTime.coins);
+    expect(r.world.player.coins).toBe(START + R.done.coins + R.onTime.coins);
     expect(r.world.inventory['forest-moss']).toBe(R.done.resources);
     expect(r.events).toEqual([
       expect.objectContaining({ kind: 'done', labKey: L1, onTime: true, branch: 'modeling', shieldCharges: 1 }),
@@ -44,7 +45,7 @@ describe('«Виконано» (acceptance: skill point, stage, building, ceilin
   it('a late lab gets all main rewards but no on-time bonus (no penalty)', () => {
     const c = markDone(sampleCurriculum(), L2, '2026-10-18'); // deadline 10-16
     const r = run(c);
-    expect(r.world.player.coins).toBe(R.done.coins);
+    expect(r.world.player.coins).toBe(START + R.done.coins);
     expect(deriveProgress(c, T).skillPoints.modeling).toBe(1);
     expect(deriveProgress(c, T).disciplines['1:mpm_ai'].shieldCharges).toBe(0);
   });
@@ -99,7 +100,7 @@ describe('no duplicated rewards (acceptance)', () => {
     const first = run(c);
     c = markDone(c, L1, '2026-09-30');
     const second = run(c, first.ledger, first.world);
-    expect(second.world.player.coins).toBe(R.done.coins);
+    expect(second.world.player.coins).toBe(START + R.done.coins);
     expect(second.events).toEqual([]);
   });
 

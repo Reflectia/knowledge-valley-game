@@ -60,6 +60,16 @@ body {
   display: block;
   flex: none;
 }
+.item-icon {
+  position: relative;
+  display: block;
+}
+/* Top-right: the count sits bottom-right and the slot key top-left. */
+.item-icon__badge {
+  position: absolute;
+  right: -4px;
+  top: -4px;
+}
 
 /* ------------------------------------------------------------ overlays */
 
@@ -436,6 +446,110 @@ body {
 }
 .settings__block p {
   margin: 0;
+}
+
+/* ------------------------------------------------------------ inventory */
+
+.inventory {
+  width: min(920px, 100%);
+  display: grid;
+  gap: var(--space-6);
+}
+.inventory__body {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: var(--space-8);
+  min-height: 0;
+}
+.inventory__groups {
+  display: grid;
+  gap: var(--space-6);
+  align-content: start;
+  max-height: 420px;
+  overflow: auto;
+  padding: var(--space-6) var(--space-6) var(--space-6) var(--space-8);
+}
+.inventory__heading {
+  margin: 0 0 var(--space-4);
+  font: 16px/24px var(--font-display);
+}
+.inventory__grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-6);
+}
+.inventory__grid .dv-slot {
+  appearance: none;
+  margin: 0;
+  padding: 0;
+  background-color: transparent;
+}
+.inventory__info {
+  align-self: start;
+  max-width: none;
+  min-height: 160px;
+}
+.inventory__info p {
+  margin: 0 0 var(--space-2);
+}
+.inventory__toolbar {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-2);
+}
+.inventory__toolbar .dv-slot {
+  appearance: none;
+  margin: 0;
+  padding: 0;
+  background-color: transparent;
+}
+.inventory__toolbar .dv-slot.is-target:hover {
+  outline: 4px solid var(--river-600);
+  outline-offset: 2px;
+}
+
+/* ------------------------------------------------------------ shop */
+
+.shop-wrap {
+  width: min(760px, 100%);
+}
+.shop__coins {
+  margin: 0 0 var(--space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  font: 16px/32px var(--font-display);
+}
+.shop__list {
+  list-style: none;
+  margin: 0;
+  padding: 0 var(--space-4) 0 0;
+  display: grid;
+  gap: var(--space-4);
+  max-height: 440px;
+  overflow: auto;
+}
+.shop__row {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  align-items: center;
+  gap: var(--space-6);
+}
+.shop__name {
+  display: grid;
+  line-height: 28px;
+}
+.shop__price {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font: 16px/28px var(--font-display);
+  min-width: 72px;
+  justify-content: flex-end;
+}
+.shop__actions {
+  display: flex;
+  gap: var(--space-4);
 }
 
 /* ------------------------------------------------------------ plan import */

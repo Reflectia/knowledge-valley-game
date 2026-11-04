@@ -36,7 +36,30 @@
     "endMinutes": 1560,
     "realSeconds": 810
   },
-  "energy": {
-    "tiredAt": 0
+  "actions": {
+    "till": {
+      "energy": 2,
+      "xp": 1
+    },
+    "water": {
+      "energy": 1,
+      "xp": 0
+    },
+    "plant": {
+      "energy": 0,
+      "xp": 1
+    },
+    "harvest": {
+      "energy": 0,
+      "xp": 3
+    },
+    "chop": {
+      "energy": 3,
+      "xp": 2
+    },
+    "mine": {
+      "energy": 3,
+      "xp": 2
+    }
   }
 }

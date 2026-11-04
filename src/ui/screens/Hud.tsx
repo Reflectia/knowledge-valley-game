@@ -3,23 +3,11 @@ import { useTranslation } from 'react-i18next';
 import { BALANCE, DEFAULT_TITLE, packByBranch } from '@/core/content';
 import { atCeiling, xpToNext } from '@/core/rules';
 import { clockText } from '@/core/time';
-import { TEMP_FRAMES } from '@/game/assets/manifest';
+import { ITEMS, isConsumable } from '@/core/items';
 
-import { Ico, SheetIcon, assetUrl } from '../components/common';
+import { Ico } from '../components/common';
+import { ItemIcon } from '../components/ItemIcon';
 import { useGame } from '../GameContext';
-
-/** Toolbar contents until the inventory arrives (stage 6). Tools are temporary art. */
-const TOOLBAR: ({ id: string; sheet: string; frame: number } | { id: string; img: string } | null)[] = [
-  { id: 'hoe', sheet: 'temp-farm', frame: TEMP_FRAMES.hoe },
-  { id: 'wateringCan', sheet: 'temp-farm', frame: TEMP_FRAMES.wateringCan },
-  { id: 'axe', sheet: 'temp-farm', frame: TEMP_FRAMES.axe },
-  { id: 'pickaxe', sheet: 'temp-town', frame: TEMP_FRAMES.pickaxe },
-  { id: 'sword', sheet: 'temp-dungeon', frame: TEMP_FRAMES.sword },
-  { id: 'seed', img: 'item-seed' },
-  null,
-  null,
-  null,
-];
 
 export function phaseOf(minutes: number): 'morning' | 'day' | 'evening' | 'night' {
   const h = minutes / 60;
@@ -33,7 +21,7 @@ export function phaseOf(minutes: number): 'morning' | 'day' | 'evening' | 'night
 const clock = (m: number) => clockText(Math.floor(m / 10) * 10);
 
 /** Game HUD (spec §8 screen 3): time of day, energy, health, coins, toolbar, level and ceiling. */
-export function Hud({ onJournal, onMenu }: { onJournal: () => void; onMenu: () => void }) {
+export function Hud({ onJournal, onMenu, onInventory }: { onJournal: () => void; onMenu: () => void; onInventory: () => void }) {
   const { t } = useTranslation();
   const player = useGame((s) => s.world.state.player);
   const day = useGame((s) => s.world.state.day);
@@ -41,6 +29,8 @@ export function Hud({ onJournal, onMenu }: { onJournal: () => void; onMenu: () =
   const progress = useGame((s) => s.progress);
   const selected = useGame((s) => s.selectedSlot);
   const selectSlot = useGame((s) => s.selectSlot);
+  const toolbar = useGame((s) => s.world.state.toolbar);
+  const inventory = useGame((s) => s.world.state.inventory);
 
   const capped = atCeiling(player, progress.ceiling);
   const need = xpToNext(player.level);
@@ -121,6 +111,9 @@ export function Hud({ onJournal, onMenu }: { onJournal: () => void; onMenu: () =
         <button type="button" className="dv-btn dv-btn--icon" aria-label={t('hud.mail')} title={t('hud.mail')} disabled>
           <Ico name="mail" />
         </button>
+        <button type="button" className="dv-btn dv-btn--icon" aria-label={t('hud.inventory')} title={t('hud.inventory')} onClick={onInventory}>
+          <Ico name="spark" />
+        </button>
         <button type="button" className="dv-btn dv-btn--icon" aria-label={t('hud.journal')} title={t('hud.journal')} onClick={onJournal}>
           <Ico name="book" />
         </button>
@@ -130,20 +123,24 @@ export function Hud({ onJournal, onMenu }: { onJournal: () => void; onMenu: () =
       </div>
 
       <nav className="hud__toolbar dv-panel" aria-label={t('hud.toolbar')}>
-        {TOOLBAR.map((tool, i) => (
-          <button
-            key={i}
-            type="button"
-            className={`dv-slot hud__slot${selected === i ? ' is-selected' : ''}`}
-            title={tool ? `${t(`hud.tools.${tool.id}`)} (${i + 1})` : String(i + 1)}
-            aria-pressed={selected === i}
-            onClick={() => selectSlot(i)}
-          >
-            {tool && 'sheet' in tool && <SheetIcon sheet={tool.sheet} frame={tool.frame} label={t(`hud.tools.${tool.id}`)} />}
-            {tool && 'img' in tool && <img src={assetUrl(tool.img)} alt={t(`hud.tools.${tool.id}`)} />}
-            <span className="hud__key">{i + 1}</span>
-          </button>
-        ))}
+        {toolbar.map((id, i) => {
+          const item = id ? ITEMS[id] : undefined;
+          const n = id ? (inventory[id] ?? 0) : 0;
+          return (
+            <button
+              key={i}
+              type="button"
+              className={`dv-slot hud__slot${selected === i ? ' is-selected' : ''}`}
+              title={item ? `${item.name} (${i + 1})` : t('hud.emptySlot', { n: i + 1 })}
+              aria-pressed={selected === i}
+              onClick={() => selectSlot(i)}
+            >
+              {item && <ItemIcon id={id!} />}
+              {item && isConsumable(id!) && <span className="dv-slot__count">{n}</span>}
+              <span className="hud__key">{i + 1}</span>
+            </button>
+          );
+        })}
       </nav>
     </div>
   );

@@ -39,6 +39,8 @@ export interface SheetAsset {
   frameHeight: number;
   /** Gap between frames in the source sheet (Kenney sheets with 1 px spacing). */
   spacing?: number;
+  /** Frames per row (for drawing single frames in the UI). */
+  columns: number;
   fallback?: string;
   temp?: boolean;
 }
@@ -60,8 +62,9 @@ const sheet = (
   url: string,
   frameWidth: number,
   frameHeight: number,
-  extra: Partial<Omit<SheetAsset, 'kind' | 'url' | 'frameWidth' | 'frameHeight'>> = {},
-): SheetAsset => ({ kind: 'spritesheet', url, frameWidth, frameHeight, ...extra });
+  columns: number,
+  extra: Partial<Omit<SheetAsset, 'kind' | 'url' | 'frameWidth' | 'frameHeight' | 'columns'>> = {},
+): SheetAsset => ({ kind: 'spritesheet', url, frameWidth, frameHeight, columns, ...extra });
 
 export const ENEMIES = ['beetle', 'deadline', 'ghost', 'magpie', 'moth', 'slime', 'sprout', 'wisp'] as const;
 export const ITEMS = ['book', 'potion', 'seed', 'staff'] as const;
@@ -76,7 +79,7 @@ export type BiomeId = (typeof BIOMES)[number];
 
 export const ASSETS: Record<string, Asset> = {
   // Heroine: 4 walk frames × (down, up, right); left = mirrored right.
-  heroine: sheet(pub('characters/heroine.png'), 16, 32),
+  heroine: sheet(pub('characters/heroine.png'), 16, 32, 4),
   'heroine-palettes': { kind: 'json', url: pub('characters/heroine-palettes.json') },
 
   ...Object.fromEntries(
@@ -94,10 +97,10 @@ export const ASSETS: Record<string, Asset> = {
   emblem: img(pub('portraits/emblem.png')),
 
   // Biome tiles stay from the design system (the new biome images are previews only).
-  ...Object.fromEntries(BIOMES.map((id) => [`tiles-${id}`, sheet(designPng(`tiles/${id}-tileset-16.png`), 16, 16)])),
+  ...Object.fromEntries(BIOMES.map((id) => [`tiles-${id}`, sheet(designPng(`tiles/${id}-tileset-16.png`), 16, 16, 5)])),
 
   // Homestead, cut from homestead-day-night-new.jpg.
-  'homestead-tiles': sheet(pub('homestead/homestead-tiles-16.png'), 16, 16),
+  'homestead-tiles': sheet(pub('homestead/homestead-tiles-16.png'), 16, 16, 3),
   'homestead-house': img(pub('homestead/house.png')),
   'homestead-window-lit': img(pub('homestead/window-lit.png')),
   'tree-blossom-a': img(pub('homestead/tree-blossom-a.png')),
@@ -106,13 +109,14 @@ export const ASSETS: Record<string, Asset> = {
   'homestead-meta': { kind: 'json', url: pub('homestead/homestead.json') },
 
   // Temporary third-party placeholders (CC0). See ASSETS-TODO.md.
-  'temp-crops': sheet(pub('_temp/josehzz-farming-crops/crops.png'), 16, 16, { temp: true }),
-  'temp-farm': sheet(pub('_temp/kenney-tiny-farm/tilemap.png'), 16, 16, { temp: true }),
-  'temp-town': sheet(pub('_temp/kenney-tiny-town/tilemap.png'), 16, 16, { temp: true }),
-  'temp-dungeon': sheet(pub('_temp/kenney-tiny-dungeon/tilemap.png'), 16, 16, { temp: true }),
-  'temp-indoor': sheet(pub('_temp/kenney-roguelike-indoor/spritesheet.png'), 16, 16, { spacing: 1, temp: true }),
+  'temp-crops': sheet(pub('_temp/josehzz-farming-crops/crops.png'), 16, 16, 12, { temp: true }),
+  'temp-farm': sheet(pub('_temp/kenney-tiny-farm/tilemap.png'), 16, 16, 12, { temp: true }),
+  'temp-town': sheet(pub('_temp/kenney-tiny-town/tilemap.png'), 16, 16, 12, { temp: true }),
+  'temp-dungeon': sheet(pub('_temp/kenney-tiny-dungeon/tilemap.png'), 16, 16, 12, { temp: true }),
+  'temp-indoor': sheet(pub('_temp/kenney-roguelike-indoor/spritesheet.png'), 16, 16, 26, { spacing: 1, temp: true }),
   // Self-drawn placeholder interior (scripts/assets/draw_interior.py).
-  'temp-interior': sheet(pub('_temp/interior/interior-16.png'), 16, 16, { temp: true }),
+  'temp-interior': sheet(pub('_temp/interior/interior-16.png'), 16, 16, 14, { temp: true }),
+  'shop-stall': img(pub('_temp/interior/shop-stall.png'), undefined, true),
 
   // Tiled maps (scripts/maps/build-maps.mjs).
   ...Object.fromEntries(MAPS.map((id) => [`map-${id}`, { kind: 'tilemap', url: pub(`maps/${id}.json`) } as MapAsset])),
@@ -141,4 +145,9 @@ export const TEMP_FRAMES = {
   // josehzz-farming-crops: 12 columns, 2 crops per row, 6 frames per crop:
   // frame 0 = harvested item, frames 5..1 = growth stages (seed → mature).
   cropColumns: 12,
+  // temp-interior: garden soil, dry and watered
+  soil: 12,
+  soilWet: 13,
+  // kenney-tiny-town: an empty building plot sign
+  plotSign: 83,
 } as const;
