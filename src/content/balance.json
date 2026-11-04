@@ -1,14 +1,42 @@
 {
-  "_comment": "Tunable numbers. ceiling and rarity come from the spec; the rest are proposals awaiting the owner's confirmation.",
-  "ceiling": { "base": 3, "perLab": 2 },
-  "xp": { "perLevel": 20 },
-  "rarityThresholds": { "rare": 0.6, "epic": 0.75, "legendary": 0.9 },
+  "_comment": "Tunable numbers. ceiling and rarity come from the spec; the rest are proposals (rewards confirmed by the owner).",
+  "ceiling": {
+    "base": 3,
+    "perLab": 2
+  },
+  "xp": {
+    "perLevel": 20
+  },
+  "rarityThresholds": {
+    "rare": 0.6,
+    "epic": 0.75,
+    "legendary": 0.9
+  },
   "rewards": {
-    "done": { "coins": 20, "resources": 3, "skillPoints": 1 },
-    "onTime": { "coins": 50, "shieldCharges": 1 }
+    "done": {
+      "coins": 20,
+      "resources": 3,
+      "skillPoints": 1
+    },
+    "onTime": {
+      "coins": 50,
+      "shieldCharges": 1
+    }
   },
   "revivalStages": 5,
   "buildingLevels": 5,
-  "player": { "startLevel": 1, "maxEnergy": 100, "maxHealth": 100 },
-  "exportReminderDays": 7
+  "player": {
+    "startLevel": 1,
+    "maxEnergy": 100,
+    "maxHealth": 100
+  },
+  "exportReminderDays": 7,
+  "day": {
+    "startMinutes": 360,
+    "endMinutes": 1560,
+    "realSeconds": 810
+  },
+  "energy": {
+    "tiredAt": 0
+  }
 }

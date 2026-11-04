@@ -14,6 +14,7 @@ import { ImportScreen } from './screens/ImportScreen';
 import { Journal } from './screens/Journal';
 import { RewardScene } from './screens/RewardScene';
 import { SettingsScreen } from './screens/SettingsScreen';
+import { SleepDialog } from './screens/SleepDialog';
 import { StartMenu } from './screens/StartMenu';
 
 type Screen = 'start' | 'create' | 'game';
@@ -43,6 +44,8 @@ export function App() {
   const saveError = useGame((s) => s.saveError);
   const setUiBlocking = useGame((s) => s.setUiBlocking);
   const selectSlot = useGame((s) => s.selectSlot);
+  const sleepRequest = useGame((s) => s.sleepRequest);
+  const uiRequest = useGame((s) => s.uiRequest);
 
   const [screen, setScreen] = useState<Screen>('start');
   const [modal, setModal] = useState<Modal>(null);
@@ -51,6 +54,15 @@ export function App() {
   // Rewards wait for the game screen; a batch is shown as one scene.
   const rewards: RewardEvent[] = screen === 'game' ? pending : [];
   const showRewards = rewards.length > 0;
+  const showSleep = screen === 'game' && sleepRequest !== null && !showRewards;
+
+  // The world asks for windows (clicking the journal on the desk).
+  useEffect(() => {
+    if (uiRequest && screen === 'game') {
+      const r = api.getState().takeUiRequest();
+      if (r === 'journal') setModal('journal');
+    }
+  }, [uiRequest, screen, api]);
 
   useEffect(() => {
     const onResize = () => setScale(resolveScale(uiScaleSetting));
@@ -60,19 +72,19 @@ export function App() {
   }, [uiScaleSetting]);
 
   useEffect(() => {
-    setUiBlocking(screen !== 'game' || modal !== null || showRewards);
-  }, [screen, modal, showRewards, setUiBlocking]);
+    setUiBlocking(screen !== 'game' || modal !== null || showRewards || showSleep);
+  }, [screen, modal, showRewards, showSleep, setUiBlocking]);
 
   // Keyboard: J journal, Esc menu / close, 1–9 toolbar slots (spec §8 controls).
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         if (modal) setModal(null);
-        else if (screen === 'game' && !showRewards) setModal('menu');
+        else if (screen === 'game' && !showRewards && !showSleep) setModal('menu');
         return;
       }
       if (screen !== 'game' || isTyping(e)) return;
-      if (showRewards) return;
+      if (showRewards || showSleep) return;
       if (e.code === 'KeyJ') setModal((m) => (m === 'journal' ? null : m ?? 'journal'));
       else if (!modal && /^Digit[1-9]$/.test(e.code)) selectSlot(Number(e.code.slice(5)) - 1);
     };
@@ -88,7 +100,7 @@ export function App() {
       window.removeEventListener('keydown', onKey);
       window.removeEventListener('wheel', onWheel);
     };
-  }, [screen, modal, showRewards, selectSlot, api]);
+  }, [screen, modal, showRewards, showSleep, selectSlot, api]);
 
   useEffect(() => {
     if (saveError) showToast({ icon: 'warn', title: t('toast.saveErrorTitle'), text: t('toast.saveErrorText', { reason: saveError }) }, 8000);
@@ -97,6 +109,7 @@ export function App() {
   const enterGame = () => {
     setModal(null);
     setScreen('game');
+    api.getState().beginSession();
     if (needsExportReminder(api.getState().labs.settings, new Date())) {
       showToast(
         { icon: 'upload', title: t('toast.exportTitle'), text: t('toast.exportText'), onClick: () => setModal('settings') },
@@ -152,6 +165,16 @@ export function App() {
           events={rewards}
           onTake={() => {
             api.getState().takeRewards();
+          }}
+        />
+      )}
+      {showSleep && (
+        <SleepDialog
+          reason={sleepRequest}
+          onStay={() => api.getState().cancelSleep()}
+          onSleep={async () => {
+            await api.getState().sleep();
+            showToast({ icon: 'clock', title: t('menu.slept', { day: api.getState().world.state.day }) });
           }}
         />
       )}

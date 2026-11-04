@@ -17,6 +17,9 @@ function queue(scene: Phaser.Scene, key: string, asset: Asset, url = asset.url):
     case 'json':
       scene.load.json(key, url);
       break;
+    case 'tilemap':
+      scene.load.tilemapTiledJSON(key, url);
+      break;
   }
 }
 
@@ -28,7 +31,7 @@ export function preloadAll(scene: Phaser.Scene): void {
   const retried = new Set<string>();
   scene.load.on(Phaser.Loader.Events.FILE_LOAD_ERROR, (file: Phaser.Loader.File) => {
     const asset = ASSETS[file.key];
-    if (!asset || asset.kind === 'json' || !asset.fallback || retried.has(file.key)) return;
+    if (!asset || asset.kind === 'json' || asset.kind === 'tilemap' || !asset.fallback || retried.has(file.key)) return;
     retried.add(file.key);
     console.warn(`[assets] ${file.key}: primary missing, using design-system fallback`);
     queue(scene, file.key, asset, asset.fallback);

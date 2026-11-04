@@ -1,10 +1,8 @@
 import { useTranslation } from 'react-i18next';
 
 import { Ico, Panel } from '../components/common';
-import { showToast } from '../components/Toasts';
-import { useGame, useGameApi } from '../GameContext';
 
-/** Esc menu in the game. «Лягти спати» ends the day until beds arrive with the homestead (stage 5). */
+/** Esc menu in the game. The day ends in the bed at home, not here. */
 export function GameMenu({
   onClose,
   onJournal,
@@ -19,8 +17,6 @@ export function GameMenu({
   onTitle: () => void;
 }) {
   const { t } = useTranslation();
-  const sleep = useGame((s) => s.sleep);
-  const api = useGameApi();
 
   return (
     <Panel title={t('menu.title')} onClose={onClose} labelledBy="menu-title" className="game-menu">
@@ -40,18 +36,6 @@ export function GameMenu({
         <button type="button" className="dv-btn dv-btn--wide" onClick={onSettings}>
           <Ico name="gear" />
           {t('menu.settings')}
-        </button>
-        <button
-          type="button"
-          className="dv-btn dv-btn--wide"
-          onClick={async () => {
-            await sleep();
-            showToast({ icon: 'clock', title: t('menu.slept', { day: api.getState().world.state.day }) });
-            onClose();
-          }}
-        >
-          <Ico name="clock" />
-          {t('menu.sleep')}
         </button>
         <button type="button" className="dv-btn dv-btn--wide" onClick={onTitle}>
           <Ico name="close" />

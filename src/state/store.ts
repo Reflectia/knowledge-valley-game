@@ -13,10 +13,17 @@ import {
   type LabsRecord,
   type WorldRecord,
 } from '@/core/save';
+import { DAY, dayOver, MINUTES_PER_SECOND } from '@/core/time';
 import type { Curriculum, ISODate, LabKey, PlayerState, RewardEvent, Settings } from '@/core/types';
 
 /** Minutes since midnight when a game day starts (morning). */
-export const DAY_START_MINUTES = 6 * 60;
+export const DAY_START_MINUTES = DAY.startMinutes;
+
+/** Why the day is ending: the bed (asks first), 02:00, or no energy left. */
+export type SleepReason = 'bed' | 'late' | 'tired';
+
+/** A window the world asks the UI to open (e.g. clicking the journal on the desk). */
+export type UiRequest = 'journal';
 
 /**
  * Shared game state for Phaser (world) and React (UI). A vanilla Zustand store,
@@ -39,8 +46,13 @@ export interface GameState {
   clockMinutes: number;
   /** Selected toolbar slot 0..8 (keys 1–9, mouse wheel). */
   selectedSlot: number;
-  /** A menu or window is open: the world ignores keyboard and mouse. */
+  /** A menu or window is open: the world ignores keyboard and mouse, time stands still. */
   uiBlocking: boolean;
+  /** Bumped when the world must restart at home in the morning (new session, new day). */
+  worldEpoch: number;
+  /** Set when the day should end; the UI confirms or explains, then calls sleep(). */
+  sleepRequest: SleepReason | null;
+  uiRequest: UiRequest | null;
 
   init(): Promise<void>;
   newGame(name: string, appearance: PlayerState['appearance']): Promise<void>;
@@ -52,7 +64,17 @@ export interface GameState {
   /** Change settings; saved immediately. New rarity thresholds re-grade items silently. */
   updateSettings(patch: Partial<Omit<Settings, 'createdAt'>>): Promise<void>;
   addXp(amount: number): void;
-  /** End the day: next day, full energy, nightly world save. */
+  /** Spend energy on an action; at zero the heroine is too tired and goes to sleep. */
+  spendEnergy(amount: number): void;
+  /** Advance the clock by real milliseconds (paused while a window is open). */
+  tickClock(realMs: number): void;
+  requestSleep(reason: SleepReason): void;
+  cancelSleep(): void;
+  requestUi(kind: UiRequest): void;
+  takeUiRequest(): UiRequest | null;
+  /** Start playing (continue / new game / imported save): morning at home. */
+  beginSession(): void;
+  /** End the day: next day, full energy, nightly world save, wake up at home. */
   sleep(): Promise<void>;
   exportSave(): string;
   importSave(text: string): Promise<void>;
@@ -117,6 +139,9 @@ export function createGameStore(saves: SaveStore, now: () => Date = () => new Da
       clockMinutes: DAY_START_MINUTES,
       selectedSlot: 0,
       uiBlocking: true,
+      worldEpoch: 0,
+      sleepRequest: null,
+      uiRequest: null,
 
       async init() {
         let file;
@@ -160,6 +185,33 @@ export function createGameStore(saves: SaveStore, now: () => Date = () => new Da
         });
       },
 
+      spendEnergy(amount) {
+        const { world } = get();
+        const energy = Math.max(0, world.state.player.energy - Math.max(0, amount));
+        set({ world: { ...world, state: { ...world.state, player: { ...world.state.player, energy } } } });
+        if (energy === 0 && !get().sleepRequest) set({ sleepRequest: 'tired' });
+      },
+
+      tickClock(realMs) {
+        const s = get();
+        if (s.uiBlocking || s.sleepRequest) return;
+        const clockMinutes = Math.min(DAY.endMinutes, s.clockMinutes + (realMs / 1000) * MINUTES_PER_SECOND);
+        set({ clockMinutes });
+        if (dayOver(clockMinutes)) set({ sleepRequest: 'late' });
+      },
+
+      requestSleep: (reason) => set({ sleepRequest: reason }),
+      cancelSleep: () => set({ sleepRequest: null }),
+      requestUi: (kind) => set({ uiRequest: kind }),
+      takeUiRequest() {
+        const r = get().uiRequest;
+        if (r) set({ uiRequest: null });
+        return r;
+      },
+
+      beginSession: () =>
+        set((s) => ({ worldEpoch: s.worldEpoch + 1, clockMinutes: DAY_START_MINUTES, sleepRequest: null, uiRequest: null })),
+
       async sleep() {
         const { world } = get();
         const state = {
@@ -168,7 +220,7 @@ export function createGameStore(saves: SaveStore, now: () => Date = () => new Da
           player: { ...world.state.player, energy: newWorld().player.energy },
         };
         const next = { ...world, state };
-        set({ world: next, clockMinutes: DAY_START_MINUTES });
+        set((s) => ({ world: next, clockMinutes: DAY_START_MINUTES, sleepRequest: null, worldEpoch: s.worldEpoch + 1 }));
         await persist(() => saves.saveWorld(next));
       },
 

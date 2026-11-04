@@ -37,29 +37,40 @@ export function paintLightmap(
   ambient: number,
   lights: Light[],
 ): void {
-  for (let y = 0; y < height; y++) {
-    for (let x = 0; x < width; x++) {
-      let cr = r(ambient);
-      let cg = g(ambient);
-      let cb = b(ambient);
-      for (const l of lights) {
+  // Ambient everywhere first, then each light only inside its own bounding box.
+  const ar = r(ambient);
+  const ag = g(ambient);
+  const ab = b(ambient);
+  for (let i = 0; i < width * height * 4; i += 4) {
+    data[i] = ar;
+    data[i + 1] = ag;
+    data[i + 2] = ab;
+    data[i + 3] = 255;
+  }
+  for (const l of lights) {
+    const x0 = Math.max(0, Math.floor(l.x - l.radius));
+    const x1 = Math.min(width - 1, Math.ceil(l.x + l.radius));
+    const y0 = Math.max(0, Math.floor(l.y - l.radius));
+    const y1 = Math.min(height - 1, Math.ceil(l.y + l.radius));
+    const lr = r(l.color);
+    const lg = g(l.color);
+    const lb = b(l.color);
+    const r2 = l.radius * l.radius;
+    const in2 = (l.radius * INNER_RING) ** 2;
+    for (let y = y0; y <= y1; y++) {
+      for (let x = x0; x <= x1; x++) {
         const dx = x + 0.5 - l.x;
         const dy = y + 0.5 - l.y;
         const d2 = dx * dx + dy * dy;
-        if (d2 > l.radius * l.radius) continue;
-        const inner = d2 <= (l.radius * INNER_RING) ** 2;
+        if (d2 > r2) continue;
         // Outer ring: checkerboard dither between ambient and the light color.
-        if (!inner && ((x + y) & 1) === 1) continue;
+        if (d2 > in2 && ((x + y) & 1) === 1) continue;
         // Several lights: the brightest channel wins (no over-bright sums).
-        cr = Math.max(cr, r(l.color));
-        cg = Math.max(cg, g(l.color));
-        cb = Math.max(cb, b(l.color));
+        const i = (y * width + x) * 4;
+        data[i] = Math.max(data[i], lr);
+        data[i + 1] = Math.max(data[i + 1], lg);
+        data[i + 2] = Math.max(data[i + 2], lb);
       }
-      const i = (y * width + x) * 4;
-      data[i] = cr;
-      data[i + 1] = cg;
-      data[i + 2] = cb;
-      data[i + 3] = 255;
     }
   }
 }

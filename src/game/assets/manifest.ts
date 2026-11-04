@@ -48,7 +48,12 @@ export interface JsonAsset {
   url: string;
 }
 
-export type Asset = ImageAsset | SheetAsset | JsonAsset;
+export interface MapAsset {
+  kind: 'tilemap';
+  url: string;
+}
+
+export type Asset = ImageAsset | SheetAsset | JsonAsset | MapAsset;
 
 const img = (url: string, fallback?: string, temp = false): ImageAsset => ({ kind: 'image', url, fallback, temp });
 const sheet = (
@@ -61,6 +66,9 @@ const sheet = (
 export const ENEMIES = ['beetle', 'deadline', 'ghost', 'magpie', 'moth', 'slime', 'sprout', 'wisp'] as const;
 export const ITEMS = ['book', 'potion', 'seed', 'staff'] as const;
 export const BIOMES = ['forest', 'tower', 'market', 'forge', 'library'] as const;
+
+export const MAPS = ['homestead', 'house', 'forest', 'tower', 'market', 'forge', 'library'] as const;
+export type MapId = (typeof MAPS)[number];
 
 export type EnemyId = (typeof ENEMIES)[number];
 export type ItemId = (typeof ITEMS)[number];
@@ -103,6 +111,18 @@ export const ASSETS: Record<string, Asset> = {
   'temp-town': sheet(pub('_temp/kenney-tiny-town/tilemap.png'), 16, 16, { temp: true }),
   'temp-dungeon': sheet(pub('_temp/kenney-tiny-dungeon/tilemap.png'), 16, 16, { temp: true }),
   'temp-indoor': sheet(pub('_temp/kenney-roguelike-indoor/spritesheet.png'), 16, 16, { spacing: 1, temp: true }),
+  // Self-drawn placeholder interior (scripts/assets/draw_interior.py).
+  'temp-interior': sheet(pub('_temp/interior/interior-16.png'), 16, 16, { temp: true }),
+
+  // Tiled maps (scripts/maps/build-maps.mjs).
+  ...Object.fromEntries(MAPS.map((id) => [`map-${id}`, { kind: 'tilemap', url: pub(`maps/${id}.json`) } as MapAsset])),
+};
+
+/** Tileset name inside the Tiled maps → texture key of its image. */
+export const TILESET_TEXTURES: Record<string, string> = {
+  homestead: 'homestead-tiles',
+  interior: 'temp-interior',
+  ...Object.fromEntries(BIOMES.map((id) => [id, `tiles-${id}`])),
 };
 
 /** Frame indices inside temporary sheets, by game use. Mirrors ASSETS-TODO.md. */

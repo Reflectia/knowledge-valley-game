@@ -144,3 +144,49 @@ describe('game store with storage', () => {
     expect((await started(kv)).store.getState().pendingRewards).toEqual([]);
   });
 });
+
+describe('day, energy and sleep', () => {
+  async function playing() {
+    const store = createGameStore(new SaveStore(memoryStore()), NOW);
+    await store.getState().init();
+    await store.getState().newGame('Н', { hair: 'red', skin: 'light', shirt: 'green' });
+    store.getState().beginSession();
+    store.getState().setUiBlocking(false);
+    return store;
+  }
+
+  it('the clock runs only while no window is open', async () => {
+    const store = await playing();
+    const start = store.getState().clockMinutes;
+    store.getState().tickClock(10_000);
+    const after = store.getState().clockMinutes;
+    expect(after).toBeGreaterThan(start);
+    store.getState().setUiBlocking(true);
+    store.getState().tickClock(10_000);
+    expect(store.getState().clockMinutes).toBe(after);
+  });
+
+  it('at 02:00 the day ends; sleeping starts the next morning at home and saves', async () => {
+    const store = await playing();
+    store.getState().tickClock(20 * 60_000);
+    expect(store.getState().sleepRequest).toBe('late');
+    const epoch = store.getState().worldEpoch;
+    await store.getState().sleep();
+    const s = store.getState();
+    expect(s.world.state.day).toBe(2);
+    expect(s.clockMinutes).toBe(6 * 60);
+    expect(s.sleepRequest).toBeNull();
+    expect(s.worldEpoch).toBe(epoch + 1);
+  });
+
+  it('running out of energy sends the heroine to sleep; sleep restores it', async () => {
+    const store = await playing();
+    store.getState().spendEnergy(60);
+    expect(store.getState().sleepRequest).toBeNull();
+    store.getState().spendEnergy(60);
+    expect(store.getState().world.state.player.energy).toBe(0);
+    expect(store.getState().sleepRequest).toBe('tired');
+    await store.getState().sleep();
+    expect(store.getState().world.state.player.energy).toBe(BALANCE.player.maxEnergy);
+  });
+});

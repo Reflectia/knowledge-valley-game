@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 
 import { BALANCE, DEFAULT_TITLE, packByBranch } from '@/core/content';
 import { atCeiling, xpToNext } from '@/core/rules';
+import { clockText } from '@/core/time';
 import { TEMP_FRAMES } from '@/game/assets/manifest';
 
 import { Ico, SheetIcon, assetUrl } from '../components/common';
@@ -28,7 +29,8 @@ export function phaseOf(minutes: number): 'morning' | 'day' | 'evening' | 'night
   return 'night';
 }
 
-const clock = (m: number) => `${String(Math.floor(m / 60) % 24).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
+/** HH:MM in 10-minute steps, like a game clock (smooth time would flicker). */
+const clock = (m: number) => clockText(Math.floor(m / 10) * 10);
 
 /** Game HUD (spec §8 screen 3): time of day, energy, health, coins, toolbar, level and ceiling. */
 export function Hud({ onJournal, onMenu }: { onJournal: () => void; onMenu: () => void }) {

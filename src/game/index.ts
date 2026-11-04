@@ -4,7 +4,8 @@ import type { StoreApi } from 'zustand/vanilla';
 import type { GameState } from '@/state/store';
 
 import { TILE_SIZE, worldScaleFor } from './constants';
-import { BootScene } from './scenes/BootScene';
+import { PreloadScene } from './scenes/PreloadScene';
+import { WorldScene } from './scenes/WorldScene';
 
 let game: Phaser.Game | null = null;
 
@@ -24,7 +25,8 @@ export function startGame(parent: HTMLElement, store: StoreApi<GameState>): Phas
     },
     // The world must not steal keys from text fields in the UI.
     input: { keyboard: { target: window } },
-    scene: [BootScene],
+    physics: { default: 'arcade', arcade: { debug: false } },
+    scene: [PreloadScene, WorldScene],
   });
 
   game.registry.set('tileSize', TILE_SIZE);
