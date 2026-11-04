@@ -436,8 +436,9 @@ body {
   max-height: 440px;
   padding-right: var(--space-2);
 }
+/* No extra top padding: anything not a multiple of 32 px shifts text off the ruled lines. */
 .import__page {
-  padding-top: var(--space-4);
+  padding-top: 0;
 }
 .import__actions {
   display: flex;
