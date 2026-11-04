@@ -27,6 +27,8 @@ export interface ItemDef {
   sell?: number;
   place?: Placement;
   collides?: boolean;
+  /** Sold only after the Architecture skill «Креслення». */
+  blueprint?: boolean;
 }
 
 export interface CropDef {

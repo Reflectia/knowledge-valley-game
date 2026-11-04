@@ -576,6 +576,143 @@ body {
   gap: var(--space-4);
 }
 
+/* ------------------------------------------------------------ mentor dialog */
+
+/* Bottom of the screen, above the toolbar; the world stays visible. */
+.dialog-layer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 96px;
+  z-index: 12;
+  display: flex;
+  justify-content: center;
+  padding: 0 var(--space-16);
+  pointer-events: none;
+}
+.dialog-layer .dv-dialog {
+  pointer-events: auto;
+  width: min(880px, 100%);
+}
+.dialog-layer .dv-nameplate {
+  margin-bottom: var(--space-4);
+}
+
+/* ------------------------------------------------------------ mail */
+
+.mail {
+  width: min(980px, 100%);
+}
+.mail__body {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: var(--space-8);
+  align-items: start;
+}
+.mail__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-2);
+  max-height: 440px;
+  overflow: auto;
+}
+.mail__item {
+  appearance: none;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-2) var(--space-4);
+  border: 0;
+  background: var(--parchment-50);
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  box-shadow: inset 0 0 0 2px var(--parchment-300);
+}
+.mail__item.is-open {
+  box-shadow: inset 0 0 0 2px var(--wood-700);
+}
+.mail__item-text {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+}
+.mail__item-title {
+  font-weight: 700;
+  line-height: 24px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mail .dv-letter {
+  background: var(--parchment-50);
+  box-shadow: 0 0 0 2px var(--parchment-300);
+}
+.mail .dv-letter__seal {
+  image-rendering: pixelated;
+}
+
+/* ------------------------------------------------------------ skills */
+
+.skills {
+  width: min(1040px, 100%);
+}
+.skills__branches {
+  display: grid;
+  gap: var(--space-8);
+  max-height: 480px;
+  overflow: auto;
+}
+.skills__branch {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  align-items: center;
+  gap: var(--space-8);
+}
+.skills__head {
+  display: grid;
+}
+.skills__branch-name {
+  font: 16px/24px var(--font-display);
+}
+.skills__chain {
+  display: flex;
+  align-items: flex-start;
+}
+.skills__node {
+  appearance: none;
+  border: 0;
+  background: none;
+  padding: 0;
+  font: inherit;
+  color: var(--ink);
+}
+.skills__node[aria-disabled='true'] {
+  cursor: inherit;
+}
+
+/* HUD: unread letters on the mail button. */
+.hud__mail {
+  position: relative;
+}
+.hud__badge {
+  position: absolute;
+  top: -12px;
+  right: -12px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 2px;
+  display: grid;
+  place-items: center;
+  font: 700 16px/16px var(--font-body);
+  color: var(--ink-on-accent);
+  background: var(--clay-600);
+  box-shadow: 0 0 0 2px var(--wood-900);
+}
+
 /* ------------------------------------------------------------ plan import */
 
 .import {

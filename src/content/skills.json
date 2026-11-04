@@ -1,0 +1,30 @@
+{
+  "_comment": "Skill tree: one branch per discipline branch id, three skills in a chain. Points come only from labs (one per done lab). Names and texts are drafts for the owner to edit. `effect` keys are read by src/core/skills.ts; `later` marks skills whose effect arrives with a later stage/version.",
+  "branches": {
+    "modeling": [
+      { "id": "green-hands", "cost": 1, "name": "Зелені руки", "text": "Лійка поливає три грядки в ряд.", "effect": { "waterWide": true } },
+      { "id": "growth-magic", "cost": 2, "name": "Магія росту", "text": "Перша політа ніч додає рослині два дні росту.", "effect": { "firstNightBoost": true } },
+      { "id": "rare-seeds", "cost": 2, "name": "Рідкісне насіння", "text": "Зі зібраного врожаю випадає насінина того ж сорту.", "effect": { "seedOnHarvest": true } }
+    ],
+    "ai": [
+      { "id": "golem-water", "cost": 1, "name": "Голем-поливальник", "text": "Уночі голем поливає шість грядок.", "effect": { "golemWater": 6 } },
+      { "id": "golem-tireless", "cost": 2, "name": "Невтомний голем", "text": "Голем поливає всі грядки.", "effect": { "golemWater": 999 } },
+      { "id": "golem-harvest", "cost": 2, "name": "Голем-збирач", "text": "Дозрілий урожай уночі сам лягає в сумку.", "effect": { "golemHarvest": true } }
+    ],
+    "management": [
+      { "id": "time-management", "cost": 1, "name": "Тайм-менеджмент", "text": "+15 енергії на день.", "effect": { "maxEnergy": 15 } },
+      { "id": "bargaining", "cost": 2, "name": "Вміння торгуватися", "text": "Знижка 15 % у крамниці.", "effect": { "shopDiscount": 0.15 } },
+      { "id": "priorities", "cost": 2, "name": "Пріоритети", "text": "Ще +15 енергії на день.", "effect": { "maxEnergy": 15 } }
+    ],
+    "architecture": [
+      { "id": "blueprints", "cost": 1, "name": "Креслення", "text": "У крамниці з'являються полиця, скриня й світильник.", "effect": { "blueprints": true } },
+      { "id": "sturdy-tools", "cost": 2, "name": "Міцні інструменти", "text": "Сокира й кайло витрачають на 1 енергію менше.", "effect": { "toolEnergy": 1 } },
+      { "id": "forged-weapon", "cost": 2, "name": "Кована зброя", "text": "Меч б'є сильніше.", "effect": { "swordBonus": 1 }, "later": "combat" }
+    ],
+    "science": [
+      { "id": "vigor", "cost": 1, "name": "Настій бадьорості", "text": "+15 здоров'я.", "effect": { "maxHealth": 15 } },
+      { "id": "spark", "cost": 2, "name": "Іскра знань", "text": "Заклинання на праву кнопку миші.", "effect": { "spell": "spark" }, "later": "combat" },
+      { "id": "alchemy", "cost": 2, "name": "Алхімія", "text": "Зілля й нові рецепти.", "effect": { "alchemy": true }, "later": "v0.2" }
+    ]
+  }
+}

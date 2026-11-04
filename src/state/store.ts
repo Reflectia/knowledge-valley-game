@@ -5,7 +5,9 @@ import { markDone, setScore, unmarkDone } from '@/core/curriculum';
 import { deriveProgress, pruneShown, reconcile, rewardKey, type DerivedProgress } from '@/core/rewards';
 import { BALANCE } from '@/core/content';
 import { growNight } from '@/core/homestead';
-import { gainXp, todayIso } from '@/core/rules';
+import { dueLetters, mentorLines, type Letter } from '@/core/mentors';
+import { effectsOf, learn, NO_EFFECTS, type Effects } from '@/core/skills';
+import { atCeiling, gainXp, todayIso } from '@/core/rules';
 import {
   newLabs,
   newWorld,
@@ -24,8 +26,14 @@ export const DAY_START_MINUTES = DAY.startMinutes;
 /** Why the day is ending: the bed (asks first), 02:00, or no energy left. */
 export type SleepReason = 'bed' | 'late' | 'tired';
 
-/** A window the world asks the UI to open (clicking the journal on the desk, the shop stall). */
-export type UiRequest = 'journal' | 'shop';
+/** A window the world asks the UI to open (the journal on the desk, the shop stall, the mailbox). */
+export type UiRequest = 'journal' | 'shop' | 'mail';
+
+/** A mentor talking: lines shown one by one in the dialog box. */
+export interface Dialog {
+  pack: string;
+  lines: string[];
+}
 
 /** Actions that cost energy and give experience (balance.json `actions`). */
 export type ActionKind = keyof typeof BALANCE.actions;
@@ -61,6 +69,9 @@ export interface GameState {
   /** Set when the day should end; the UI confirms or explains, then calls sleep(). */
   sleepRequest: SleepReason | null;
   uiRequest: UiRequest | null;
+  dialog: Dialog | null;
+  /** Active skill effects (derived from learned skills and lab points). */
+  effects: Effects;
 
   init(): Promise<void>;
   newGame(name: string, appearance: PlayerState['appearance']): Promise<void>;
@@ -82,6 +93,15 @@ export interface GameState {
   act(kind: ActionKind, edit: (w: WorldState) => EditResult): string | null;
   /** Free edits (shop, toolbar, decor). */
   editWorld(edit: (w: WorldState) => EditResult | WorldState): string | null;
+  learnSkill(id: string): Promise<boolean>;
+  /** Deliver letters due today (real date). Returns the new ones. */
+  checkMail(): Promise<Letter[]>;
+  readLetter(id: string): Promise<void>;
+  /** A mentor speaks (in their location or visiting the homestead). */
+  talkTo(pack: string): void;
+  closeDialog(): void;
+  maxEnergy(): number;
+  maxHealth(): number;
   /** Advance the clock by real milliseconds (paused while a window is open). */
   tickClock(realMs: number): void;
   requestSleep(reason: SleepReason): void;
@@ -132,10 +152,12 @@ export function createGameStore(saves: SaveStore, now: () => Date = () => new Da
       const fresh = silent ? [] : r.events.filter((e) => !seen.has(rewardKey(e)));
       // Silent changes (new thresholds) count as seen, so they never pop up later.
       const labs = { ...incoming, shownRewards: silent ? [...new Set([...shown, ...r.events.map(rewardKey)])] : shown };
+      const progress = deriveProgress(labs.curriculum, thresholds);
       set((s) => ({
         labs,
         world: { state: r.world, ledger: r.ledger },
-        progress: deriveProgress(labs.curriculum, thresholds),
+        progress,
+        effects: effectsOf(labs.skills ?? [], progress.skillPoints),
         pendingRewards: [...s.pendingRewards.filter((e) => !fresh.some((f) => rewardKey(f) === rewardKey(e))), ...fresh],
       }));
       await persist(() => saves.saveLabs(labs));
@@ -158,6 +180,8 @@ export function createGameStore(saves: SaveStore, now: () => Date = () => new Da
       worldEpoch: 0,
       sleepRequest: null,
       uiRequest: null,
+      dialog: null,
+      effects: NO_EFFECTS,
 
       async init() {
         let file;
@@ -209,12 +233,14 @@ export function createGameStore(saves: SaveStore, now: () => Date = () => new Da
       },
 
       act(kind, edit) {
-        const { world, progress } = get();
+        const { world, progress, effects } = get();
         const cost = BALANCE.actions[kind];
-        if (world.state.player.energy < cost.energy) return 'tired';
+        // Architecture «Міцні інструменти»: the axe and the pickaxe are lighter.
+        const energyCost = Math.max(0, cost.energy - (kind === 'chop' || kind === 'mine' ? effects.toolEnergy : 0));
+        if (world.state.player.energy < energyCost) return 'tired';
         const r = edit(world.state);
         if (!r.ok) return r.reason;
-        const energy = r.world.player.energy - cost.energy;
+        const energy = r.world.player.energy - energyCost;
         const player = gainXp({ ...r.world.player, energy }, cost.xp, progress.ceiling);
         set({ world: { ...world, state: { ...r.world, player } } });
         if (energy <= 0 && !get().sleepRequest) set({ sleepRequest: 'tired' });
@@ -229,6 +255,57 @@ export function createGameStore(saves: SaveStore, now: () => Date = () => new Da
         set({ world: { ...world, state: next } });
         return null;
       },
+
+      maxEnergy: () => BALANCE.player.maxEnergy + get().effects.maxEnergyBonus,
+      maxHealth: () => BALANCE.player.maxHealth + get().effects.maxHealthBonus,
+
+      async learnSkill(id) {
+        const { labs, progress } = get();
+        const skills = learn(id, labs.skills ?? [], progress.skillPoints);
+        if (!skills) return false;
+        const next = { ...labs, skills };
+        set({ labs: next, effects: effectsOf(skills, progress.skillPoints) });
+        await persist(() => saves.saveLabs(next));
+        return true;
+      },
+
+      async checkMail() {
+        const { labs } = get();
+        const fresh = dueLetters(labs.curriculum, todayIso(now()), labs.mail ?? []);
+        if (fresh.length === 0) return [];
+        const next = { ...labs, mail: [...(labs.mail ?? []), ...fresh] };
+        set({ labs: next });
+        await persist(() => saves.saveLabs(next));
+        return fresh;
+      },
+
+      async readLetter(id) {
+        const { labs } = get();
+        if (!labs.mail.some((l) => l.id === id && !l.read)) return;
+        const next = { ...labs, mail: labs.mail.map((l) => (l.id === id ? { ...l, read: true } : l)) };
+        set({ labs: next });
+        await persist(() => saves.saveLabs(next));
+      },
+
+      talkTo(pack) {
+        const { labs, world, progress } = get();
+        const seen = labs.mentorSeen ?? {};
+        const { lines, done } = mentorLines(pack, {
+          curriculum: labs.curriculum,
+          today: todayIso(now()),
+          name: world.state.player.name,
+          atCeiling: atCeiling(world.state.player, progress.ceiling),
+          seenDone: seen[pack] ?? 0,
+          day: world.state.day,
+          firstMeeting: seen[pack] === undefined,
+        });
+        if (lines.length === 0) return;
+        const next = { ...labs, mentorSeen: { ...seen, [pack]: done } };
+        set({ dialog: { pack, lines }, labs: next });
+        void persist(() => saves.saveLabs(next));
+      },
+
+      closeDialog: () => set({ dialog: null }),
 
       tickClock(realMs) {
         const s = get();
@@ -252,12 +329,12 @@ export function createGameStore(saves: SaveStore, now: () => Date = () => new Da
 
       async sleep() {
         const { world } = get();
-        // Night: watered crops grow, the soil dries.
-        const grown = growNight(world.state);
+        // Night: the golem helps, watered crops grow, the soil dries.
+        const grown = growNight(world.state, get().effects);
         const state = {
           ...grown,
           day: world.state.day + 1,
-          player: { ...world.state.player, energy: newWorld().player.energy },
+          player: { ...grown.player, energy: get().maxEnergy() },
         };
         const next = { ...world, state };
         set((s) => ({ world: next, clockMinutes: DAY_START_MINUTES, sleepRequest: null, worldEpoch: s.worldEpoch + 1 }));
@@ -275,10 +352,12 @@ export function createGameStore(saves: SaveStore, now: () => Date = () => new Da
 
       async importSave(text) {
         const file = parseSaveFile(text); // throws SaveError with a readable message
+        const progress = deriveProgress(file.labs.curriculum, file.labs.settings.rarityThresholds);
         set({
           labs: file.labs,
           world: file.world,
-          progress: deriveProgress(file.labs.curriculum, file.labs.settings.rarityThresholds),
+          progress,
+          effects: effectsOf(file.labs.skills ?? [], progress.skillPoints),
           pendingRewards: [],
           hasSave: true,
           clockMinutes: DAY_START_MINUTES,

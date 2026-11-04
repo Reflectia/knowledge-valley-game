@@ -15,6 +15,8 @@
 //   garden     rect   tiles that can be tilled with the hoe
 //   building   rect   plot for a discipline building (pack); the building grows with labs
 //   shop       rect   the shop stall (click to open the shop)
+//   mailbox    point  the mailbox by the house (click to read mentor letters)
+//   visit      point  where visiting mentors stand on a deadline day
 import { mkdirSync, writeFileSync } from 'node:fs';
 
 const T = 16;
@@ -173,6 +175,9 @@ function homestead() {
   m.obj('light', 'window', hx + 27.5, hy - 118 + 90, 0, 0, { kind: 'window' });
 
   m.obj('sprite', 'lamp', hx + 100, hy + 4, 0, 0, { key: 'lamp-post', footW: 6, footH: 4, lamp: true });
+  // Mailbox left of the door path; visiting mentors gather right of the lamp.
+  m.obj('mailbox', 'mailbox', hx + 34, hy + 12);
+  [[216, 196], [236, 196], [256, 196], [226, 216], [246, 216]].forEach(([x, y], i) => m.obj('visit', `visit-${i}`, x, y));
   // Trees on the edges, away from the garden and the building plots.
   const trees = [
     ['tree-blossom-a', 216, 112],

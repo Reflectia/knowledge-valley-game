@@ -17,6 +17,7 @@ import {
   water,
 } from './homestead';
 import { CROPS, ITEMS, STARTER } from './items';
+import { NO_EFFECTS } from './skills';
 import { newWorld } from './save';
 import type { WorldState } from './types';
 
@@ -146,5 +147,38 @@ describe('decor', () => {
     expect(placeDecor(w, 'rug', 'homestead', 1, 1, false)).toEqual({ ok: false, reason: 'indoorOnly' });
     expect(placeDecor(w, 'fence', 'house', 1, 1, true)).toEqual({ ok: false, reason: 'outdoorOnly' });
     expect(placeDecor(w, 'hoe', 'house', 1, 1, true)).toEqual({ ok: false, reason: 'notFurniture' });
+  });
+});
+
+describe('skill effects in the garden', () => {
+  const fx = (over: Partial<typeof import('./skills').NO_EFFECTS>) => ({ ...NO_EFFECTS, ...over });
+  const planted = (n: number) => {
+    let w = addItem(newWorld(), 'seed-turnip', n);
+    for (let i = 0; i < n; i++) {
+      w = unwrap(till(w, `${i},0`));
+      w = unwrap(plant(w, `${i},0`, 'seed-turnip'));
+    }
+    return w;
+  };
+
+  it('the golem waters up to N planted plots overnight', () => {
+    const w = growNight(planted(8), fx({ golemWater: 6 }));
+    expect(Object.values(w.plots).filter((p) => p.growth === 1)).toHaveLength(6);
+  });
+
+  it('«Магія росту»: the first watered night counts twice', () => {
+    let w = unwrap(water(planted(1), '0,0'));
+    w = growNight(w, fx({ firstNightBoost: true }));
+    expect(w.plots['0,0'].growth).toBe(2);
+  });
+
+  it('the golem harvests ripe crops, with a seed from «Рідкісне насіння»', () => {
+    let w = planted(1);
+    w = { ...w, plots: { '0,0': { crop: 'turnip', growth: CROPS.turnip.days, wateredToday: false } } };
+    const seeds = count(w, 'seed-turnip');
+    w = growNight(w, fx({ golemHarvest: true, seedOnHarvest: true }));
+    expect(count(w, 'turnip')).toBe(1);
+    expect(count(w, 'seed-turnip')).toBe(seeds + 1);
+    expect(w.plots['0,0'].crop).toBeUndefined();
   });
 });

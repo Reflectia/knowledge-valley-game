@@ -13,16 +13,19 @@ import { CreateCharacter } from './screens/CreateCharacter';
 import { GameMenu } from './screens/GameMenu';
 import { Hud } from './screens/Hud';
 import { ImportScreen } from './screens/ImportScreen';
+import { DialogBox } from './screens/DialogBox';
 import { InventoryScreen } from './screens/InventoryScreen';
+import { MailScreen } from './screens/MailScreen';
 import { Journal } from './screens/Journal';
 import { RewardScene } from './screens/RewardScene';
 import { SettingsScreen } from './screens/SettingsScreen';
 import { ShopScreen } from './screens/ShopScreen';
+import { SkillTreeScreen } from './screens/SkillTreeScreen';
 import { SleepDialog } from './screens/SleepDialog';
 import { StartMenu } from './screens/StartMenu';
 
 type Screen = 'start' | 'create' | 'game';
-type Modal = null | 'journal' | 'menu' | 'settings' | 'import' | 'inventory' | 'shop';
+type Modal = null | 'journal' | 'menu' | 'settings' | 'import' | 'inventory' | 'shop' | 'mail' | 'skills';
 
 /** UI scale ×2 / ×3 / ×4 (design system: ui-scale-default / -1080 / -1440). */
 function resolveScale(setting: UiScale): 2 | 3 | 4 {
@@ -52,6 +55,9 @@ export function App() {
   const uiRequest = useGame((s) => s.uiRequest);
   const blocking = useGame((s) => s.uiBlocking);
   const selectedItem = useGame((s) => s.world.state.toolbar[s.selectedSlot] ?? null);
+  const dialog = useGame((s) => s.dialog);
+  const curriculum = useGame((s) => s.labs.curriculum);
+  const day = useGame((s) => s.world.state.day);
 
   const [screen, setScreen] = useState<Screen>('start');
   const [modal, setModal] = useState<Modal>(null);
@@ -61,6 +67,23 @@ export function App() {
   const rewards: RewardEvent[] = screen === 'game' ? pending : [];
   const showRewards = rewards.length > 0;
   const showSleep = screen === 'game' && sleepRequest !== null && !showRewards;
+  const showDialog = screen === 'game' && dialog !== null && !showRewards && !showSleep;
+
+  // Letters (spec §6): checked when playing starts, each new day and when the plan changes.
+  useEffect(() => {
+    if (screen !== 'game') return;
+    void api
+      .getState()
+      .checkMail()
+      .then((fresh) => {
+        if (fresh.length === 1) {
+          const l = fresh[0];
+          showToast({ icon: 'mail', title: t('mail.newTitle'), text: l.title, onClick: () => setModal('mail') }, 6000);
+        } else if (fresh.length > 1) {
+          showToast({ icon: 'mail', title: t('mail.newTitle'), text: t('mail.more', { count: fresh.length }), onClick: () => setModal('mail') }, 6000);
+        }
+      });
+  }, [screen, curriculum, day, api, t]);
 
   // Over the world the cursor shows the selected toolbar item; menus keep the sword.
   useEffect(() => {
@@ -86,6 +109,7 @@ export function App() {
       const r = api.getState().takeUiRequest();
       if (r === 'journal') setModal('journal');
       else if (r === 'shop') setModal('shop');
+      else if (r === 'mail') setModal('mail');
     }
   }, [uiRequest, screen, api]);
 
@@ -97,21 +121,23 @@ export function App() {
   }, [uiScaleSetting]);
 
   useEffect(() => {
-    setUiBlocking(screen !== 'game' || modal !== null || showRewards || showSleep);
-  }, [screen, modal, showRewards, showSleep, setUiBlocking]);
+    setUiBlocking(screen !== 'game' || modal !== null || showRewards || showSleep || showDialog);
+  }, [screen, modal, showRewards, showSleep, showDialog, setUiBlocking]);
 
   // Keyboard: J journal, Esc menu / close, 1–9 toolbar slots (spec §8 controls).
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        if (modal) setModal(null);
+        if (showDialog && !modal) api.getState().closeDialog();
+        else if (modal) setModal(null);
         else if (screen === 'game' && !showRewards && !showSleep) setModal('menu');
         return;
       }
       if (screen !== 'game' || isTyping(e)) return;
-      if (showRewards || showSleep) return;
+      if (showRewards || showSleep || showDialog) return;
       if (e.code === 'KeyJ') setModal((m) => (m === 'journal' ? null : m ?? 'journal'));
       else if (e.code === 'KeyI') setModal((m) => (m === 'inventory' ? null : m ?? 'inventory'));
+      else if (e.code === 'KeyK') setModal((m) => (m === 'skills' ? null : m ?? 'skills'));
       else if (!modal && /^Digit[1-9]$/.test(e.code)) selectSlot(Number(e.code.slice(5)) - 1);
     };
     const onWheel = (e: WheelEvent) => {
@@ -126,7 +152,7 @@ export function App() {
       window.removeEventListener('keydown', onKey);
       window.removeEventListener('wheel', onWheel);
     };
-  }, [screen, modal, showRewards, showSleep, selectSlot, api]);
+  }, [screen, modal, showRewards, showSleep, showDialog, selectSlot, api]);
 
   useEffect(() => {
     if (saveError) showToast({ icon: 'warn', title: t('toast.saveErrorTitle'), text: t('toast.saveErrorText', { reason: saveError }) }, 8000);
@@ -158,7 +184,15 @@ export function App() {
           }}
         />
       )}
-      {screen === 'game' && ready && <Hud onJournal={() => setModal('journal')} onMenu={() => setModal('menu')} onInventory={() => setModal('inventory')} />}
+      {screen === 'game' && ready && (
+        <Hud
+          onJournal={() => setModal('journal')}
+          onMenu={() => setModal('menu')}
+          onInventory={() => setModal('inventory')}
+          onMail={() => setModal('mail')}
+          onSkills={() => setModal('skills')}
+        />
+      )}
 
       {modal === 'journal' && (
         <Overlay>
@@ -189,6 +223,27 @@ export function App() {
         <Overlay>
           <InventoryScreen onClose={() => setModal(null)} />
         </Overlay>
+      )}
+      {modal === 'mail' && (
+        <Overlay>
+          <MailScreen onClose={() => setModal(null)} onJournal={() => setModal('journal')} />
+        </Overlay>
+      )}
+      {modal === 'skills' && (
+        <Overlay>
+          <SkillTreeScreen onClose={() => setModal(null)} />
+        </Overlay>
+      )}
+      {showDialog && !modal && (
+        <DialogBox
+          key={dialog.pack + dialog.lines.join('|')}
+          dialog={dialog}
+          onClose={() => api.getState().closeDialog()}
+          onJournal={() => {
+            api.getState().closeDialog();
+            setModal('journal');
+          }}
+        />
       )}
       {modal === 'shop' && (
         <Overlay>

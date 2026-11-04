@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 
-import { BALANCE, DEFAULT_TITLE, packByBranch } from '@/core/content';
+import { DEFAULT_TITLE, packByBranch } from '@/core/content';
 import { atCeiling, xpToNext } from '@/core/rules';
 import { clockText } from '@/core/time';
 import { ITEMS, isConsumable } from '@/core/items';
@@ -21,7 +21,19 @@ export function phaseOf(minutes: number): 'morning' | 'day' | 'evening' | 'night
 const clock = (m: number) => clockText(Math.floor(m / 10) * 10);
 
 /** Game HUD (spec §8 screen 3): time of day, energy, health, coins, toolbar, level and ceiling. */
-export function Hud({ onJournal, onMenu, onInventory }: { onJournal: () => void; onMenu: () => void; onInventory: () => void }) {
+export function Hud({
+  onJournal,
+  onMenu,
+  onInventory,
+  onMail,
+  onSkills,
+}: {
+  onJournal: () => void;
+  onMenu: () => void;
+  onInventory: () => void;
+  onMail: () => void;
+  onSkills: () => void;
+}) {
   const { t } = useTranslation();
   const player = useGame((s) => s.world.state.player);
   const day = useGame((s) => s.world.state.day);
@@ -30,13 +42,16 @@ export function Hud({ onJournal, onMenu, onInventory }: { onJournal: () => void;
   const selected = useGame((s) => s.selectedSlot);
   const selectSlot = useGame((s) => s.selectSlot);
   const toolbar = useGame((s) => s.world.state.toolbar);
+  const unread = useGame((s) => (s.labs.mail ?? []).filter((l) => !l.read).length);
+  const maxEnergy = useGame((s) => s.maxEnergy());
+  const maxHealth = useGame((s) => s.maxHealth());
   const inventory = useGame((s) => s.world.state.inventory);
 
   const capped = atCeiling(player, progress.ceiling);
   const need = xpToNext(player.level);
   const xpPct = capped ? 100 : Math.round((player.xp / need) * 100);
-  const energyPct = Math.round((player.energy / BALANCE.player.maxEnergy) * 100);
-  const healthPct = Math.round((player.health / BALANCE.player.maxHealth) * 100);
+  const energyPct = Math.round((player.energy / maxEnergy) * 100);
+  const healthPct = Math.round((player.health / maxHealth) * 100);
   const title = (progress.topBranch && packByBranch(progress.topBranch)?.title) || DEFAULT_TITLE;
 
   // Level pips: a short window around the current level, the ceiling plate before the first locked one.
@@ -81,7 +96,7 @@ export function Hud({ onJournal, onMenu, onInventory }: { onJournal: () => void;
             <span className="dv-bar__fill" style={{ '--value': `${energyPct}%` } as React.CSSProperties} />
           </span>
           <span className="dv-bar__value">
-            {player.energy}/{BALANCE.player.maxEnergy}
+            {player.energy}/{maxEnergy}
           </span>
         </div>
         <div className="dv-bar dv-bar--health" title={t('hud.health')}>
@@ -90,7 +105,7 @@ export function Hud({ onJournal, onMenu, onInventory }: { onJournal: () => void;
             <span className="dv-bar__fill" style={{ '--value': `${healthPct}%` } as React.CSSProperties} />
           </span>
           <span className="dv-bar__value">
-            {player.health}/{BALANCE.player.maxHealth}
+            {player.health}/{maxHealth}
           </span>
         </div>
         <div className={`dv-bar dv-bar--xp${capped ? ' is-capped' : ''}`} title={capped ? t('hud.ceilingHint') : t('hud.xp')}>
@@ -108,8 +123,18 @@ export function Hud({ onJournal, onMenu, onInventory }: { onJournal: () => void;
       </section>
 
       <div className="hud__buttons">
-        <button type="button" className="dv-btn dv-btn--icon" aria-label={t('hud.mail')} title={t('hud.mail')} disabled>
+        <button
+          type="button"
+          className="dv-btn dv-btn--icon hud__mail"
+          aria-label={unread ? t('hud.mailUnread', { count: unread }) : t('hud.mail')}
+          data-tip={unread ? t('hud.mailUnread', { count: unread }) : t('hud.mail')}
+          onClick={onMail}
+        >
           <Ico name="mail" />
+          {unread > 0 && <span className="hud__badge">{unread}</span>}
+        </button>
+        <button type="button" className="dv-btn dv-btn--icon" aria-label={t('hud.skills')} data-tip={t('hud.skills')} onClick={onSkills}>
+          <Ico name="xp" />
         </button>
         <button type="button" className="dv-btn dv-btn--icon" aria-label={t('hud.inventory')} title={t('hud.inventory')} onClick={onInventory}>
           <Ico name="spark" />

@@ -117,6 +117,8 @@ export const ASSETS: Record<string, Asset> = {
   // Self-drawn placeholder interior (scripts/assets/draw_interior.py).
   'temp-interior': sheet(pub('_temp/interior/interior-16.png'), 16, 16, 14, { temp: true }),
   'shop-stall': img(pub('_temp/interior/shop-stall.png'), undefined, true),
+  mailbox: sheet(pub('_temp/interior/mailbox.png'), 16, 32, 2, { temp: true }),
+  'wax-seal': img(designPng('ui/wax-seal-10.png')),
 
   // Tiled maps (scripts/maps/build-maps.mjs).
   ...Object.fromEntries(MAPS.map((id) => [`map-${id}`, { kind: 'tilemap', url: pub(`maps/${id}.json`) } as MapAsset])),

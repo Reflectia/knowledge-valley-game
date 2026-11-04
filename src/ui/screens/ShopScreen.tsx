@@ -18,6 +18,11 @@ export function ShopScreen({ onClose }: { onClose: () => void }) {
   const coins = useGame((s) => s.world.state.player.coins);
   const inventory = useGame((s) => s.world.state.inventory);
   const editWorld = useGame((s) => s.editWorld);
+  const effects = useGame((s) => s.effects);
+  const discount = effects.shopDiscount;
+  const priceOf = (price: number) => Math.ceil(price * (1 - discount));
+  // Architecture «Креслення» unlocks the blueprint furniture.
+  const forSale = SHOP_BUY.filter((id) => !ITEMS[id].blueprint || effects.blueprints);
 
   const fail = (reason: string | null) => reason && showToast({ icon: 'warn', title: t(`world.fail.${reason}`) });
   const sellable = Object.entries(inventory).filter(([id, n]) => n > 0 && ITEMS[id]?.sell);
@@ -35,10 +40,11 @@ export function ShopScreen({ onClose }: { onClose: () => void }) {
       <Panel title={t('shop.title')} onClose={onClose} labelledBy="shop-title" className="shop">
         <p className="shop__coins">
           <Ico name="coin" /> {coins}
+          {discount > 0 && <span className="dv-chip dv-chip--done">{t('shop.discount', { pct: Math.round(discount * 100) })}</span>}
         </p>
         <ul className="shop__list">
           {tab === 'buy' &&
-            SHOP_BUY.map((id) => {
+            forSale.map((id) => {
               const item = ITEMS[id];
               return (
                 <li key={id} className="shop__row">
@@ -50,14 +56,14 @@ export function ShopScreen({ onClose }: { onClose: () => void }) {
                     <span className="dv-caption">{item.text}</span>
                   </span>
                   <span className="shop__price">
-                    <Ico name="coin" /> {item.price}
+                    <Ico name="coin" /> {priceOf(item.price ?? 0)}
                   </span>
                   <button
                     type="button"
                     className="dv-btn"
-                    disabled={coins < (item.price ?? Infinity)}
+                    disabled={coins < priceOf(item.price ?? Infinity)}
                     onClick={() => {
-                      const reason = editWorld((w) => buy(w, id));
+                      const reason = editWorld((w) => buy(w, id, 1, discount));
                       if (reason) fail(reason);
                       else showToast({ icon: 'coin', title: t('shop.bought', { name: item.name }) }, 1500);
                     }}

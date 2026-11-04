@@ -4,6 +4,8 @@ import type { StoreApi } from 'zustand/vanilla';
 import { getPack } from '@/core/content';
 import { addItem, cropFrame, decorAt, harvest, isRipe, pickUpDecor, placeDecor, plant, till, water } from '@/core/homestead';
 import { getItem, ITEMS } from '@/core/items';
+import { MENTORS, visitorsToday } from '@/core/mentors';
+import { todayIso } from '@/core/rules';
 import { ambientAt, darkness } from '@/core/time';
 import i18n from '@/i18n';
 import type { GameState } from '@/state/store';
@@ -67,6 +69,12 @@ export class WorldScene extends Phaser.Scene {
   private decorBlockers!: Phaser.Physics.Arcade.StaticGroup;
   private layers: Phaser.Tilemaps.TilemapLayer[] = [];
   private cursorBox!: Phaser.GameObjects.Rectangle;
+  /** Where the location's mentor stands, and where visiting mentors gather on the homestead. */
+  private mentorSpot: { x: number; y: number } | null = null;
+  private visitSpots: { x: number; y: number }[] = [];
+  private mentorObjects: Phaser.GameObjects.GameObject[] = [];
+  private mentorTalk: { rect: Phaser.Geom.Rectangle; pack: string }[] = [];
+  private mailbox: Phaser.GameObjects.Image | null = null;
   private night!: NightLayer;
   private lightSources: Light[] = [];
   private nightOverlays: Phaser.GameObjects.Image[] = [];
@@ -94,6 +102,11 @@ export class WorldScene extends Phaser.Scene {
     this.plots = [];
     this.soilSprites = [];
     this.decorSprites = [];
+    this.mentorSpot = null;
+    this.visitSpots = [];
+    this.mentorObjects = [];
+    this.mentorTalk = [];
+    this.mailbox = null;
     this.lightSources = [];
     this.nightOverlays = [];
     this.fireflies = [];
@@ -167,6 +180,17 @@ export class WorldScene extends Phaser.Scene {
         case 'shop':
           this.interacts.push({ rect: new Phaser.Geom.Rectangle(x, y, w, h), action: 'shop' });
           break;
+        case 'mentor':
+          this.mentorSpot = { x, y };
+          break;
+        case 'visit':
+          this.visitSpots.push({ x, y });
+          break;
+        case 'mailbox':
+          this.mailbox = this.add.image(x, y, 'mailbox', 0).setOrigin(0.5, 1).setDepth(y);
+          this.addBlocker(x - 3, y - 4, 6, 4);
+          this.interacts.push({ rect: new Phaser.Geom.Rectangle(x - 8, y - 32, 16, 32), action: 'mail' });
+          break;
       }
     }
 
@@ -195,6 +219,8 @@ export class WorldScene extends Phaser.Scene {
     this.renderSoil();
     this.renderDecor();
     this.renderBuildings();
+    this.renderMentors();
+    this.updateMailbox();
     // Outline of the tile the selected item acts on (honey-300).
     this.cursorBox = this.add.rectangle(0, 0, T, T).setOrigin(0).setStrokeStyle(1, 0xf2c76b).setDepth(DEPTH.cursor).setVisible(false);
 
@@ -221,7 +247,9 @@ export class WorldScene extends Phaser.Scene {
           this.buildGates();
           this.applyRevival();
           this.renderBuildings();
+          this.renderMentors();
         }
+        if (s.labs.mail !== prev.labs.mail) this.updateMailbox();
         if (s.world.state.plots !== prev.world.state.plots) this.renderSoil();
         if (s.world.state.decor !== prev.world.state.decor) this.renderDecor();
         if (s.worldEpoch !== prev.worldEpoch) this.goTo('house', 'bed');
@@ -445,6 +473,14 @@ export class WorldScene extends Phaser.Scene {
       if (it.action === 'sleep') s.requestSleep('bed');
       else if (it.action === 'journal') s.requestUi('journal');
       else if (it.action === 'shop') s.requestUi('shop');
+      else if (it.action === 'mail') s.requestUi('mail');
+      return;
+    }
+    // Mentors: click to talk.
+    for (const m of this.mentorTalk) {
+      if (!Phaser.Geom.Rectangle.Contains(m.rect, world.x, world.y)) continue;
+      if (!this.inReachRect(m.rect)) this.notice('world.tooFar');
+      else s.talkTo(m.pack);
       return;
     }
     // 2) The selected tool or item on the tile under the cursor.
@@ -500,14 +536,29 @@ export class WorldScene extends Phaser.Scene {
     if (ripe) {
       // Anything in hand harvests a ripe crop.
       const crop = plot!.crop!;
-      reason = s.act('harvest', (w) => harvest(w, key));
+      reason = s.act('harvest', (w) => harvest(w, key, s.effects));
       if (!reason) showToast({ icon: 'spark', title: i18n.t('world.harvested', { name: getItem(crop).name }) });
     } else if (item?.tool === 'hoe') {
       if (this.mapId !== 'homestead' || !this.inGarden(tx, ty)) reason = 'notGarden';
       else if (decorAt(s.world.state, this.mapId, tx, ty)) reason = 'occupied';
       else reason = s.act('till', (w) => till(w, key));
     } else if (item?.tool === 'water') {
-      reason = this.mapId === 'homestead' ? s.act('water', (w) => water(w, key)) : 'notTilled';
+      if (this.mapId !== 'homestead') reason = 'notTilled';
+      else if (s.effects.waterWide) {
+        // Modeling «Зелені руки»: the can waters three plots in a row for the price of one.
+        reason = s.act('water', (w) => {
+          let next = w;
+          let any = false;
+          for (const k of [`${tx - 1},${ty}`, key, `${tx + 1},${ty}`]) {
+            const r = water(next, k);
+            if (r.ok) {
+              next = r.world;
+              any = true;
+            }
+          }
+          return any ? { ok: true, world: next } : water(w, key);
+        });
+      } else reason = s.act('water', (w) => water(w, key));
     } else if (item?.kind === 'seed') {
       reason = this.mapId === 'homestead' ? s.act('plant', (w) => plant(w, key, id!)) : 'notTilled';
     } else if (item?.tool === 'axe' || item?.tool === 'pickaxe') {
@@ -655,6 +706,44 @@ export class WorldScene extends Phaser.Scene {
       const walls = wallRows(level) * T;
       plot.objects.push(this.addBlocker(left, bottom - walls, w * T, walls));
     }
+  }
+
+  /**
+   * Mentors: the location's mentor at their clearing; on a deadline day the mentor
+   * of that discipline visits the homestead (spec §6). Temporary Tiny Dungeon figures.
+   */
+  private renderMentors(): void {
+    for (const o of this.mentorObjects) {
+      this.tweens.killTweensOf(o);
+      o.destroy();
+    }
+    this.mentorObjects = [];
+    this.mentorTalk = [];
+    const s = this.store.getState();
+    const place = (pack: string, x: number, y: number) => {
+      const m = MENTORS[pack];
+      if (!m) return;
+      const img = this.add.image(x, y, 'temp-dungeon', m.sprite).setOrigin(0.5, 1).setDepth(y);
+      // A small bob so mentors read as alive.
+      this.tweens.add({ targets: img, y: y - 1, duration: 600, yoyo: true, repeat: -1, ease: 'Stepped' });
+      this.mentorObjects.push(img, this.addBlocker(x - 5, y - 5, 10, 5));
+      this.mentorTalk.push({ pack, rect: new Phaser.Geom.Rectangle(x - 8, y - 18, 16, 18) });
+    };
+    const pack = this.packOfMap();
+    if (pack && this.mentorSpot) place(pack, this.mentorSpot.x, this.mentorSpot.y);
+    if (this.mapId === 'homestead') {
+      visitorsToday(s.labs.curriculum, todayIso()).forEach((p, i) => {
+        const spot = this.visitSpots[i % Math.max(1, this.visitSpots.length)];
+        if (spot) place(p, spot.x, spot.y);
+      });
+    }
+  }
+
+  /** The mailbox flag is up while there are unread letters. */
+  private updateMailbox(): void {
+    if (!this.mailbox) return;
+    const unread = (this.store.getState().labs.mail ?? []).some((l) => !l.read);
+    this.mailbox.setFrame(unread ? 1 : 0);
   }
 
   /** Props chopped or mined today stay gone until the next day. */

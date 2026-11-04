@@ -300,7 +300,8 @@
       "icon": {
         "sheet": "temp-indoor",
         "frame": 122
-      }
+      },
+      "blueprint": true
     },
     {
       "id": "bookshelf",
@@ -313,7 +314,8 @@
       "icon": {
         "sheet": "temp-interior",
         "frame": 10
-      }
+      },
+      "blueprint": true
     },
     {
       "id": "chest",
@@ -326,7 +328,8 @@
       "icon": {
         "sheet": "temp-interior",
         "frame": 11
-      }
+      },
+      "blueprint": true
     },
     {
       "id": "rug",
@@ -454,5 +457,6 @@
       "flowers"
     ]
   },
-  "_crops": "Crop sheet (josehzz): per crop 6 frames from firstFrame: +0 harvested item, +1 mature, +2, +3, +4 sprout, +5 seeds in soil. Growth shows +5 → +1 over `days` watered days."
+  "_crops": "Crop sheet (josehzz): per crop 6 frames from firstFrame: +0 harvested item, +1 mature, +2, +3, +4 sprout, +5 seeds in soil. Growth shows +5 → +1 over `days` watered days.",
+  "_blueprint": "blueprint: sold in the shop only after the Architecture skill «Креслення»."
 }

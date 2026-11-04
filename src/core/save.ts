@@ -13,6 +13,7 @@
 import { BALANCE } from './content';
 import { EMPTY_CURRICULUM } from './curriculum';
 import { STARTER, TOOLBAR_SIZE } from './items';
+import type { Letter } from './mentors';
 import type { Curriculum, RewardLedger, Settings, WorldState } from './types';
 
 /** 1: first format. 2: toolbar, garden plots and decor in the world (stage 6). */
@@ -23,6 +24,12 @@ export interface LabsRecord {
   settings: Settings;
   /** Reward moments the player has already seen (see rewards.rewardKey). */
   shownRewards?: string[];
+  /** Learned skills (skill ids). Lab-driven, so saved with the labs. */
+  skills: string[];
+  /** Mentor letters in the mailbox. */
+  mail: Letter[];
+  /** Per pack: how many done labs the mentor has already praised. */
+  mentorSeen: Record<string, number>;
 }
 
 export interface WorldRecord {
@@ -74,7 +81,7 @@ export function defaultSettings(now = new Date()): Settings {
 }
 
 export function newLabs(now = new Date()): LabsRecord {
-  return { curriculum: EMPTY_CURRICULUM, settings: defaultSettings(now) };
+  return { curriculum: EMPTY_CURRICULUM, settings: defaultSettings(now), skills: [], mail: [], mentorSeen: {} };
 }
 
 // ----------------------------------------------------------------- migrations
@@ -123,6 +130,10 @@ export function migrate(
   const d = defaultSettings();
   const s = file.labs.settings;
   file.labs.settings = { ...d, ...s, volume: { ...d.volume, ...s.volume } };
+  // Lab-record fields added within version 2 (stage 7): skills, mail, mentors.
+  file.labs.skills ??= [];
+  file.labs.mail ??= [];
+  file.labs.mentorSeen ??= {};
   return file;
 }
 

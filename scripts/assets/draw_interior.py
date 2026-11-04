@@ -382,6 +382,54 @@ def draw_stall() -> None:
     print("wrote", STALL_OUT.relative_to(ROOT))
 
 
+
+
+# ------------------------------------------------------------------ mailbox (16×32, flag down / up)
+
+MAILBOX_OUT = ROOT / "public/assets/_temp/interior/mailbox.png"
+
+
+def draw_mailbox() -> None:
+    img = Image.new("RGBA", (32, 32), (0, 0, 0, 0))  # two frames side by side
+    for frame in (0, 1):
+        ox = frame * 16
+        put = lambda x, y, c: img.putpixel((ox + x, y), hexrgb(P[c]))
+        # Post
+        for y in range(14, 31):
+            put(7, y, "D")
+            put(8, y, "M")
+        for x in range(5, 11):
+            put(x, 31, "K")
+        # Box: wood-500 body, rounded top, darker outline, slot
+        for y in range(6, 15):
+            for x in range(2, 14):
+                put(x, y, "M")
+        for x in range(3, 13):
+            put(x, 5, "K")
+        for x in range(2, 14):
+            put(x, 15, "K")
+        for y in range(6, 15):
+            put(1, y, "K")
+            put(14, y, "K")
+        for x in range(3, 13):
+            put(x, 6, "L")
+        for x in range(4, 9):
+            put(x, 9, "K")
+        # Flag: down (frame 0) along the side, up (frame 1) raised in clay-600
+        if frame == 0:
+            for y in range(10, 14):
+                put(15, y, "C")
+        else:
+            for y in range(1, 10):
+                put(15, y, "D")
+            for y in range(1, 4):
+                for x in range(12, 15):
+                    put(x, y, "C")
+    img.save(MAILBOX_OUT)
+    print("wrote", MAILBOX_OUT.relative_to(ROOT))
+
+
 if __name__ == "__main__":
     main()
     draw_stall()
+    draw_mailbox()

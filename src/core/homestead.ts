@@ -3,6 +3,7 @@
  * Pure functions on WorldState; every function returns a new state or an error code.
  */
 import { CROPS, getItem, isConsumable, ITEMS, TOOLBAR_SIZE } from './items';
+import { NO_EFFECTS, type Effects } from './skills';
 import type { Placed, Plot, WorldState } from './types';
 
 export type Fail<C extends string> = { ok: false; reason: C };
@@ -92,24 +93,55 @@ export function water(w: WorldState, key: string) {
   return ok({ ...w, plots: { ...w.plots, [key]: { ...plot, wateredToday: true } } });
 }
 
-export function harvest(w: WorldState, key: string) {
+/** Seed item of a crop ("seed-<crop>"), if the catalog has it. */
+function seedOf(crop: string): string | undefined {
+  return Object.values(ITEMS).find((i) => i.kind === 'seed' && i.crop === crop)?.id;
+}
+
+export function harvest(w: WorldState, key: string, fx: Effects = NO_EFFECTS) {
   const plot = w.plots[key];
   if (!plot?.crop) return fail('empty');
   if (!isRipe(plot)) return fail('notRipe');
   const item = CROPS[plot.crop].harvest;
-  const after = addItem(w, item);
+  let after = addItem(w, item);
+  // Modeling «Рідкісне насіння»: a seed of the same crop.
+  const seed = fx.seedOnHarvest ? seedOf(plot.crop) : undefined;
+  if (seed) after = addItem(after, seed);
   const plots: Record<string, Plot> = { ...after.plots, [key]: { growth: 0, wateredToday: plot.wateredToday } };
   return { ok: true as const, world: { ...after, plots }, item };
 }
 
-/** Night: watered crops grow one day; all soil dries. */
-export function growNight(w: WorldState): WorldState {
+/**
+ * Night: the golem waters (AI skills), watered crops grow one day (two on their first
+ * night with «Магія росту»), the golem harvests ripe crops (AI «Голем-збирач»), and
+ * all soil dries.
+ */
+export function growNight(w: WorldState, fx: Effects = NO_EFFECTS): WorldState {
   const plots: Record<string, Plot> = {};
-  for (const [key, p] of Object.entries(w.plots)) {
-    const grows = p.crop && p.wateredToday && !isRipe(p);
-    plots[key] = { ...p, growth: grows ? p.growth + 1 : p.growth, wateredToday: false };
+  let golem = fx.golemWater;
+  for (const key of Object.keys(w.plots).sort()) {
+    const p = w.plots[key];
+    let watered = p.wateredToday;
+    if (!watered && p.crop && !isRipe(p) && golem > 0) {
+      watered = true;
+      golem -= 1;
+    }
+    const grows = p.crop && watered && !isRipe(p);
+    const step = grows ? (fx.firstNightBoost && p.growth === 0 ? 2 : 1) : 0;
+    const days = p.crop ? CROPS[p.crop].days : 0;
+    plots[key] = { ...p, growth: Math.min(days || Infinity, p.growth + step), wateredToday: false };
   }
-  return { ...w, plots };
+  let next: WorldState = { ...w, plots };
+  if (fx.golemHarvest) {
+    for (const key of Object.keys(plots)) {
+      if (isRipe(plots[key])) {
+        const r = harvest(next, key, fx);
+        if (r.ok) next = r.world;
+      }
+    }
+    next = { ...next, plots: Object.fromEntries(Object.entries(next.plots).map(([k, p]) => [k, { ...p, wateredToday: false }])) };
+  }
+  return next;
 }
 
 // ------------------------------------------------------------------ shop
