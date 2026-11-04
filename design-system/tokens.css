@@ -1,0 +1,127 @@
+/* Спадок у Долині Знань — generated from tokens.json */
+@font-face { font-family: "Press Start 2P"; src: url("fonts/PressStart2P-Regular.woff2") format("woff2"); font-weight: 400; font-style: normal; font-display: block; }
+@font-face { font-family: "Tiny5"; src: url("fonts/Tiny5-Regular.woff2") format("woff2"); font-weight: 400; font-style: normal; font-display: block; }
+@font-face { font-family: "Tiny5"; src: url("fonts/Tiny5-Bold.woff2") format("woff2"); font-weight: 700; font-style: normal; font-display: block; }
+:root, [data-theme="valley"] {
+  --wood-900: #2e1b12;
+  --wood-700: #5a3420;
+  --wood-500: #8a5530;
+  --wood-300: #b97d45;
+  --parchment-50: #fbf3dc;
+  --parchment-100: #f3e2b8;
+  --parchment-200: #e8d09c;
+  --parchment-300: #c9a565;
+  --ink: #3a2414;
+  --ink-muted: #674528;
+  --ink-on-wood: #f8e9c4;
+  --ink-on-accent: #fbf3dc;
+  --moss-700: #3d6128;
+  --moss-600: #466e2e;
+  --moss-500: #4a7330;
+  --honey-500: #e0a33a;
+  --honey-300: #f2c76b;
+  --river-600: #2c6670;
+  --river-300: #7cc4c0;
+  --clay-600: #a3432c;
+  --rune-glow: #9fe3d2;
+  --disabled-fill: #c8b48c;
+  --disabled-ink: #4d3a28;
+  --rarity-common: #6b6359;
+  --rarity-rare: #2b65a0;
+  --rarity-epic: #7b3ea3;
+  --rarity-legendary: #8a4f00;
+  --rarity-legendary-glint: #f6c84c;
+  --bar-track: #2e1b12;
+  --bar-energy: #86c440;
+  --bar-health: #d9503f;
+  --bar-xp: #4fb0d8;
+  --bar-ceiling: #f6c84c;
+  --light-morning: #fff1d6;
+  --light-day: #ffffff;
+  --light-evening: #f2b07e;
+  --light-night: #4a5788;
+  --light-warm: #ffc861;
+  --light-window: #ffad42;
+  --light-firefly: #e9f77c;
+  --forest-deep: #24452a;
+  --forest-shade: #3f7a39;
+  --forest-mid: #6fae4a;
+  --forest-light: #a8d96a;
+  --forest-accent: #f2a9c0;
+  --forest-accent-2: #fff4d0;
+  --forest-earth: #6b4a2b;
+  --forest-detail: #9a6b3f;
+  --tower-deep: #26324f;
+  --tower-shade: #4b6a96;
+  --tower-mid: #8fb6d9;
+  --tower-light: #e9f3fb;
+  --tower-accent: #a99be0;
+  --tower-accent-2: #5f4f9a;
+  --tower-earth: #4a4658;
+  --tower-detail: #7d7a8c;
+  --market-deep: #3c5a1e;
+  --market-shade: #7aaa3c;
+  --market-mid: #c9df6a;
+  --market-light: #f1d48a;
+  --market-accent: #d65a3a;
+  --market-accent-2: #f39a3d;
+  --market-earth: #7a4526;
+  --market-detail: #3d8db0;
+  --forge-deep: #2a2424;
+  --forge-shade: #4f4644;
+  --forge-mid: #7e716a;
+  --forge-light: #6f7650;
+  --forge-accent: #9c4a28;
+  --forge-accent-2: #e0701e;
+  --forge-earth: #ffc24d;
+  --forge-detail: #b9aea0;
+  --library-deep: #2a2c4a;
+  --library-shade: #4e3150;
+  --library-mid: #8c3f2e;
+  --library-light: #c4622b;
+  --library-accent: #e39b3a;
+  --library-accent-2: #f1d07a;
+  --library-earth: #6b6a35;
+  --library-detail: #ecdcb4;
+  --shadow-drop: 0 4px 0 0 rgba(46, 27, 18, 0.35);
+  --shadow-bar-gloss: inset 0 2px 0 0 rgba(255, 255, 255, 0.35);
+}
+:root {
+  --space-1: 2px;
+  --space-2: 4px;
+  --space-4: 8px;
+  --space-6: 12px;
+  --space-8: 16px;
+  --space-12: 24px;
+  --space-16: 32px;
+  --space-24: 48px;
+  --radius-none: 0;
+  --notch-1: 2px;
+  --ui-scale-default: 2;
+  --ui-scale-1080: 3;
+  --ui-scale-1440: 4;
+  --world-scale-default: 3;
+  --world-scale-1080: 4;
+  --tile: 16px;
+  --character: 16px 32px;
+  --portrait: 64px;
+  --item-icon: 16px;
+  --enemy: 16px;
+  --ui-icon: 8px;
+  --revival-1: saturate(0.1) brightness(0.8);
+  --revival-2: saturate(0.32) brightness(0.87);
+  --revival-3: saturate(0.58) brightness(0.93);
+  --revival-4: saturate(0.82) brightness(0.97);
+  --revival-5: saturate(1) brightness(1);
+  --font-display: "Press Start 2P", monospace;
+  --font-body: "Tiny5", monospace;
+}
+.display-logo { font-family: "Press Start 2P", monospace; font-size: 32px; line-height: 40px; font-weight: 400; }
+.heading-1 { font-family: "Press Start 2P", monospace; font-size: 32px; line-height: 40px; font-weight: 400; }
+.heading-2 { font-family: "Press Start 2P", monospace; font-size: 24px; line-height: 32px; font-weight: 400; }
+.heading-3 { font-family: "Press Start 2P", monospace; font-size: 16px; line-height: 24px; font-weight: 400; }
+.stat { font-family: "Press Start 2P", monospace; font-size: 16px; line-height: 24px; font-weight: 400; }
+.body-lg { font-family: "Tiny5", monospace; font-size: 32px; line-height: 40px; font-weight: 400; }
+.body { font-family: "Tiny5", monospace; font-size: 24px; line-height: 32px; font-weight: 400; }
+.label { font-family: "Tiny5", monospace; font-size: 24px; line-height: 28px; font-weight: 700; }
+.caption { font-family: "Tiny5", monospace; font-size: 16px; line-height: 24px; font-weight: 400; }
