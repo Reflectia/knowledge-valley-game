@@ -1,6 +1,7 @@
 import { useState, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { sfx } from '@/audio';
 import type { RarityThresholds, UiScale, Volume } from '@/core/types';
 
 import { FileButton, Ico, Panel } from '../components/common';
@@ -65,6 +66,9 @@ function SoundTab() {
             value={volume[r.id]}
             style={{ '--value': `${volume[r.id]}%` } as CSSProperties}
             onChange={(e) => void update({ volume: { ...volume, [r.id]: Number(e.target.value) } })}
+            // A sample when the slider is let go, to hear the new level.
+            onPointerUp={() => r.id !== 'music' && sfx('harvest')}
+            onKeyUp={() => r.id !== 'music' && sfx('harvest')}
             onWheel={(e) => {
               const v = Math.max(0, Math.min(100, volume[r.id] + (e.deltaY < 0 ? 5 : -5)));
               void update({ volume: { ...volume, [r.id]: v } });
@@ -73,7 +77,6 @@ function SoundTab() {
           <span className="dv-slider__value">{volume[r.id]}%</span>
         </label>
       ))}
-      <p className="dv-caption">{t('settings.soundSoon')}</p>
     </div>
   );
 }

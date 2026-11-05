@@ -77,6 +77,12 @@ export class AudioEngine {
     };
     window.addEventListener('pointerdown', unlock, { capture: true });
     window.addEventListener('keydown', unlock, { capture: true });
+    // A hidden tab is silent; the sound comes back with the tab.
+    document.addEventListener('visibilitychange', () => {
+      if (!this.ctx) return;
+      if (document.hidden) void this.ctx.suspend();
+      else void this.ctx.resume();
+    });
   }
 
   private context(): AudioContext | null {
