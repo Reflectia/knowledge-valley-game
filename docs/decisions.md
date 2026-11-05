@@ -31,4 +31,4 @@ Date: 2026-11-04.
 
 ## Homestead
 
-12. **The trading stall stays (addition to the spec).** The spec only has «Крамниця» as the `market` discipline building (5 upgrade levels, grows with labs) and mentions «знижки в крамниці» and seeds/furniture/weapons earned by play, but no trading place or shop screen. Buying and selling happen at a stall on the homestead (`shop` object in `scripts/maps/build-maps.mjs`), available from day one; the «Крамниця» building has no trade. Approved by the owner (2026-11-05).
+12. **The trading stall stays (addition to the spec).** The spec only has «Крамниця» as the `market` discipline building (5 upgrade levels, grows with labs) and mentions «знижки в крамниці» and seeds/furniture/weapons earned by play, but no trading place or shop screen. Buying and selling happen at a stall on the homestead (`shop` object in `scripts/maps/build-maps.mjs`), available from day one; the «Крамниця» building has no trade. To keep them apart, the stall window and its texts say «Прилавок» / «біля прилавка». Approved by the owner (2026-11-05).

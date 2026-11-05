@@ -13,11 +13,11 @@
     ],
     "management": [
       { "id": "time-management", "cost": 1, "name": "Тайм-менеджмент", "text": "+15 енергії на день.", "effect": { "maxEnergy": 15 } },
-      { "id": "bargaining", "cost": 2, "name": "Вміння торгуватися", "text": "Знижка 15 % у крамниці.", "effect": { "shopDiscount": 0.15 } },
+      { "id": "bargaining", "cost": 2, "name": "Вміння торгуватися", "text": "Знижка 15 % біля прилавка.", "effect": { "shopDiscount": 0.15 } },
       { "id": "priorities", "cost": 2, "name": "Пріоритети", "text": "Ще +15 енергії на день.", "effect": { "maxEnergy": 15 } }
     ],
     "architecture": [
-      { "id": "blueprints", "cost": 1, "name": "Креслення", "text": "У крамниці з'являються полиця, скриня й світильник.", "effect": { "blueprints": true } },
+      { "id": "blueprints", "cost": 1, "name": "Креслення", "text": "На прилавку з'являються полиця, скриня й світильник.", "effect": { "blueprints": true } },
       { "id": "sturdy-tools", "cost": 2, "name": "Міцні інструменти", "text": "Сокира й кайло витрачають на 1 енергію менше.", "effect": { "toolEnergy": 1 } },
       { "id": "forged-weapon", "cost": 2, "name": "Кована зброя", "text": "Меч б'є сильніше.", "effect": { "swordBonus": 1 }, "later": "combat" }
     ],
