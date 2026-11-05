@@ -140,54 +140,15 @@ body {
   top: 37%;
   transform: translateX(-50%);
   display: grid;
-  justify-items: center;
-  gap: 0;
-  min-width: 360px;
-  /* Room for the sword beside the longest item. */
-  padding: 0 52px;
+  gap: 8px;
+  width: 400px;
+  padding: 0 4px;
   border-style: solid;
   border-color: transparent;
   border-width: 54px 48px 57px 51px;
   border-image: url('/assets/ui/start-panel.png') 18 16 19 17 fill / 54px 48px 57px 51px / 0 round;
   image-rendering: pixelated;
 }
-.start-menu__item {
-  position: relative;
-  padding: 2px 4px;
-  border: 0;
-  background: none;
-  color: var(--ink);
-  font: 32px/40px var(--font-body);
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-.start-menu__item:disabled {
-  opacity: 0.5;
-}
-.start-menu__item:focus-visible {
-  outline: 2px solid var(--ink);
-  outline-offset: 0;
-}
-/* The sword points at the hovered item (or the default one when nothing is hovered). */
-.start-menu__item::after {
-  content: '';
-  position: absolute;
-  left: calc(100% + 4px);
-  top: 50%;
-  width: 48px;
-  height: 48px;
-  transform: translateY(-50%);
-  background: url('/assets/ui/cursor-sword-32.png') center / 48px 48px no-repeat;
-  image-rendering: pixelated;
-  visibility: hidden;
-}
-.start-menu__item:not(:disabled):hover::after,
-.start-menu__item:not(:disabled):focus-visible::after,
-.start-menu__panel:not(:hover):not(:focus-within) .is-default:not(:disabled)::after {
-  visibility: visible;
-}
-
 /* ------------------------------------------------------------ character creation */
 
 .create {

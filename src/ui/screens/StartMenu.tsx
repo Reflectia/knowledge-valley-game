@@ -9,8 +9,8 @@ const ART = `${import.meta.env.BASE_URL}assets/ui/`;
 
 /**
  * Start screen (spec §8 screen 1): the owner's valley backdrop, title art and a
- * stone-and-vine panel (start-menu-*-new.jpg). The sword marks the hovered item,
- * or the default one («Продовжити» with a save, else «Нова гра»).
+ * stone-and-vine panel (start-menu-*-new.jpg). The buttons are the same `dv-btn`s
+ * as the in-game menu; «Продовжити» is the primary one when a save exists.
  */
 export function StartMenu({
   onContinue,
@@ -45,28 +45,37 @@ export function StartMenu({
         </h1>
         <nav className="start-menu__panel" aria-label={t('game.title')}>
           {hasSave && (
-            <button type="button" className="start-menu__item is-default" disabled={!ready} onClick={onContinue}>
+            <button type="button" className="dv-btn dv-btn--primary dv-btn--wide" disabled={!ready} onClick={onContinue}>
+              <Ico name="spark" />
               {t('start.continue')}
             </button>
           )}
           <button
             type="button"
-            className={`start-menu__item${hasSave ? '' : ' is-default'}`}
+            className={`dv-btn dv-btn--wide${hasSave ? '' : ' dv-btn--primary'}`}
             disabled={!ready}
             onClick={() => (hasSave ? setDialog('overwrite') : onNewGame())}
           >
+            <Ico name="book" />
             {t('start.newGame')}
           </button>
           <FileButton
-            className="start-menu__item"
-            label={t('start.importSave')}
+            className="dv-btn dv-btn--wide"
+            label={
+              <>
+                <Ico name="upload" />
+                {t('start.importSave')}
+              </>
+            }
             accept=".json,application/json"
             onFile={(f) => void onImport(f)}
           />
-          <button type="button" className="start-menu__item" onClick={onSettings}>
+          <button type="button" className="dv-btn dv-btn--wide" onClick={onSettings}>
+            <Ico name="gear" />
             {t('start.settings')}
           </button>
-          <button type="button" className="start-menu__item" onClick={() => setDialog('language')}>
+          <button type="button" className="dv-btn dv-btn--wide" onClick={() => setDialog('language')}>
+            <Ico name="globe" />
             {t('start.language')}
           </button>
         </nav>
