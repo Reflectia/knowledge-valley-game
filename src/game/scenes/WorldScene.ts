@@ -259,6 +259,10 @@ export class WorldScene extends Phaser.Scene {
     cam.fadeIn(250, 46, 27, 18);
 
     this.cursors = this.input.keyboard!.createCursorKeys();
+    // No global preventDefault: Space and Shift are not used by the world, and the page never
+    // scrolls (overflow: hidden). Capturing them would stop Space from pressing a focused UI
+    // button and arrows from moving a slider, even while a window is open (WCAG 2.1.1).
+    this.input.keyboard!.clearCaptures();
     this.input.on(Phaser.Input.Events.POINTER_DOWN, this.onPointer, this);
     this.input.mouse?.disableContextMenu();
 
