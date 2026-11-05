@@ -12,7 +12,9 @@ Visual check: `docs/assets-preview.png` (old design-system PNG next to the new c
 | Enemies ×8 | `public/assets/enemies/*.png` | `enemies/enemies_new.jpg` | |
 | Items ×4 | `public/assets/items/*.png` | `items/items-new.jpg` | **staff** is thin at 14 px — worth redrawing. |
 | Mentor portraits ×5 + emblem | `public/assets/portraits/*.png` | `portraits/Gemini_Generated_Image_*.jpg` | Cut with frames; frames are 58–60 px wide inside the 64×64 canvas. |
-| Start menu backdrop 640×360 | `public/assets/ui/start-bg-640x360.png` | `backdrops/start-menu-cursor-new.jpg` (left panel) | Sampled on the art grid (320×180) then ×2. Some sky above the tower and the lowest garden row are cropped to fit 16:9. |
+| Start menu backdrop 475×265 | `public/assets/ui/start-bg.png` | `backdrops/start-menu-new.jpg` | One pixel per art cell (grid 5.78 px), 64 colours. `scripts/assets/build_start_menu.py`. |
+| Start menu title 213×75 | `public/assets/ui/start-title.png` | `backdrops/start-menu-interface-new.jpg` | Keyed out of the sky (the assets sheet draws it on a plaque, the reference does not). |
+| Start menu panel 117×55 (9-slice) | `public/assets/ui/start-panel.png` | `backdrops/start-menu-assets-new.jpg` («Нова гра» button) | Centre filled with plain parchment; edges repeat when the panel is taller. |
 | Mouse cursor (sword) | `public/assets/ui/cursor-sword-16.png`, `-32.png` | same file, right panel | Thin at 16 px; the gold guard is barely visible. |
 | Homestead house, 2 blossom trees, lamp post | `public/assets/homestead/*.png` | `lighting/homestead-day-night-new.jpg` (day half) | Cut at 1/8 so the door matches the heroine's height. |
 | Lit window (night overlay) | `public/assets/homestead/window-lit.png` | same file, night half | The rest of the night look comes from lighting. |

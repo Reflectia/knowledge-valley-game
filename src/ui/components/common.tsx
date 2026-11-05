@@ -89,16 +89,19 @@ export function FileButton({
   accept,
   onFile,
   primary = false,
+  className,
 }: {
   label: ReactNode;
   accept: string;
   onFile: (file: File) => void;
   primary?: boolean;
+  /** Replaces the default `dv-btn` look. */
+  className?: string;
 }) {
   const input = useRef<HTMLInputElement>(null);
   return (
     <>
-      <button type="button" className={`dv-btn${primary ? ' dv-btn--primary' : ''}`} onClick={() => input.current?.click()}>
+      <button type="button" className={className ?? `dv-btn${primary ? ' dv-btn--primary' : ''}`} onClick={() => input.current?.click()}>
         {label}
       </button>
       <input

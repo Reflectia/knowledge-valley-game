@@ -13,7 +13,7 @@ import numpy as np
 from PIL import Image
 
 sys.path.insert(0, str(Path(__file__).parent))
-from pixelize import Region, grid_pixelize, load_rgb, pixelize  # noqa: E402
+from pixelize import Region, load_rgb, pixelize  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]
 IMG = ROOT / "images"
@@ -94,12 +94,7 @@ def portraits() -> None:
 def start_menu() -> None:
     print("start menu")
     src = load_rgb(str(IMG / "backdrops/start-menu-cursor-new.jpg"))
-    # Left panel only (the divider is at x≈2056). Art grid ≈ 5.79 px; a 320×180
-    # window keeps the tower spire and the homestead, then ×2 to 640×360.
-    bg = grid_pixelize(src, (0, 440, 1860, 1490), 5.79, 48)
-    bg = bg.crop((0, 0, 320, 180)).resize((640, 360), Image.NEAREST)
-    save(bg, "ui/start-bg-640x360.png")
-
+    # The backdrop, title and panel come from build_start_menu.py.
     # Sword cursor from the right panel; tip at the top-left = hotspot (0, 0).
     reg = Region((2080, 300, 2752, 1236), bg_tolerance=40)
     sword = pixelize(src, reg, (16, 16), colors=10, anchor="center", dark_weight=2.0)

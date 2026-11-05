@@ -118,25 +118,74 @@ body {
 .start-screen .dv-start__bg {
   image-rendering: pixelated;
 }
-/* The tower stands top-left in this backdrop, so the title sits in the calmer sky. */
-.start-screen .dv-start__logo {
-  left: auto;
-  right: 6%;
-  top: 7%;
-  max-width: 50%;
-  text-align: right;
+/* Start menu art (start-menu-*-new.jpg, scripts/assets/build_start_menu.py):
+   title centred over the sky, the panel below it between the tower and the observatory. */
+.start-menu__title {
+  position: absolute;
+  left: 50%;
+  top: 4%;
+  width: 42%;
+  margin: 0;
+  transform: translateX(-50%);
+  line-height: 0;
 }
-/* Between the tower (left) and the observatory (right), over the river valley. */
-.start-screen .dv-start__menu {
-  top: 58%;
-  right: 22%;
-}
-.start-screen__file {
-  display: grid;
-}
-.start-screen__file .dv-btn {
+.start-menu__title img {
   width: 100%;
-  justify-content: flex-start;
+  image-rendering: pixelated;
+}
+/* 9-slice: insets are the PANEL_SLICE art pixels ×3 (about the backdrop's own pixel size). */
+.start-menu__panel {
+  position: absolute;
+  left: 50%;
+  top: 37%;
+  transform: translateX(-50%);
+  display: grid;
+  justify-items: center;
+  gap: 0;
+  min-width: 360px;
+  /* Room for the sword beside the longest item. */
+  padding: 0 52px;
+  border-style: solid;
+  border-color: transparent;
+  border-width: 54px 48px 57px 51px;
+  border-image: url('/assets/ui/start-panel.png') 18 16 19 17 fill / 54px 48px 57px 51px / 0 round;
+  image-rendering: pixelated;
+}
+.start-menu__item {
+  position: relative;
+  padding: 2px 4px;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: 32px/40px var(--font-body);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.start-menu__item:disabled {
+  opacity: 0.5;
+}
+.start-menu__item:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 0;
+}
+/* The sword points at the hovered item (or the default one when nothing is hovered). */
+.start-menu__item::after {
+  content: '';
+  position: absolute;
+  left: calc(100% + 4px);
+  top: 50%;
+  width: 48px;
+  height: 48px;
+  transform: translateY(-50%);
+  background: url('/assets/ui/cursor-sword-32.png') center / 48px 48px no-repeat;
+  image-rendering: pixelated;
+  visibility: hidden;
+}
+.start-menu__item:not(:disabled):hover::after,
+.start-menu__item:not(:disabled):focus-visible::after,
+.start-menu__panel:not(:hover):not(:focus-within) .is-default:not(:disabled)::after {
+  visibility: visible;
 }
 
 /* ------------------------------------------------------------ character creation */

@@ -5,11 +5,12 @@ import { Ico, Overlay, Panel, FileButton, useEscape } from '../components/common
 import { useGame } from '../GameContext';
 
 const VERSION = '0.1';
-const BACKDROP = `${import.meta.env.BASE_URL}assets/ui/start-bg-640x360.png`;
+const ART = `${import.meta.env.BASE_URL}assets/ui/`;
 
 /**
- * Start screen (spec §8 screen 1, StartMenu README): static valley backdrop,
- * game title and five buttons; «Продовжити» is the primary one when a save exists.
+ * Start screen (spec §8 screen 1): the owner's valley backdrop, title art and a
+ * stone-and-vine panel (start-menu-*-new.jpg). The sword marks the hovered item,
+ * or the default one («Продовжити» with a save, else «Нова гра»).
  */
 export function StartMenu({
   onContinue,
@@ -38,42 +39,34 @@ export function StartMenu({
   return (
     <div className="start-screen">
       <div className="dv-start">
-        <img className="dv-start__bg" src={BACKDROP} alt="" />
-        <h1 className="dv-start__logo">{t('game.title')}</h1>
-        <nav className="dv-start__menu" aria-label={t('game.title')}>
+        <img className="dv-start__bg" src={`${ART}start-bg.png`} alt="" />
+        <h1 className="start-menu__title">
+          <img src={`${ART}start-title.png`} alt={t('game.title')} />
+        </h1>
+        <nav className="start-menu__panel" aria-label={t('game.title')}>
           {hasSave && (
-            <button type="button" className="dv-btn dv-btn--primary dv-btn--wide" disabled={!ready} onClick={onContinue}>
-              <Ico name="spark" />
+            <button type="button" className="start-menu__item is-default" disabled={!ready} onClick={onContinue}>
               {t('start.continue')}
             </button>
           )}
           <button
             type="button"
-            className={`dv-btn dv-btn--wide${hasSave ? '' : ' dv-btn--primary'}`}
+            className={`start-menu__item${hasSave ? '' : ' is-default'}`}
             disabled={!ready}
             onClick={() => (hasSave ? setDialog('overwrite') : onNewGame())}
           >
-            <Ico name="book" />
             {t('start.newGame')}
           </button>
-          <span className="start-screen__file">
-            <FileButton
-              label={
-                <>
-                  <Ico name="upload" />
-                  {t('start.importSave')}
-                </>
-              }
-              accept=".json,application/json"
-              onFile={(f) => void onImport(f)}
-            />
-          </span>
-          <button type="button" className="dv-btn dv-btn--wide" onClick={onSettings}>
-            <Ico name="gear" />
+          <FileButton
+            className="start-menu__item"
+            label={t('start.importSave')}
+            accept=".json,application/json"
+            onFile={(f) => void onImport(f)}
+          />
+          <button type="button" className="start-menu__item" onClick={onSettings}>
             {t('start.settings')}
           </button>
-          <button type="button" className="dv-btn dv-btn--wide" onClick={() => setDialog('language')}>
-            <Ico name="globe" />
+          <button type="button" className="start-menu__item" onClick={() => setDialog('language')}>
             {t('start.language')}
           </button>
         </nav>
