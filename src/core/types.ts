@@ -32,7 +32,8 @@ export interface Lab {
   disciplineId: string;
   labNo: number;
   title?: string;
-  maxScore: number;
+  /** Unknown until the teacher publishes it; a score can only be set once it is known. */
+  maxScore?: number;
   deadline?: ISODate;
   /** Set by «Виконано» (stage 1 of a lab). */
   doneDate?: ISODate;

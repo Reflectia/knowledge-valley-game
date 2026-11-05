@@ -125,7 +125,7 @@ function SingleReward({ events, curriculum, onTake }: { events: RewardEvent[]; c
           </span>
           {lab && lab.score !== undefined && (
             <p className="dv-reward__text dv-caption">
-              {t('reward.from', { n: lab.labNo, score: scoreText(lab.score), max: scoreText(lab.maxScore) })}
+              {t('reward.from', { n: lab.labNo, score: scoreText(lab.score), max: scoreText(lab.maxScore!) })}
             </p>
           )}
         </>

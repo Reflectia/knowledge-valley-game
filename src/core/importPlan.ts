@@ -28,7 +28,7 @@ export const COLUMNS = [
   'score',
 ] as const;
 export type Column = (typeof COLUMNS)[number];
-const REQUIRED: Column[] = ['semester', 'discipline_id', 'discipline_name', 'theme_pack', 'has_exam', 'lab_no', 'max_score'];
+const REQUIRED: Column[] = ['semester', 'discipline_id', 'discipline_name', 'theme_pack', 'has_exam', 'lab_no'];
 
 /** A data row: spreadsheet row number (header = row 1) and trimmed cell strings. */
 export interface RawRow {
@@ -48,7 +48,7 @@ export type ImportErrorCode =
   | 'badYesNo'
   | 'badId'
   | 'unknownPack'
-  | 'examDateRequired'
+  | 'scoreWithoutMax'
   | 'maxScoreNotPositive'
   | 'scoreOutOfRange'
   | 'scoreWithoutDone'
@@ -293,11 +293,9 @@ export function validateRows(rows: RawRow[]): { plan: ValidatedPlan | null; erro
       err('badYesNo', 'has_exam', { value: get('has_exam') });
       ok = false;
     }
+    // The exam date may stay empty until it is announced.
     const examDate = date('exam_date');
-    if (hasExam && !examDate && get('exam_date') === '') {
-      err('examDateRequired', 'exam_date');
-      ok = false;
-    }
+    // Empty max_score = not announced yet.
     const maxScore = decimal('max_score');
     if (maxScore !== undefined && maxScore <= 0) {
       err('maxScoreNotPositive', 'max_score', { value: get('max_score') });
@@ -314,7 +312,11 @@ export function validateRows(rows: RawRow[]): { plan: ValidatedPlan | null; erro
       err('scoreWithoutDone', 'score');
       ok = false;
     }
-    if (!ok || semester === undefined || labNo === undefined || maxScore === undefined || hasExam === undefined) continue;
+    if (score !== undefined && maxScore === undefined) {
+      err('scoreWithoutMax', 'score');
+      ok = false;
+    }
+    if (!ok || semester === undefined || labNo === undefined || hasExam === undefined) continue;
 
     const dKey = disciplineKey(semester, id);
     const d: Discipline = {
@@ -345,7 +347,7 @@ export function validateRows(rows: RawRow[]): { plan: ValidatedPlan | null; erro
       semester,
       disciplineId: id,
       labNo,
-      maxScore,
+      ...(maxScore !== undefined ? { maxScore } : {}),
       ...(title ? { title } : {}),
       ...(deadline ? { deadline } : {}),
       ...(doneDate ? { doneDate } : {}),
@@ -386,7 +388,7 @@ export function mergePlan(current: Curriculum, plan: ValidatedPlan): { curriculu
     const next: Lab = { ...incoming };
     if (doneDate) next.doneDate = doneDate;
     // A kept score must still fit the (possibly changed) maximum.
-    if (score !== undefined && score <= next.maxScore) next.score = score;
+    if (score !== undefined && next.maxScore !== undefined && score <= next.maxScore) next.score = score;
     else delete next.score;
 
     if (!prev) summary.newLabs += 1;

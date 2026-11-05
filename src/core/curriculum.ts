@@ -40,6 +40,7 @@ export function setScore(c: Curriculum, key: LabKey, score: number | undefined):
   const lab = requireLab(c, key);
   if (score !== undefined) {
     if (!lab.doneDate) throw new LabEditError('A lab must be done before it gets a score');
+    if (lab.maxScore === undefined) throw new LabEditError('The maximum score of this lab is not known yet');
     if (!Number.isFinite(score) || score < 0 || score > lab.maxScore) {
       throw new LabEditError(`Score must be between 0 and ${lab.maxScore}`);
     }

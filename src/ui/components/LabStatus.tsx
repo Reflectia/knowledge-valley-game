@@ -18,7 +18,7 @@ export function LabStatus({ lab, thresholds = BALANCE.rarityThresholds }: { lab:
     );
   }
   const late = !isOnTime(lab);
-  const rarity = lab.score !== undefined ? rarityFor(lab.score, lab.maxScore, thresholds) : null;
+  const rarity = lab.score !== undefined && lab.maxScore !== undefined ? rarityFor(lab.score, lab.maxScore, thresholds) : null;
   return (
     <>
       <span className="dv-chip dv-chip--done">
@@ -36,7 +36,7 @@ export function LabStatus({ lab, thresholds = BALANCE.rarityThresholds }: { lab:
           <span className={`dv-ico dv-ico--r-${rarity}`} aria-hidden />
           {t('status.graded', {
             score: scoreText(lab.score!),
-            max: scoreText(lab.maxScore),
+            max: scoreText(lab.maxScore!),
             rarity: t(`rarity.${rarity}`),
           })}
         </span>

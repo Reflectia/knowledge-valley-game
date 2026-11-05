@@ -119,7 +119,7 @@ export function InventoryScreen({ onClose }: { onClose: () => void }) {
                 {lab && (
                   <p className="dv-tooltip__hint">
                     {t('inventory.fromLab', { n: lab.labNo, discipline: disc?.name ?? '' })}
-                    {lab.score !== undefined ? ` · ${scoreText(lab.score)}/${scoreText(lab.maxScore)}` : ''}
+                    {lab.score !== undefined ? ` · ${scoreText(lab.score)}/${scoreText(lab.maxScore!)}` : ''}
                   </p>
                 )}
               </>

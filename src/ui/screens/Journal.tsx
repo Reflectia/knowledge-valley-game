@@ -239,6 +239,18 @@ function ScoreForm({ lab, onDone }: { lab: Lab; onDone: () => void }) {
   const setLabScore = useGame((s) => s.setLabScore);
   const thresholds = useGame((s) => s.labs.settings.rarityThresholds);
   const [text, setText] = useState(lab.score !== undefined ? String(lab.score) : '');
+  if (lab.maxScore === undefined) {
+    return (
+      <div className="journal__form">
+        <p className="dv-field__help">{t('journal.maxUnknown')}</p>
+        <div className="dv-page__actions">
+          <button type="button" className="dv-btn" onClick={onDone}>
+            {t('common.cancel')}
+          </button>
+        </div>
+      </div>
+    );
+  }
   const value = Number(text.replace(',', '.'));
   const valid = text.trim() !== '' && Number.isFinite(value) && value >= 0 && value <= lab.maxScore;
   const tooHigh = Number.isFinite(value) && value > lab.maxScore;

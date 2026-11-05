@@ -123,7 +123,10 @@ describe('errors are shown before applying', () => {
 
   it('required cells, exam date, ids, yes/no, numbers', () => {
     expect(errorsOf(row({ discipline_name: '' }))[0]).toMatchObject({ code: 'required', column: 'discipline_name' });
-    expect(errorsOf(row({ has_exam: 'yes' }))[0]).toMatchObject({ code: 'examDateRequired' });
+    // Exam date and max score may stay empty until they are announced.
+    expect(errorsOf(row({ has_exam: 'yes' }))).toEqual([]);
+    expect(errorsOf(row({ max_score: '' }))).toEqual([]);
+    expect(errorsOf(row({ max_score: '', done_date: '2026-10-01', score: '5' }))[0]).toMatchObject({ code: 'scoreWithoutMax' });
     expect(errorsOf(row({ discipline_id: 'Методологія' }))[0]).toMatchObject({ code: 'badId' });
     expect(errorsOf(row({ has_exam: 'maybe' }))[0]).toMatchObject({ code: 'badYesNo' });
     expect(errorsOf(row({ lab_no: '1.5' }))[0]).toMatchObject({ code: 'notInteger', column: 'lab_no' });
@@ -147,7 +150,6 @@ describe('errors are shown before applying', () => {
       'discipline_name',
       'theme_pack',
       'has_exam',
-      'max_score',
     ]);
     // The player sees which headers the file really has.
     expect(errs.at(-1)).toEqual({ code: 'foundColumns', row: 1, params: { columns: 'semester, lab_no' } });

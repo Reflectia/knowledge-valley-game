@@ -65,12 +65,12 @@ export function labWorth(curriculum: Curriculum, labKey: LabKey, thresholds: Rar
   const r = BALANCE.rewards;
   const done = Boolean(lab.doneDate);
   const onTime = done && isOnTime(lab);
-  const graded = done && lab.score !== undefined;
+  const graded = done && lab.score !== undefined && lab.maxScore !== undefined;
   return {
     done,
     onTime,
     branch: pack.branch.id,
-    rarity: graded ? rarityFor(lab.score!, lab.maxScore, thresholds) : undefined,
+    rarity: graded ? rarityFor(lab.score!, lab.maxScore!, thresholds) : undefined,
     itemId: graded ? uniqueItemFor(pack, lab.labNo) : undefined,
     coins: done ? r.done.coins + (onTime ? r.onTime.coins : 0) : 0,
     resources: done ? { [pack.resource.id]: r.done.resources } : {},
