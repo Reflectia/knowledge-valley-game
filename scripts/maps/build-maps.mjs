@@ -277,27 +277,27 @@ function house() {
   const thing = (name, x, y, footW, footH, extra = {}) =>
     m.obj('sprite', name, x, y, 0, 0, { key: `interior-${name}`, footW, footH, ...extra });
   thing('bed', 24, 64, 22, 30);
-  thing('fireplace', 96, 48, 28, 14);
+  thing('fireplace', 96, 48, 26, 12);
   thing('clock', 120, 30, 0, 0); // hangs on the wall
-  thing('desk', 160, 64, 22, 12);
-  thing('bookshelf', 181, 48, 18, 14);
+  thing('desk', 148, 64, 26, 12);
+  thing('bookshelf', 179, 48, 24, 14);
   thing('fern', 72, 48, 12, 6);
   thing('rug', 96, 96, 0, 0, { flat: true });
   thing('doormat', 96, 144, 0, 0, { flat: true });
-  thing('table', 144, 120, 36, 10);
+  thing('table', 144, 120, 30, 8);
   thing('lamp', 56, 128, 8, 6);
   thing('chest', 24, 128, 14, 10);
   thing('palm', 184, 128, 12, 6);
   m.obj('interact', 'bed', 12, 32, 24, 32, { action: 'sleep' });
-  m.obj('interact', 'journal', 148, 34, 24, 30, { action: 'journal' });
+  m.obj('interact', 'journal', 134, 34, 28, 30, { action: 'journal' });
   m.obj('exit', 'door', 5 * T, H * T - 6, 2 * T, 6, { target: 'homestead', spawn: 'door' });
   m.obj('spawn', 'door', 6 * T, (H - 1) * T - 2);
   m.obj('spawn', 'bed', 2 * T + 14, 4 * T + 6);
   m.obj('spawn', 'default', 2 * T + 14, 4 * T + 6);
   // Warm lights at night: the candle on the desk, the fire and the standing lamp.
-  m.obj('light', 'candle', 168, 40, 0, 0, { kind: 'lamp' });
+  m.obj('light', 'candle', 158, 40, 0, 0, { kind: 'lamp' });
   m.obj('light', 'fire', 96, 40, 0, 0, { kind: 'lamp' });
-  m.obj('light', 'lamp', 56, 104, 0, 0, { kind: 'lamp' });
+  m.obj('light', 'lamp', 56, 110, 0, 0, { kind: 'lamp' });
   save('house', m);
 }
 

@@ -21,7 +21,7 @@ from PIL import Image, ImageFilter
 
 sys.path.insert(0, str(Path(__file__).parent))
 from build_buildings import background, cut, defringe  # noqa: E402
-from pixelize import assign, drop_specks, kmeans_colors, majority_downscale, to_image  # noqa: E402
+from pixelize import assign, drop_specks, grid_phase, kmeans_colors, majority_downscale, to_image  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]
 SRC = ROOT / "images/interior"
@@ -53,6 +53,58 @@ OBJECTS: dict[str, tuple[tuple[int, int, int, int], tuple[int, int]]] = {
     "table": ((1040, 1625, 1700, 1990), (40, 24)),  # round table with two stools
     "clock": ((1735, 1480, 1995, 1965), (14, 26)),
 }
+
+
+# Simpler furniture (images/interior/interior-objects-simple-new.jpg), drawn on a coarse grid of
+# SIMPLE_PERIOD source px per art pixel at about game size: sampled one cell = one game pixel.
+# It replaces the detailed sprites of the same name (the simple sheet has no chest).
+SIMPLE_PERIOD = 20.4
+SIMPLE: dict[str, tuple[int, int, int, int]] = {
+    "bed": (95, 50, 585, 765),
+    "desk": (730, 130, 1312, 755),
+    "bookshelf": (1445, 50, 1975, 728),
+    "fireplace": (72, 808, 622, 1465),
+    "rug": (755, 878, 1312, 1428),
+    "doormat": (1402, 1150, 1852, 1465),  # the lower of the two mats
+    "fern": (72, 1625, 395, 2020),
+    "palm": (438, 1520, 755, 2025),
+    "lamp": (808, 1525, 978, 2025),
+    "table": (1032, 1636, 1688, 2032),
+    "clock": (1730, 1594, 1980, 2036),
+}
+
+
+def native(src: np.ndarray, box: tuple[int, int, int, int], period: float) -> Image.Image:
+    """Sample a sprite drawn on a coarse pixel grid back to one pixel per cell."""
+    rgb, fg = cut(src, box)
+    gray = rgb.astype(np.float64).mean(2)
+    ox, oy = grid_phase(gray, period, 1), grid_phase(gray, period, 0)
+    nx = int(np.ceil((rgb.shape[1] - ox) / period)) + 1
+    ny = int(np.ceil((rgb.shape[0] - oy) / period)) + 1
+    xs = np.clip((ox - period + np.arange(nx + 1) * period).round().astype(int), 0, rgb.shape[1])
+    ys = np.clip((oy - period + np.arange(ny + 1) * period).round().astype(int), 0, rgb.shape[0])
+    cells = np.zeros((ny, nx, 3))
+    opaque = np.zeros((ny, nx), dtype=bool)
+    for j in range(ny):
+        for i in range(nx):
+            y0, y1, x0, x1 = ys[j], ys[j + 1], xs[i], xs[i + 1]
+            if y1 - y0 < 2 or x1 - x0 < 2:
+                continue
+            m = max(1, (y1 - y0) // 4), max(1, (x1 - x0) // 4)
+            core = (slice(y0 + m[0], max(y0 + m[0] + 1, y1 - m[0])), slice(x0 + m[1], max(x0 + m[1] + 1, x1 - m[1])))
+            f = fg[core]
+            if f.mean() < 0.5:
+                continue
+            opaque[j, i] = True
+            cells[j, i] = np.median(rgb[core][f], 0)
+    palette = kmeans_colors(cells[opaque], 12)
+    idx = np.full(opaque.shape, -1, dtype=np.int32)
+    idx[opaque] = assign(cells[opaque], palette)
+    # Dark magenta (the sheet's shadows under objects): red and blue with almost no green.
+    shade = (palette[:, 1] < 0.25 * np.minimum(palette[:, 0], palette[:, 2])) & (np.minimum(palette[:, 0], palette[:, 2]) > 40)
+    idx[(idx >= 0) & shade[np.maximum(idx, 0)]] = -1
+    im = to_image(drop_specks(defringe(idx, palette), 2), palette)
+    return im.crop(im.getbbox())
 
 
 def calm(idx: np.ndarray, passes: int = 2) -> np.ndarray:
@@ -149,12 +201,17 @@ def objects() -> dict[str, Image.Image]:
     return out
 
 
+def simple() -> dict[str, Image.Image]:
+    src = np.asarray(Image.open(SRC / "interior-objects-simple-new.jpg").convert("RGB"))
+    return {name: native(src, box, SIMPLE_PERIOD) for name, box in SIMPLE.items()}
+
+
 def main() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
     tiles = surfaces()
     tiles.save(OUT / "interior-tiles.png")
     print(f"  interior/interior-tiles.png  {tiles.width}x{tiles.height}")
-    for name, im in objects().items():
+    for name, im in {**objects(), **simple()}.items():
         im.save(OUT / f"{name}.png")
         print(f"  interior/{name}.png  {im.width}x{im.height}")
 
