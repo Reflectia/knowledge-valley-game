@@ -299,7 +299,8 @@ export class WorldScene extends Phaser.Scene {
     const ox = p.originX !== undefined ? Number(p.originX) : 0.5;
     const oy = p.originY !== undefined ? Number(p.originY) : 1;
     const img = this.add.image(x, y, key).setOrigin(ox, oy);
-    img.setDepth(y); // y-sort by the sprite's base
+    // y-sort by the sprite's base; flat things (rugs, mats) lie under everyone.
+    img.setDepth(p.flat ? DEPTH.soil : y);
     if (p.footW && p.footH) {
       const fw = Number(p.footW);
       const fh = Number(p.footH);
@@ -708,9 +709,9 @@ export class WorldScene extends Phaser.Scene {
     for (const d of this.store.getState().world.state.decor) {
       if (d.map !== this.mapId) continue;
       const item = ITEMS[d.item];
-      if (!item?.icon.sheet) continue;
-      const img = this.add
-        .image(d.x * T + T / 2, d.y * T + T, item.icon.sheet, item.icon.frame)
+      const icon = item?.icon;
+      if (!icon || (!icon.sheet && !icon.texture)) continue;
+      const img = (icon.texture ? this.add.image(d.x * T + T / 2, d.y * T + T, icon.texture) : this.add.image(d.x * T + T / 2, d.y * T + T, icon.sheet!, icon.frame))
         .setOrigin(0.5, 1)
         .setDepth(item.collides ? d.y * T + T - 1 : DEPTH.soil);
       this.decorSprites.push(img);

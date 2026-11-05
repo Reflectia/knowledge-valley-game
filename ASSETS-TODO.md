@@ -35,11 +35,13 @@ All in `public/assets/_temp/`, each folder with its license. Frame numbers are a
 | Fences | `_temp/kenney-tiny-town/tilemap.png` | 44–47, 56–59, 68–71, 80–82 |
 | Discipline buildings ×5 (5 upgrade levels each) | `_temp/kenney-tiny-town/tilemap.png` | walls, roofs, doors 48–91 — assembled in the maps (stage 5–6) |
 | Sword, staffs | `_temp/kenney-tiny-dungeon/tilemap.png` | 103–107, 129–131 |
-| House furniture and decor | `_temp/kenney-roguelike-indoor/spritesheet.png` | 16×16 with 1 px spacing |
 
-House interior tiles are self-drawn placeholders in the design-system palette
-(`scripts/assets/draw_interior.py` → `public/assets/_temp/interior/interior-16.png`): floor, log wall,
-window, door mat, rug, desk with the journal, bed (2 tiles), bookshelf, chest.
+House interior: the owner's art (`images/interior/interior-surfaces-new.jpg`,
+`interior-objects-new.jpg` → `public/assets/interior/`, `scripts/assets/build_interior.py`): a 4×4-tile
+floor patch, a 2-tile log wall with a window and a herb shelf, and 12 furniture sprites (bed, desk with
+the journal, bookshelf, chest, fireplace, rug, door mat, fern, palm, lamp, table with stools, clock).
+The furniture items in the shop use the same sprites. The old self-drawn interior tiles 0–11 in
+`_temp/interior/interior-16.png` are no longer used.
 
 Also self-drawn there: garden soil (dry / watered) and the shop stall (`shop-stall.png`, 32×32).
 
@@ -49,7 +51,7 @@ Need real art: 5 buildings × 5 levels (Оранжерея моделей, Ве�
 Майстерня, Алхімічна лабораторія).
 
 Item icons in `src/content/items.json` come from the temporary packs: tools (Tiny Farm / Town /
-Dungeon), crops and growth stages (josehzz), furniture (Roguelike Indoor + self-drawn), wood and
+Dungeon), crops and growth stages (josehzz), furniture (the owner's interior sprites), wood and
 stone (Tiny Farm), location resources (the biome's prop tile). Seeds use the owner's seed bag
 (`items/seed.png`) with the crop in the corner.
 

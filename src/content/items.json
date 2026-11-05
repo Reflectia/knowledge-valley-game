@@ -295,8 +295,7 @@
       "text": "Трохи зелені для затишку.",
       "price": 40,
       "icon": {
-        "sheet": "temp-indoor",
-        "frame": 16
+        "texture": "interior-fern"
       }
     },
     {
@@ -308,8 +307,7 @@
       "text": "Відпустка, що росте в кімнаті.",
       "price": 45,
       "icon": {
-        "sheet": "temp-indoor",
-        "frame": 17
+        "texture": "interior-palm"
       }
     },
     {
@@ -321,8 +319,7 @@
       "text": "Тепле світло для довгих вечорів.",
       "price": 60,
       "icon": {
-        "sheet": "temp-indoor",
-        "frame": 122
+        "texture": "interior-lamp"
       },
       "blueprint": true
     },
@@ -335,8 +332,7 @@
       "text": "Конспекти знайдуть свій дім.",
       "price": 80,
       "icon": {
-        "sheet": "temp-interior",
-        "frame": 10
+        "texture": "interior-bookshelf"
       },
       "blueprint": true
     },
@@ -349,8 +345,7 @@
       "text": "Для скарбів і зошитів.",
       "price": 50,
       "icon": {
-        "sheet": "temp-interior",
-        "frame": 11
+        "texture": "interior-chest"
       },
       "blueprint": true
     },
@@ -363,8 +358,7 @@
       "text": "По ньому приємно ходити босоніж.",
       "price": 35,
       "icon": {
-        "sheet": "temp-interior",
-        "frame": 6
+        "texture": "interior-rug"
       }
     },
     {

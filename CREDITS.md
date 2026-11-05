@@ -16,7 +16,6 @@
 | Tiny Town | Kenney (kenney.nl) | CC0 1.0 | https://opengameart.org/content/tiny-town | `public/assets/_temp/kenney-tiny-town/` |
 | Tiny Farm | Kenney (kenney.nl) | CC0 1.0 | https://opengameart.org/content/tiny-farm | `public/assets/_temp/kenney-tiny-farm/` |
 | Tiny Dungeon | Kenney (kenney.nl) | CC0 1.0 | https://opengameart.org/content/tiny-dungeon | `public/assets/_temp/kenney-tiny-dungeon/` |
-| Roguelike Indoor Pack | Kenney (kenney.nl) | CC0 1.0 | https://opengameart.org/content/roguelike-indoor-pack | `public/assets/_temp/kenney-roguelike-indoor/` |
 | Farming Crops 16x16 | josehzz (https://opengameart.org/users/josehzz) | CC0 1.0 | https://opengameart.org/content/farming-crops-16x16 | `public/assets/_temp/josehzz-farming-crops/` |
 
 CC0 needs no attribution; it is listed here so every file's origin is known.

@@ -35,7 +35,11 @@ async function drawIcon(ctx: CanvasRenderingContext2D, icon: ItemIcon, x: number
     ctx.drawImage(img, sx, sy, SIZE, SIZE, x, y, SIZE * scale, SIZE * scale);
   } else if (icon.texture) {
     const img = await loadImage(ASSETS[icon.texture].url);
-    ctx.drawImage(img, 0, 0, img.width, img.height, x, y, SIZE * scale, SIZE * scale);
+    // Fit bigger textures (furniture) into the icon box, keeping their shape.
+    const k = Math.min(1, SIZE / img.width, SIZE / img.height) * scale;
+    const w = img.width * k;
+    const h = img.height * k;
+    ctx.drawImage(img, 0, 0, img.width, img.height, x + (SIZE * scale - w) / 2, y + (SIZE * scale - h), w, h);
   }
 }
 

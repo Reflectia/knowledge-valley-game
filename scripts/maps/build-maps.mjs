@@ -249,39 +249,55 @@ function house() {
   const W = 12;
   const H = 9;
   const m = new MapBuilder(W, H, { title: 'Дім', kind: 'interior' });
-  // interior-16.png: 0 floor, 1 floor knot, 2 wall, 3 wall+baseboard, 4 window, 5 mat, 6 rug, 7 desk,
-  // 8 bed head, 9 bed foot, 10 bookshelf, 11 chest
+  // interior/interior-tiles.png (scripts/assets/build_interior.py), 8 columns:
+  // 0–15 floor 4×4 patch, 16–19 / 20–23 log wall (top / baseboard), 24–27 window 2×2, 28–31 herb shelf 2×2.
+  const WALL = Array.from({ length: 16 }, (_, i) => 16 + i);
   m.tilesets.push(
-    tileset({ firstgid: 1, name: 'interior', image: '../_temp/interior/interior-16.png', w: 224, h: 16, columns: 14, tilecount: 14, collides: [2, 3, 4, 7, 8, 9, 10, 11] }),
+    tileset({ firstgid: 1, name: 'house', image: '../interior/interior-tiles.png', w: 128, h: 64, columns: 8, tilecount: 32, collides: WALL }),
   );
   const g = (i) => i + 1;
   const ground = m.layer('ground');
-  const decor = m.layer('decor');
-  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) ground.set(x, y, g((x * 7 + y * 3) % 11 === 0 ? 1 : 0));
+  m.layer('decor');
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) ground.set(x, y, g((y % 4) * 4 + (x % 4)));
+  // Back wall, 2 tiles tall: log wall with two windows and a herb shelf above the bed.
   for (let x = 0; x < W; x++) {
-    ground.set(x, 0, g(x === 3 || x === 8 ? 4 : 2));
-    ground.set(x, 1, g(3));
+    ground.set(x, 0, g(16 + (x % 4)));
+    ground.set(x, 1, g(20 + (x % 4)));
   }
-  ground.set(5, H - 1, g(5));
-  ground.set(6, H - 1, g(5));
-  decor.set(5, 4, g(6));
-  decor.set(6, 4, g(6));
-  decor.set(5, 5, g(6));
-  decor.set(6, 5, g(6));
-  decor.set(1, 2, g(8));
-  decor.set(1, 3, g(9));
-  decor.set(9, 2, g(7));
-  decor.set(10, 2, g(10));
-  decor.set(1, 7, g(11));
-  // The room has walls only at the top; the other sides are blocked by the map edge.
-  m.obj('interact', 'bed', 1 * T, 2 * T, T, 2 * T, { action: 'sleep' });
-  m.obj('interact', 'journal', 9 * T, 2 * T, T, T, { action: 'journal' });
+  const panel = (x, base) => {
+    ground.set(x, 0, g(base));
+    ground.set(x + 1, 0, g(base + 1));
+    ground.set(x, 1, g(base + 2));
+    ground.set(x + 1, 1, g(base + 3));
+  };
+  panel(2, 24);
+  panel(8, 24);
+  panel(0, 28);
+  // Furniture: sprites standing on their base (x = center, y = bottom), with a footprint that blocks.
+  const thing = (name, x, y, footW, footH, extra = {}) =>
+    m.obj('sprite', name, x, y, 0, 0, { key: `interior-${name}`, footW, footH, ...extra });
+  thing('bed', 24, 64, 22, 30);
+  thing('fireplace', 96, 48, 28, 14);
+  thing('clock', 120, 30, 0, 0); // hangs on the wall
+  thing('desk', 160, 64, 22, 12);
+  thing('bookshelf', 181, 48, 18, 14);
+  thing('fern', 72, 48, 12, 6);
+  thing('rug', 96, 96, 0, 0, { flat: true });
+  thing('doormat', 96, 144, 0, 0, { flat: true });
+  thing('table', 144, 120, 36, 10);
+  thing('lamp', 56, 128, 8, 6);
+  thing('chest', 24, 128, 14, 10);
+  thing('palm', 184, 128, 12, 6);
+  m.obj('interact', 'bed', 12, 32, 24, 32, { action: 'sleep' });
+  m.obj('interact', 'journal', 148, 34, 24, 30, { action: 'journal' });
   m.obj('exit', 'door', 5 * T, H * T - 6, 2 * T, 6, { target: 'homestead', spawn: 'door' });
   m.obj('spawn', 'door', 6 * T, (H - 1) * T - 2);
-  m.obj('spawn', 'bed', 2 * T + 10, 3 * T + 14);
-  m.obj('spawn', 'default', 2 * T + 10, 3 * T + 14);
-  // A candle on the desk keeps the room warm at night.
-  m.obj('light', 'candle', 9 * T + 8, 2 * T + 8, 0, 0, { kind: 'lamp' });
+  m.obj('spawn', 'bed', 2 * T + 14, 4 * T + 6);
+  m.obj('spawn', 'default', 2 * T + 14, 4 * T + 6);
+  // Warm lights at night: the candle on the desk, the fire and the standing lamp.
+  m.obj('light', 'candle', 168, 40, 0, 0, { kind: 'lamp' });
+  m.obj('light', 'fire', 96, 40, 0, 0, { kind: 'lamp' });
+  m.obj('light', 'lamp', 56, 104, 0, 0, { kind: 'lamp' });
   save('house', m);
 }
 

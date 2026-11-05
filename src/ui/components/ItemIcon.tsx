@@ -9,7 +9,18 @@ function Icon({ icon, scale, label }: { icon: ItemIconDef; scale: number; label?
     const a = ASSETS[sheet] as SheetAsset;
     return <SheetIcon sheet={sheet} frame={frame} columns={a.columns} spacing={a.spacing ?? 0} scale={scale} label={label} />;
   }
-  if (texture) return <img src={assetUrl(texture)} alt={label ?? ''} width={16 * scale} height={16 * scale} className="dv-px" />;
+  // Textures may be bigger than a slot (furniture): fitted inside the 16×16 box.
+  if (texture)
+    return (
+      <img
+        src={assetUrl(texture)}
+        alt={label ?? ''}
+        width={16 * scale}
+        height={16 * scale}
+        className="dv-px"
+        style={{ objectFit: 'contain' }}
+      />
+    );
   return null;
 }
 

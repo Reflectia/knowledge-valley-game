@@ -74,6 +74,9 @@ export const BIOMES = ['forest', 'tower', 'market', 'forge', 'library'] as const
 export const BUILDING_ART: readonly string[] = ['forest', 'tower', 'market', 'forge', 'library'];
 export const buildingKey = (pack: string, level: number) => `building-${pack}-${level}`;
 
+/** Furniture sprites of the house (images/interior/interior-objects-new.jpg). */
+export const INTERIOR_OBJECTS = ['bed', 'desk', 'bookshelf', 'chest', 'fireplace', 'rug', 'doormat', 'fern', 'palm', 'lamp', 'table', 'clock'] as const;
+
 export const MAPS = ['homestead', 'house', 'forest', 'tower', 'market', 'forge', 'library'] as const;
 export type MapId = (typeof MAPS)[number];
 
@@ -112,6 +115,10 @@ export const ASSETS: Record<string, Asset> = {
   'lamp-post': img(pub('homestead/lamp-post.png')),
   'homestead-meta': { kind: 'json', url: pub('homestead/homestead.json') },
 
+  // House interior (scripts/assets/build_interior.py): tiles and furniture sprites.
+  'interior-tiles': sheet(pub('interior/interior-tiles.png'), 16, 16, 8),
+  ...Object.fromEntries(INTERIOR_OBJECTS.map((id) => [`interior-${id}`, img(pub(`interior/${id}.png`))])),
+
   // Discipline buildings, levels 1..5, cut from images/buildings/building-<pack>-new.jpg.
   ...Object.fromEntries(
     BUILDING_ART.flatMap((pack) => [1, 2, 3, 4, 5].map((l) => [buildingKey(pack, l), img(pub(`buildings/${pack}-${l}.png`))])),
@@ -122,7 +129,6 @@ export const ASSETS: Record<string, Asset> = {
   'temp-farm': sheet(pub('_temp/kenney-tiny-farm/tilemap.png'), 16, 16, 12, { temp: true }),
   'temp-town': sheet(pub('_temp/kenney-tiny-town/tilemap.png'), 16, 16, 12, { temp: true }),
   'temp-dungeon': sheet(pub('_temp/kenney-tiny-dungeon/tilemap.png'), 16, 16, 12, { temp: true }),
-  'temp-indoor': sheet(pub('_temp/kenney-roguelike-indoor/spritesheet.png'), 16, 16, 26, { spacing: 1, temp: true }),
   // Self-drawn placeholder interior (scripts/assets/draw_interior.py).
   'temp-interior': sheet(pub('_temp/interior/interior-16.png'), 16, 16, 14, { temp: true }),
   'shop-stall': img(pub('_temp/interior/shop-stall.png'), undefined, true),
@@ -138,6 +144,7 @@ export const TILESET_TEXTURES: Record<string, string> = {
   homestead: 'homestead-tiles',
   town: 'temp-town',
   interior: 'temp-interior',
+  house: 'interior-tiles',
   ...Object.fromEntries(BIOMES.map((id) => [id, `tiles-${id}`])),
 };
 
