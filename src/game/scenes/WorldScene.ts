@@ -13,7 +13,7 @@ import type { GameState } from '@/state/store';
 import { showToast } from '@/ui/components/Toasts';
 
 import { ensureHeroine, heroineAnim, type Facing } from '../assets/heroine';
-import { TEMP_FRAMES, TILESET_TEXTURES, type MapId } from '../assets/manifest';
+import { buildingKey, TEMP_FRAMES, TILESET_TEXTURES, type MapId } from '../assets/manifest';
 import { LIGHT, LIGHT_RADIUS, type Light } from '../lighting/lightmap';
 import { NightLayer, createGlowOverlay } from '../lighting/NightLayer';
 import { revivalMatrix } from '../lighting/revival';
@@ -736,6 +736,15 @@ export class WorldScene extends Phaser.Scene {
         const x = plot.rect.centerX;
         plot.objects.push(this.add.image(x, bottom, 'temp-town', TEMP_FRAMES.plotSign).setOrigin(0.5, 1).setDepth(bottom));
         plot.objects.push(this.addBlocker(x - 5, bottom - 6, 10, 6));
+        continue;
+      }
+      const art = buildingKey(plot.pack, Math.min(5, level));
+      if (this.textures.exists(art)) {
+        // The owner's sprite, standing on the plot; walls block, the roof is walked behind.
+        const img = this.add.image(plot.rect.centerX, bottom, art).setOrigin(0.5, 1).setDepth(bottom);
+        const bw = Math.round(img.width * 0.8);
+        const bh = Math.min(3 * T, Math.max(8, Math.round(img.height * 0.4)));
+        plot.objects.push(img, this.addBlocker(plot.rect.centerX - bw / 2, bottom - bh, bw, bh));
         continue;
       }
       const w = rows[0].length;

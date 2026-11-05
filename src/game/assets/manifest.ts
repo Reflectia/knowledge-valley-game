@@ -70,6 +70,10 @@ export const ENEMIES = ['beetle', 'deadline', 'ghost', 'magpie', 'moth', 'slime'
 export const ITEMS = ['book', 'potion', 'seed', 'staff'] as const;
 export const BIOMES = ['forest', 'tower', 'market', 'forge', 'library'] as const;
 
+/** Discipline buildings with the owner's art (scripts/assets/build_buildings.py); the rest use temporary tiles. */
+export const BUILDING_ART: readonly string[] = ['forest', 'market', 'library'];
+export const buildingKey = (pack: string, level: number) => `building-${pack}-${level}`;
+
 export const MAPS = ['homestead', 'house', 'forest', 'tower', 'market', 'forge', 'library'] as const;
 export type MapId = (typeof MAPS)[number];
 
@@ -107,6 +111,11 @@ export const ASSETS: Record<string, Asset> = {
   'tree-blossom-b': img(pub('homestead/tree-blossom-b.png')),
   'lamp-post': img(pub('homestead/lamp-post.png')),
   'homestead-meta': { kind: 'json', url: pub('homestead/homestead.json') },
+
+  // Discipline buildings, levels 1..5, cut from images/buildings/building-<pack>-new.jpg.
+  ...Object.fromEntries(
+    BUILDING_ART.flatMap((pack) => [1, 2, 3, 4, 5].map((l) => [buildingKey(pack, l), img(pub(`buildings/${pack}-${l}.png`))])),
+  ),
 
   // Temporary third-party placeholders (CC0). See ASSETS-TODO.md.
   'temp-crops': sheet(pub('_temp/josehzz-farming-crops/crops.png'), 16, 16, 12, { temp: true }),
