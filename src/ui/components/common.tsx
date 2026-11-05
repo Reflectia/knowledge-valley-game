@@ -1,4 +1,4 @@
-import { useEffect, useRef, type CSSProperties, type ReactNode } from 'react';
+import { useEffect, useRef, type CSSProperties, type ReactNode, type RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { ASSETS } from '@/game/assets/manifest';
@@ -80,7 +80,105 @@ export function Panel({
 
 /** Centered modal layer over the world. */
 export function Overlay({ children, dim = false }: { children: ReactNode; dim?: boolean }) {
-  return <div className={`screen-overlay${dim ? ' is-dim' : ''}`}>{children}</div>;
+  const ref = useRef<HTMLDivElement>(null);
+  useModalFocus(ref);
+  return (
+    <div ref={ref} className={`screen-overlay${dim ? ' is-dim' : ''}`}>
+      {children}
+    </div>
+  );
+}
+
+const FOCUSABLE =
+  'button:not([disabled]), [href], input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+function focusables(root: HTMLElement): HTMLElement[] {
+  return [...root.querySelectorAll<HTMLElement>(FOCUSABLE)].filter((el) => el.getClientRects().length > 0);
+}
+
+// Open modal layers, innermost last. Only the top one is interactive.
+const modalStack: HTMLElement[] = [];
+const madeInert = new Set<HTMLElement>();
+const lastFocus = new WeakMap<HTMLElement, HTMLElement>();
+
+/** Make everything outside the top modal layer inert (not focusable, not clickable). */
+function applyInert(): void {
+  for (const el of madeInert) el.inert = false;
+  madeInert.clear();
+  const top = modalStack[modalStack.length - 1];
+  const root = top?.closest('.app-ui');
+  if (!top || !root) return;
+  for (let node: HTMLElement = top; node !== root && node.parentElement; node = node.parentElement) {
+    for (const sibling of node.parentElement.children) {
+      if (sibling === node || !(sibling instanceof HTMLElement) || sibling.inert) continue;
+      sibling.inert = true;
+      madeInert.add(sibling);
+    }
+  }
+}
+
+/**
+ * Modal focus (WCAG 2.4.3): move focus into the layer when it opens, keep Tab inside it,
+ * make the rest of the UI inert, and give focus back to where it was when the layer closes.
+ */
+export function useModalFocus(ref: RefObject<HTMLElement>) {
+  useEffect(() => {
+    const layer = ref.current;
+    if (!layer) return;
+    const previous = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    modalStack.push(layer);
+    applyInert();
+
+    // autoFocus (a dialog's main button) has already run; otherwise focus the dialog itself,
+    // so a screen reader announces its title and the next Tab lands on its first control.
+    const resumed = lastFocus.get(layer);
+    if (resumed && layer.contains(resumed)) {
+      resumed.focus({ preventScroll: true });
+    } else if (!layer.contains(document.activeElement)) {
+      const dialog = layer.matches('[role="dialog"]') ? layer : layer.querySelector<HTMLElement>('[role="dialog"]');
+      const target = dialog ?? focusables(layer)[0];
+      if (target) {
+        if (!target.hasAttribute('tabindex') && !target.matches(FOCUSABLE)) target.tabIndex = -1;
+        target.focus({ preventScroll: true });
+      }
+    }
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Tab' || e.defaultPrevented || modalStack[modalStack.length - 1] !== layer) return;
+      const list = focusables(layer);
+      if (list.length === 0) {
+        e.preventDefault();
+        return;
+      }
+      const first = list[0];
+      const last = list[list.length - 1];
+      const active = document.activeElement;
+      const outside = !layer.contains(active);
+      if (e.shiftKey && (active === first || outside)) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && (active === last || outside)) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener('keydown', onKey);
+
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      // StrictMode re-runs the effect on the same layer: resume where focus was.
+      if (document.activeElement instanceof HTMLElement && layer.contains(document.activeElement)) {
+        lastFocus.set(layer, document.activeElement);
+      }
+      const i = modalStack.indexOf(layer);
+      if (i >= 0) modalStack.splice(i, 1);
+      applyInert();
+      // Back to the control that opened the layer (if it is still there and usable).
+      if (previous && previous.isConnected && !previous.closest('[inert]') && !layer.contains(previous)) {
+        previous.focus({ preventScroll: true });
+      }
+    };
+  }, [ref]);
 }
 
 /** Hidden file input behind a regular button. */

@@ -13,6 +13,7 @@ import {
 } from '@/core/importPlan';
 import type { Curriculum } from '@/core/types';
 
+import { useModalFocus } from '../components/common';
 import { LabStatus } from '../components/LabStatus';
 import { useGame, useGameApi } from '../GameContext';
 import { dayMonth, downloadText } from '../format';
@@ -33,6 +34,8 @@ export function ImportScreen({ onClose }: { onClose: () => void }) {
   const api = useGameApi();
   const [step, setStep] = useState<Step>({ kind: 'idle' });
   const [over, setOver] = useState(false);
+  const layer = useRef<HTMLDivElement>(null);
+  useModalFocus(layer);
   const input = useRef<HTMLInputElement>(null);
 
 
@@ -68,7 +71,7 @@ export function ImportScreen({ onClose }: { onClose: () => void }) {
     e.row === 0 ? '' : e.column ? t('import.rowColumn', { row: e.row, column: e.column }) : t('import.row', { row: e.row });
 
   return (
-    <div className="screen-overlay" role="dialog" aria-modal="true" aria-labelledby="import-title">
+    <div ref={layer} className="screen-overlay" role="dialog" aria-modal="true" aria-labelledby="import-title">
       <section className="dv-panel import">
         <h2 className="dv-panel__title" id="import-title">
           {t('import.title')}

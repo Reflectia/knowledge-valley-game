@@ -241,8 +241,10 @@
 /* ---------- keyboard focus ---------- */
 /* Two-tone pixel ring (dark / honey / dark), like the text outlines: the honey line always sits
    between two dark lines (≥ 9:1), and the outer dark line stands out on parchment (≥ 12:1). */
-.dv.dv :where(button, input, select, textarea, a[href], [tabindex]):focus-visible { outline: none;
+.dv.dv :where(button, input, select, textarea, a[href], [tabindex]:not([tabindex="-1"])):focus-visible { outline: none;
   box-shadow: 0 0 0 2px var(--wood-900), 0 0 0 4px var(--honey-300), 0 0 0 6px var(--wood-900); }
 .dv .dv-field.is-error .dv-input:focus-visible { box-shadow: 0 0 0 2px var(--clay-600), 0 0 0 4px var(--honey-300), 0 0 0 6px var(--wood-900); }
 .dv-slot:focus-visible { z-index: 1; }
+/* Dialogs take focus themselves (tabindex="-1") so their title is announced; no ring around the whole window. */
+.dv [tabindex="-1"]:focus { outline: none; }
 .dv .dv-slot.is-selected:focus-visible { outline: 4px solid var(--honey-700); outline-offset: 8px; }
