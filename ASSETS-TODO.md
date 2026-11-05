@@ -70,4 +70,10 @@ Combat: enemies use the owner's sprites (`enemies/*.png`). The bow icon is Tiny 
 the staff is the owner's staff sprite. The spark and arrow projectiles are drawn in code from
 design tokens (rune-glow, river-300, wood-700). The sword swing reuses the sword icon.
 
-Still missing, no placeholder yet: music and sound effects (planned for stage 9), exam bosses 32×32 (v0.2), house interior tiles.
+Audio (stage 9) is from free CC0 packs, all listed in `CREDITS.md` and built by
+`scripts/assets/build_audio.py`. To replace: keep the file names in `public/assets/audio/music/<place>.ogg`
+and `sfx/<name>.ogg`. The night music is the day track through a low-pass filter and reverb (made
+at runtime); real night arrangements can replace it later (would need a `music/<place>-night.ogg`
+and a small change in `src/audio/engine.ts`). Footsteps are one surface (no grass/stone variants).
+
+Still missing, no placeholder yet: exam bosses 32×32 (v0.2), house interior tiles.

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { sfx } from '@/audio';
 import { buy, sell } from '@/core/homestead';
 import { ITEMS, SHOP_BUY } from '@/core/items';
 
@@ -65,7 +66,10 @@ export function ShopScreen({ onClose }: { onClose: () => void }) {
                     onClick={() => {
                       const reason = editWorld((w) => buy(w, id, 1, discount));
                       if (reason) fail(reason);
-                      else showToast({ icon: 'coin', title: t('shop.bought', { name: item.name }) }, 1500);
+                      else {
+                        sfx('coins');
+                        showToast({ icon: 'coin', title: t('shop.bought', { name: item.name }) }, 1500);
+                      }
                     }}
                   >
                     {t('shop.buyOne')}
@@ -80,7 +84,10 @@ export function ShopScreen({ onClose }: { onClose: () => void }) {
               const doSell = (qty: number) => {
                 const reason = editWorld((w) => sell(w, id, qty));
                 if (reason) fail(reason);
-                else showToast({ icon: 'coin', title: t('shop.sold', { name: item.name, count: qty }) }, 1500);
+                else {
+                  sfx('coins');
+                  showToast({ icon: 'coin', title: t('shop.sold', { name: item.name, count: qty }) }, 1500);
+                }
               };
               return (
                 <li key={id} className="shop__row">

@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import type { StoreApi } from 'zustand/vanilla';
 
+import { sfx } from '@/audio';
 import { ENEMY_DEFS, enemiesFor, PLAYER_COMBAT, SPAWN, SPELL, WEAPONS, weaponDamage } from '@/core/combat';
 import { getItem } from '@/core/items';
 import { activeSkills } from '@/core/skills';
@@ -180,6 +181,7 @@ export class Combat {
     if (now < this.invulnerableUntil || s.uiBlocking || s.sleepRequest || this.o.leaving()) return;
     this.invulnerableUntil = now + PLAYER_COMBAT.invulnerableMs;
     s.damagePlayer(ENEMY_DEFS[enemy.id].damage);
+    sfx('hurt');
     const h = this.o.heroine;
     const a = Phaser.Math.Angle.Between(enemy.sprite.x, enemy.sprite.y, h.x, h.y);
     this.knockback = { vx: Math.cos(a) * PLAYER_COMBAT.knockback, vy: Math.sin(a) * PLAYER_COMBAT.knockback, until: now + 160 };
@@ -194,7 +196,10 @@ export class Combat {
     enemy.stunnedUntil = this.scene.time.now + 180;
     enemy.sprite.setTintFill(0xfbf3dc); // parchment-50 flash
     this.scene.time.delayedCall(90, () => enemy.sprite.active && enemy.sprite.clearTint());
-    if (enemy.hp <= 0) this.defeat(enemy);
+    if (enemy.hp <= 0) {
+      sfx('enemy-defeat');
+      this.defeat(enemy);
+    } else sfx('enemy-hit');
   }
 
   private defeat(enemy: Enemy): void {
@@ -234,6 +239,7 @@ export class Combat {
     const a = Phaser.Math.Angle.Between(origin.x, origin.y, target.x, target.y);
     const dmg = weaponDamage(tool, this.o.store.getState().effects);
     if (w.kind === 'melee') {
+      sfx('swing');
       this.swing(tool, origin, a);
       for (const e of [...this.enemies]) {
         const ex = e.sprite.x;
@@ -244,6 +250,7 @@ export class Combat {
       }
       return;
     }
+    sfx(w.kind === 'arrow' ? 'swing' : 'shoot');
     const key = w.kind === 'arrow' ? 'arrow-bolt' : 'spark-bolt';
     const p = this.projectiles.create(origin.x, origin.y, key) as Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
     p.setRotation(a).setDepth(origin.y + 20);
@@ -281,6 +288,7 @@ export class Combat {
     }
     this.nextSpell = now + SPELL.cooldown;
     s.spendEnergy(SPELL.energy);
+    sfx('spell');
     const h = this.o.heroine;
     const c = { x: h.x, y: h.y - 8 };
     const ring = this.scene.add.circle(c.x, c.y, 4).setStrokeStyle(2, 0x9fe3d2).setDepth(h.y + 40); // rune-glow

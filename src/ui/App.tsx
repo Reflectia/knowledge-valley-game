@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { connectAudio, setInGame, sfx } from '@/audio';
 import { needsExportReminder } from '@/core/rules';
 import type { RewardEvent, UiScale } from '@/core/types';
 
@@ -69,6 +70,13 @@ export function App() {
   const showSleep = screen === 'game' && sleepRequest !== null && !showRewards;
   const showDialog = screen === 'game' && dialog !== null && !showRewards && !showSleep;
 
+  // Sound: volumes follow the settings; menus play the homestead theme, the game the place's.
+  useEffect(() => connectAudio(api), [api]);
+  useEffect(() => setInGame(screen === 'game'), [screen]);
+  useEffect(() => {
+    if (modal === 'journal') sfx('book');
+  }, [modal]);
+
   // Letters (spec §6): checked when playing starts, each new day and when the plan changes.
   useEffect(() => {
     if (screen !== 'game') return;
@@ -76,6 +84,7 @@ export function App() {
       .getState()
       .checkMail()
       .then((fresh) => {
+        if (fresh.length > 0) sfx('mail');
         if (fresh.length === 1) {
           const l = fresh[0];
           showToast({ icon: 'mail', title: t('mail.newTitle'), text: l.title, onClick: () => setModal('mail') }, 6000);

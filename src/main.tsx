@@ -5,6 +5,7 @@ import '@ds/tokens.css';
 import '@ds/components/bundle.css';
 import './styles/app.css';
 
+import { audio } from './audio';
 import './i18n';
 import { startGame } from './game';
 import { getGameStore } from './state/store';
@@ -15,7 +16,7 @@ void getGameStore().then((store) => {
   // Load the saved game (IndexedDB); the start menu waits for `ready`.
   void store.getState().init();
   startGame(document.getElementById('game')!, store);
-  if (import.meta.env.DEV) (window as unknown as { __store: typeof store }).__store = store;
+  if (import.meta.env.DEV) Object.assign(window, { __store: store, __audio: audio });
 
   createRoot(document.getElementById('ui')!).render(
     <StrictMode>

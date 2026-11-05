@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import type { StoreApi } from 'zustand/vanilla';
 
+import { setNight, setPlace, sfx, type Sfx } from '@/audio';
 import { getPack } from '@/core/content';
 import { addItem, cropFrame, decorAt, harvest, isRipe, pickUpDecor, placeDecor, plant, till, water } from '@/core/homestead';
 import { getItem, ITEMS } from '@/core/items';
@@ -23,6 +24,8 @@ import { Combat } from '../world/Combat';
 const LAMP_GLASS_RGB: [number, number, number] = [58, 66, 78];
 /** Walking speed in source pixels per second. */
 const SPEED = 64;
+/** One footstep sound per stride (the walk cycle has two steps). */
+const STEP_MS = 300;
 /** How close the heroine must be to click-interact with something (px). */
 const REACH = 30;
 /** Depth bands: tiles < soil < y-sorted objects (fog sorts by its bottom edge) < night < lit overlays. */
@@ -59,6 +62,7 @@ export class WorldScene extends Phaser.Scene {
   private heroine!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
   private heroineKey = '';
   private facing: Facing = 'down';
+  private lastStep = 0;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private blockers!: Phaser.Physics.Arcade.StaticGroup;
   private gates: { rect: Phaser.Geom.Rectangle; minStage: number; body?: Phaser.GameObjects.Zone; fog?: Phaser.GameObjects.TileSprite }[] = [];
@@ -96,6 +100,7 @@ export class WorldScene extends Phaser.Scene {
   create(data: SceneData): void {
     this.store = this.registry.get('store') as StoreApi<GameState>;
     this.mapId = data.map;
+    setPlace(data.map);
     this.leaving = false;
     this.facing = 'down';
     this.gates = [];
@@ -467,6 +472,8 @@ export class WorldScene extends Phaser.Scene {
   private goTo(map: MapId, spawn: string): void {
     if (this.leaving) return;
     this.leaving = true;
+    // Through a door: in or out of the house (not when carried to bed at night).
+    if (spawn !== 'bed' && (map === 'house' || this.mapId === 'house')) sfx('door');
     this.heroine.setVelocity(0, 0);
     const cam = this.cameras.main;
     cam.fadeOut(200, 46, 27, 18);
@@ -560,16 +567,20 @@ export class WorldScene extends Phaser.Scene {
       return true;
     }
     let reason: string | null = null;
+    let sound: Sfx | null = null;
     if (ripe) {
+      sound = 'harvest';
       // Anything in hand harvests a ripe crop.
       const crop = plot!.crop!;
       reason = s.act('harvest', (w) => harvest(w, key, s.effects));
       if (!reason) showToast({ icon: 'spark', title: i18n.t('world.harvested', { name: getItem(crop).name }) });
     } else if (item?.tool === 'hoe') {
+      sound = 'till';
       if (this.mapId !== 'homestead' || !this.inGarden(tx, ty)) reason = 'notGarden';
       else if (decorAt(s.world.state, this.mapId, tx, ty)) reason = 'occupied';
       else reason = s.act('till', (w) => till(w, key));
     } else if (item?.tool === 'water') {
+      sound = 'water';
       if (this.mapId !== 'homestead') reason = 'notTilled';
       else if (s.effects.waterWide) {
         // Modeling «Зелені руки»: the can waters three plots in a row for the price of one.
@@ -587,11 +598,13 @@ export class WorldScene extends Phaser.Scene {
         });
       } else reason = s.act('water', (w) => water(w, key));
     } else if (item?.kind === 'seed') {
+      sound = 'plant';
       reason = this.mapId === 'homestead' ? s.act('plant', (w) => plant(w, key, id!)) : 'notTilled';
     } else if (item?.tool === 'axe' || item?.tool === 'pickaxe') {
       reason = this.gather(tx, ty, item.tool);
     }
     if (reason) this.notice(`world.fail.${reason}`);
+    else if (sound) sfx(sound);
     return true;
   }
 
@@ -610,6 +623,7 @@ export class WorldScene extends Phaser.Scene {
       return { ok: true, world: next };
     });
     if (reason) return reason;
+    sfx(tool === 'axe' ? 'chop' : 'mine');
     decor.removeTileAt(tx, ty);
     gathered.keys.add(`${this.mapId}:${tx},${ty}`);
     showToast({
@@ -842,6 +856,10 @@ export class WorldScene extends Phaser.Scene {
       this.facing = dx < 0 ? 'left' : dx > 0 ? 'right' : dy < 0 ? 'up' : 'down';
       const len = Math.hypot(dx, dy);
       this.heroine.setVelocity((dx / len) * SPEED, (dy / len) * SPEED);
+      if (this.time.now - this.lastStep > STEP_MS) {
+        this.lastStep = this.time.now;
+        sfx('step');
+      }
     } else {
       this.heroine.setVelocity(0, 0);
     }
@@ -854,6 +872,8 @@ export class WorldScene extends Phaser.Scene {
     const minutes = this.store.getState().clockMinutes;
     const ambient = ambientAt(minutes);
     const dark = darkness(minutes);
+    // Morning and evening tints keep the day version; it turns to night with the dark.
+    setNight(Math.max(0, (dark - 0.25) / 0.75));
     const on = ambient !== 0xffffff;
     this.night.setVisible(on);
     for (const o of this.nightOverlays) o.setVisible(dark > 0.05).setAlpha(Math.min(1, dark * 1.4));

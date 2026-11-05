@@ -23,4 +23,29 @@ CC0 needs no attribution; it is listed here so every file's origin is known.
 
 ## Audio
 
-None yet.
+All audio is CC0 1.0 from OpenGameArt (no attribution required; listed so every file's origin is known).
+Files are converted by `scripts/assets/build_audio.py` into `public/assets/audio/`.
+
+### Music — RandomMind (https://opengameart.org/users/randommind)
+
+| Place | File | Track | Source |
+| --- | --- | --- | --- |
+| Homestead, house, menus | `music/homestead.ogg` | Medieval: Harvest Season | https://opengameart.org/content/medieval-harvest-season |
+| Forest | `music/forest.ogg` | Medieval: Exploration | https://opengameart.org/content/medieval-exploration |
+| Tower | `music/tower.ogg` | Fantasy: Rising Moon | https://opengameart.org/content/fantasy-rising-moon |
+| Market | `music/market.ogg` | Medieval: Market Day (loop) | https://opengameart.org/content/medieval-market-day |
+| Forge | `music/forge.ogg` | Medieval: King's Feast (loop) | https://opengameart.org/content/medieval-kings-feast |
+| Library | `music/library.ogg` | Medieval: The Bard's Tale (loop) | https://opengameart.org/content/medieval-the-bards-tale |
+
+The night versions are the same tracks played through a low-pass filter and reverb (`src/audio/engine.ts`).
+
+### Sound effects
+
+| Pack | Author | Used for | Source |
+| --- | --- | --- | --- |
+| 50 RPG sound effects | Kenney (kenney.nl) | footsteps, chop, plant, coins, door, book, mail | https://opengameart.org/content/50-rpg-sound-effects |
+| Interface Sounds | Kenney (kenney.nl) | harvest | https://opengameart.org/content/interface-sounds |
+| 85 Short music jingles | Kenney (kenney.nl) | reward jingles (one per rarity) | https://opengameart.org/content/85-short-music-jingles |
+| RPG Sound Pack | artisticdude | sword swing, spell, heroine hurt | https://opengameart.org/content/rpg-sound-pack |
+| 80 CC0 RPG SFX | rubberduck | till, mine, staff spark, enemy hit/defeat | https://opengameart.org/content/80-cc0-rpg-sfx |
+| 40 CC0 water / splash / slime SFX | rubberduck | watering | https://opengameart.org/content/40-cc0-water-splash-slime-sfx |

@@ -1,7 +1,10 @@
+import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { sfx } from '@/audio';
+
 import { PACKS, getPack, packByBranch, uniqueItem } from '@/core/content';
-import type { Curriculum, Rarity, RewardEvent } from '@/core/types';
+import { RARITIES, type Curriculum, type Rarity, type RewardEvent } from '@/core/types';
 
 import { Ico, Overlay, assetUrl } from '../components/common';
 import { useGame } from '../GameContext';
@@ -17,6 +20,17 @@ type Graded = Extract<RewardEvent, { kind: 'graded' }>;
 export function RewardScene({ events, onTake }: { events: RewardEvent[]; onTake: () => void }) {
   const curriculum = useGame((s) => s.labs.curriculum);
   const labs = new Set(events.map((e) => e.labKey));
+  // One jingle per scene, for the rarest item in it (spec §8: a sound per rarity).
+  const played = useRef<RewardEvent[] | null>(null);
+  useEffect(() => {
+    if (played.current === events) return;
+    played.current = events;
+    const top = events.reduce<Rarity>(
+      (best, e) => (e.kind === 'graded' && RARITIES.indexOf(e.rarity) > RARITIES.indexOf(best) ? e.rarity : best),
+      'common',
+    );
+    sfx(`reward-${top}`);
+  }, [events]);
   return (
     <Overlay dim>
       {labs.size === 1 ? (
