@@ -20,7 +20,7 @@ import numpy as np
 from PIL import Image, ImageFilter
 
 sys.path.insert(0, str(Path(__file__).parent))
-from build_buildings import cut, defringe  # noqa: E402
+from build_buildings import background, cut, defringe  # noqa: E402
 from pixelize import assign, drop_specks, kmeans_colors, majority_downscale, to_image  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -97,19 +97,53 @@ def surfaces() -> Image.Image:
     return tiles
 
 
+DETAILED = {"bookshelf", "desk", "clock"}
+
+
+def calm_sprite(idx: np.ndarray, passes: int = 2) -> np.ndarray:
+    """Like `calm`, for sprites: a lone opaque pixel takes its commonest opaque neighbour.
+    Transparency is never changed, so outlines and the silhouette stay."""
+    for _ in range(passes):
+        p = np.pad(idx, 1, constant_values=-1)
+        nb = np.stack([p[:-2, 1:-1], p[2:, 1:-1], p[1:-1, :-2], p[1:-1, 2:]])
+        out = idx.copy()
+        for y, x in zip(*np.nonzero((idx >= 0) & (nb != idx).all(0))):
+            v = nb[:, y, x]
+            v = v[v >= 0]
+            if v.size:
+                vals, counts = np.unique(v, return_counts=True)
+                out[y, x] = vals[counts.argmax()]
+        idx = out
+    return idx
+
+
 def objects() -> dict[str, Image.Image]:
-    src = np.asarray(Image.open(SRC / "interior-objects-new.jpg").convert("RGB"))
+    sheet = Image.open(SRC / "interior-objects-new.jpg").convert("RGB")
+    src = np.asarray(sheet)
+    # Smoothed copy for the colors (the shapes come from the sharp sheet). Small-detail
+    # objects (book spines, the journal, clock hands) stay sharp: smoothing erases them.
+    smooth = np.asarray(sheet.filter(ImageFilter.MedianFilter(7)))
     out = {}
     for name, (box, (mw, mh)) in OBJECTS.items():
         rgb, fg = cut(src, box)
+        l, t = box[0], box[1]
+        # `cut` trims to the object: find the same window in the smoothed copy.
+        full = ~background(src[t : box[3], l : box[2]])
+        y0 = np.nonzero(full.sum(1) >= 3)[0].min()
+        x0 = np.nonzero(full.sum(0) >= 3)[0].min()
+        sharp = name in DETAILED
+        if not sharp:
+            rgb = smooth[t + y0 : t + y0 + fg.shape[0], l + x0 : l + x0 + fg.shape[1]]
         h, w = fg.shape
         scale = max(w / mw, h / mh)
         size = (max(1, round(w / scale)), max(1, round(h / scale)))
-        palette = kmeans_colors(rgb[fg], 24)
+        palette = kmeans_colors(rgb[fg], 24 if sharp else 12)
         labels = np.zeros(fg.shape, dtype=np.int32)
         labels[fg] = assign(rgb[fg], palette)
-        idx = majority_downscale(labels, fg, size[0], size[1], 0.5, palette, 2.0)
+        idx = majority_downscale(labels, fg, size[0], size[1], 0.5, palette, 2.0 if sharp else 1.6)
         idx = drop_specks(defringe(idx, palette), 2)
+        if not sharp:
+            idx = calm_sprite(idx)
         im = to_image(idx, palette)
         out[name] = im.crop(im.getbbox())
     return out
