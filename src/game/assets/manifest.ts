@@ -109,6 +109,8 @@ export const ASSETS: Record<string, Asset> = {
   // Homestead, cut from homestead-day-night-new.jpg.
   'homestead-tiles': sheet(pub('homestead/homestead-tiles-16.png'), 16, 16, 3),
   'homestead-house': img(pub('homestead/house.png')),
+  // Trading stall (images/buildings/shop-stall-new.jpg, scripts/assets/build_buildings.py stall).
+  'shop-stall': img(pub('homestead/shop-stall.png')),
   'homestead-window-lit': img(pub('homestead/window-lit.png')),
   'tree-blossom-a': img(pub('homestead/tree-blossom-a.png')),
   'tree-blossom-b': img(pub('homestead/tree-blossom-b.png')),
@@ -131,7 +133,6 @@ export const ASSETS: Record<string, Asset> = {
   'temp-dungeon': sheet(pub('_temp/kenney-tiny-dungeon/tilemap.png'), 16, 16, 12, { temp: true }),
   // Self-drawn placeholder interior (scripts/assets/draw_interior.py).
   'temp-interior': sheet(pub('_temp/interior/interior-16.png'), 16, 16, 14, { temp: true }),
-  'shop-stall': img(pub('_temp/interior/shop-stall.png'), undefined, true),
   mailbox: sheet(pub('_temp/interior/mailbox.png'), 16, 32, 2, { temp: true }),
   'wax-seal': img(designPng('ui/wax-seal-10.png')),
 

@@ -225,9 +225,12 @@ function homestead() {
     for (let yy = 23; yy < 24; yy++) for (let xx = x + 1; xx < x + 4; xx++) ground.set(xx, yy, PATH);
   }
 
-  // Shop stall by the crossroads.
-  m.obj('shop', 'shop', 20 * T, 11 * T, 2 * T, 2 * T);
-  m.obj('sprite', 'shop-sign', 21 * T, 13 * T, 0, 0, { key: 'shop-stall', footW: 24, footH: 10 });
+  // Trading stall above the main road (sprite 56×57, images/buildings/shop-stall-new.jpg),
+  // left of the blossom tree at x=360. The counter is the click area and the blocker.
+  const sx = 312;
+  const sy = 13 * T;
+  m.obj('shop', 'shop', sx - 24, sy - 40, 48, 40);
+  m.obj('sprite', 'shop-stall', sx, sy, 0, 0, { key: 'shop-stall', footW: 48, footH: 10 });
 
   // Exits to the five locations and the spawn points for coming back.
   m.obj('exit', 'to-forest', 24 * T, 0, 2 * T, 6, { target: 'forest', spawn: 'from-homestead', requiresPack: 'forest' });

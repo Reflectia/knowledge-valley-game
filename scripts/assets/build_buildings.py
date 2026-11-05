@@ -1,6 +1,6 @@
 """Discipline buildings (5 levels each) from the owner's sheets in images/buildings/.
 
-Run from the repo root:  python scripts/assets/build_buildings.py [pack ...]
+Run from the repo root:  python scripts/assets/build_buildings.py [pack ... | stall]
 Outputs public/assets/buildings/<pack>-<level>.png (level 1..5), bottom-aligned,
 tight around the building, magenta background removed.
 
@@ -155,11 +155,38 @@ def build(pack: str) -> None:
         print(f"  buildings/{pack}-{level}.png  {im.width}x{im.height}")
 
 
+# The homestead trading stall (images/buildings/shop-stall-new.jpg): one object on magenta,
+# cut the same way as the buildings. 48 px wide = 3 tiles with the hanging sign.
+STALL_WIDTH = 56
+STALL_OUT = ROOT / "public/assets/homestead/shop-stall.png"
+
+
+def build_stall() -> None:
+    src = np.asarray(Image.open(SRC / "shop-stall-new.jpg").convert("RGB")).copy()
+    h, w = src.shape[:2]
+    rgb, fg = cut(src, (0, 0, w, h))
+    scale = fg.shape[1] / STALL_WIDTH
+    palette = kmeans_colors(rgb[fg], 32)
+    labels = np.zeros(fg.shape, dtype=np.int32)
+    labels[fg] = assign(rgb[fg], palette)
+    idx = majority_downscale(labels, fg, STALL_WIDTH, max(1, round(fg.shape[0] / scale)), 0.5, palette, 2.0)
+    idx = defringe(idx, palette)
+    idx = drop_specks(idx, 4)
+    im = to_image(idx, palette)
+    im = im.crop(im.getbbox())
+    STALL_OUT.parent.mkdir(parents=True, exist_ok=True)
+    im.save(STALL_OUT)
+    print(f"  homestead/shop-stall.png  {im.width}x{im.height}")
+
+
 def main() -> None:
-    packs = sys.argv[1:] or list(SHEETS)
-    for pack in packs:
-        print(pack)
-        build(pack)
+    targets = sys.argv[1:] or [*SHEETS, "stall"]
+    for name in targets:
+        print(name)
+        if name == "stall":
+            build_stall()
+        else:
+            build(name)
 
 
 if __name__ == "__main__":

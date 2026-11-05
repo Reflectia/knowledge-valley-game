@@ -46,7 +46,9 @@ pixel = one game pixel); the chest and the herb shelf above the bed are self-dra
 The furniture items in the shop use the same sprites. The old self-drawn interior tiles 0–11 in
 `_temp/interior/interior-16.png` are no longer used.
 
-Also self-drawn there: garden soil (dry / watered) and the shop stall (`shop-stall.png`, 32×32).
+Also self-drawn there: garden soil (dry / watered). The old self-drawn shop stall (`_temp/interior/shop-stall.png`)
+is no longer used: the trading stall is cut from `images/buildings/shop-stall-new.jpg` into
+`homestead/shop-stall.png` (56×57) by `python scripts/assets/build_buildings.py stall`.
 
 Discipline buildings (5 levels) are assembled from Kenney Tiny Town roof and wall tiles
 (`src/game/world/buildings.ts`): red or grey roofs per pack, wider and taller with each level.
