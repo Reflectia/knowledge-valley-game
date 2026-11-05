@@ -71,6 +71,7 @@ export function Hud({
       <span
         key={lv}
         className={`dv-levels__pip${lv <= player.level ? ' is-reached' : ''}${lv > progress.ceiling ? ' is-locked' : ''}`}
+        aria-hidden
       />,
     );
   }
@@ -85,8 +86,9 @@ export function Hud({
             <Ico name="clock" />
             {t('hud.day', { day })} · {clock(minutes)} · {t(`hud.phase.${phaseOf(minutes)}`)}
           </span>
-          <span className="hud__coins" aria-label={t('hud.coins')} data-tip={t('hud.coins')}>
+          <span className="hud__coins" data-tip={t('hud.coins')}>
             <Ico name="coin" />
+            <span className="visually-hidden">{t('hud.coins')}: </span>
             {player.coins}
           </span>
         </p>
@@ -96,6 +98,7 @@ export function Hud({
             <span className="dv-bar__fill" style={{ '--value': `${energyPct}%` } as React.CSSProperties} />
           </span>
           <span className="dv-bar__value">
+            <span className="visually-hidden">{t('hud.energy')}: </span>
             {player.energy}/{maxEnergy}
           </span>
         </div>
@@ -105,6 +108,7 @@ export function Hud({
             <span className="dv-bar__fill" style={{ '--value': `${healthPct}%` } as React.CSSProperties} />
           </span>
           <span className="dv-bar__value">
+            <span className="visually-hidden">{t('hud.health')}: </span>
             {player.health}/{maxHealth}
           </span>
         </div>
@@ -113,7 +117,10 @@ export function Hud({
           <span className="dv-bar__track">
             <span className="dv-bar__fill" style={{ '--value': `${xpPct}%` } as React.CSSProperties} />
           </span>
-          <span className="dv-bar__value">{capped ? t('hud.ceiling', { ceiling: progress.ceiling }) : `${player.xp}/${need}`}</span>
+          <span className="dv-bar__value">
+            <span className="visually-hidden">{t('hud.xp')}: </span>
+            {capped ? t('hud.ceiling', { ceiling: progress.ceiling }) : `${player.xp}/${need}`}
+          </span>
         </div>
         <div className="hud__levels">
           <span className="hud__level">{t('hud.level', { level: player.level })}</span>
