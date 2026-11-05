@@ -1,0 +1,206 @@
+{
+  "_comment": "Enemies (spec §4: light combat). Study-humor enemies appear in every location; biome creatures in their own. hp/damage are hit points; speed in px/s; xp per defeat; loot: coins range and item chances. Names and texts are drafts for the owner to edit.",
+  "enemies": {
+    "deadline": {
+      "name": "Монстр Дедлайну",
+      "text": "Цокає голосніше, що ближче кінець тижня.",
+      "hp": 6,
+      "damage": 9,
+      "speed": 34,
+      "aggro": 96,
+      "xp": 6,
+      "coins": [
+        6,
+        12
+      ],
+      "loot": [],
+      "everywhere": true
+    },
+    "ghost": {
+      "name": "Привид Прокрастинації",
+      "text": "Шепоче: «почнеш завтра».",
+      "hp": 4,
+      "damage": 6,
+      "speed": 24,
+      "aggro": 80,
+      "xp": 4,
+      "coins": [
+        3,
+        8
+      ],
+      "loot": [],
+      "everywhere": true
+    },
+    "slime": {
+      "name": "Плагіатний Слиз",
+      "text": "Носить чужий аркуш і видає за свій.",
+      "hp": 5,
+      "damage": 7,
+      "speed": 20,
+      "aggro": 72,
+      "xp": 5,
+      "coins": [
+        4,
+        9
+      ],
+      "loot": [],
+      "everywhere": true
+    },
+    "sprout": {
+      "name": "Мухомор-сумнів",
+      "text": "Росте там, де бракує джерел.",
+      "hp": 3,
+      "damage": 5,
+      "speed": 18,
+      "aggro": 64,
+      "xp": 3,
+      "coins": [
+        1,
+        4
+      ],
+      "loot": [
+        {
+          "item": "forest-moss",
+          "chance": 0.5
+        }
+      ],
+      "biomes": [
+        "forest"
+      ]
+    },
+    "moth": {
+      "name": "Метелик-відволікач",
+      "text": "Летить на світло екрана замість конспекту.",
+      "hp": 3,
+      "damage": 5,
+      "speed": 30,
+      "aggro": 80,
+      "xp": 3,
+      "coins": [
+        1,
+        4
+      ],
+      "loot": [
+        {
+          "item": "library-stardust",
+          "chance": 0.5
+        }
+      ],
+      "biomes": [
+        "forest",
+        "library"
+      ]
+    },
+    "wisp": {
+      "name": "Крижаний вогник",
+      "text": "Холодний, як рецензія без пояснень.",
+      "hp": 4,
+      "damage": 5,
+      "speed": 26,
+      "aggro": 80,
+      "xp": 4,
+      "coins": [
+        2,
+        5
+      ],
+      "loot": [
+        {
+          "item": "tower-crystal",
+          "chance": 0.5
+        }
+      ],
+      "biomes": [
+        "tower"
+      ]
+    },
+    "magpie": {
+      "name": "Сорока-цитатниця",
+      "text": "Краде блискучі цитати без посилань.",
+      "hp": 3,
+      "damage": 5,
+      "speed": 32,
+      "aggro": 88,
+      "xp": 3,
+      "coins": [
+        3,
+        7
+      ],
+      "loot": [
+        {
+          "item": "market-token",
+          "chance": 0.5
+        }
+      ],
+      "biomes": [
+        "market"
+      ]
+    },
+    "beetle": {
+      "name": "Жук-жаровик",
+      "text": "Панцир гартований у горні дедлайнів.",
+      "hp": 5,
+      "damage": 6,
+      "speed": 16,
+      "aggro": 64,
+      "xp": 4,
+      "coins": [
+        2,
+        6
+      ],
+      "loot": [
+        {
+          "item": "forge-ore",
+          "chance": 0.5
+        }
+      ],
+      "biomes": [
+        "forge"
+      ]
+    }
+  },
+  "weapons": {
+    "sword": {
+      "damage": 2,
+      "cooldown": 400,
+      "range": 22,
+      "kind": "melee"
+    },
+    "staff": {
+      "damage": 3,
+      "cooldown": 700,
+      "range": 96,
+      "kind": "spark",
+      "speed": 150
+    },
+    "bow": {
+      "damage": 2,
+      "cooldown": 550,
+      "range": 160,
+      "kind": "arrow",
+      "speed": 220
+    }
+  },
+  "spell": {
+    "id": "spark",
+    "damage": 3,
+    "radius": 32,
+    "energy": 5,
+    "cooldown": 2000
+  },
+  "spawn": {
+    "perLocation": 5,
+    "minDistanceFromEntrance": 96
+  },
+  "defeat": {
+    "coinsLost": 0.2,
+    "stackLost": 0.25,
+    "kinds": [
+      "crop",
+      "resource"
+    ]
+  },
+  "player": {
+    "invulnerableMs": 1200,
+    "knockback": 120
+  }
+}

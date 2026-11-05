@@ -17,6 +17,7 @@ import { LIGHT, LIGHT_RADIUS, type Light } from '../lighting/lightmap';
 import { NightLayer, createGlowOverlay } from '../lighting/NightLayer';
 import { revivalMatrix } from '../lighting/revival';
 import { buildingTiles, PACK_STYLE, wallRows } from '../world/buildings';
+import { Combat } from '../world/Combat';
 
 /** Lantern glass color in lamp-post.png (set by scripts/assets/build_sprites.py). */
 const LAMP_GLASS_RGB: [number, number, number] = [58, 66, 78];
@@ -75,6 +76,7 @@ export class WorldScene extends Phaser.Scene {
   private mentorObjects: Phaser.GameObjects.GameObject[] = [];
   private mentorTalk: { rect: Phaser.Geom.Rectangle; pack: string }[] = [];
   private mailbox: Phaser.GameObjects.Image | null = null;
+  private combat: Combat | null = null;
   private night!: NightLayer;
   private lightSources: Light[] = [];
   private nightOverlays: Phaser.GameObjects.Image[] = [];
@@ -107,6 +109,7 @@ export class WorldScene extends Phaser.Scene {
     this.mentorObjects = [];
     this.mentorTalk = [];
     this.mailbox = null;
+    this.combat = null;
     this.lightSources = [];
     this.nightOverlays = [];
     this.fireflies = [];
@@ -215,6 +218,22 @@ export class WorldScene extends Phaser.Scene {
     this.buildGates();
     this.applyRevival();
     this.buildNight(W, H);
+    // Enemies live in the locations only.
+    const pack = this.packOfMap();
+    if (pack) {
+      this.combat = new Combat(this, {
+        store: this.store,
+        heroine: this.heroine,
+        layers,
+        blockers: this.blockers,
+        mapId: this.mapId,
+        pack,
+        entrance: spawns.get('from-homestead') ?? spawn,
+        locked: this.gates.filter((g) => g.body).map((g) => g.rect),
+        notice: (key) => this.notice(key),
+        leaving: () => this.leaving,
+      });
+    }
     this.removeGathered();
     this.renderSoil();
     this.renderDecor();
@@ -459,7 +478,8 @@ export class WorldScene extends Phaser.Scene {
     if (s.uiBlocking || this.leaving) return;
     const world = pointer.positionToCamera(this.cameras.main) as Phaser.Math.Vector2;
     if (pointer.rightButtonDown()) {
-      this.onPlace(world);
+      if (this.combat) this.combat.castSpell();
+      else this.onPlace(world);
       return;
     }
     if (!pointer.leftButtonDown()) return;
@@ -486,7 +506,7 @@ export class WorldScene extends Phaser.Scene {
     // 2) The selected tool or item on the tile under the cursor.
     const tx = Math.floor(world.x / T);
     const ty = Math.floor(world.y / T);
-    if (this.useItem(tx, ty)) return;
+    if (this.useItem(tx, ty, world)) return;
     // 3) Building plots: show what grows there.
     for (const plot of this.plots) {
       if (Phaser.Geom.Rectangle.Contains(plot.rect, world.x, world.y)) {
@@ -519,9 +539,16 @@ export class WorldScene extends Phaser.Scene {
   }
 
   /** Use the selected item on a tile. Returns true when the click was meant for the tile. */
-  private useItem(tx: number, ty: number): boolean {
+  private useItem(tx: number, ty: number, world: Phaser.Math.Vector2): boolean {
     const s = this.store.getState();
     const key = `${tx},${ty}`;
+    // Weapons attack toward the cursor (no reach limit).
+    const weapon = this.selectedItem();
+    if (weapon && (ITEMS[weapon]?.tool === 'sword' || ITEMS[weapon]?.tool === 'staff' || ITEMS[weapon]?.tool === 'bow')) {
+      if (this.combat) this.combat.attack(weapon, world);
+      else this.notice('combat.noEnemies');
+      return true;
+    }
     const plot = this.mapId === 'homestead' ? s.world.state.plots[key] : undefined;
     const id = this.selectedItem();
     const item = id ? ITEMS[id] : undefined;
@@ -767,7 +794,8 @@ export class WorldScene extends Phaser.Scene {
   private updateCursor(): void {
     const id = this.selectedItem();
     const item = id ? ITEMS[id] : undefined;
-    const active = !!item && (item.kind === 'seed' || item.kind === 'furniture' || (item.kind === 'tool' && item.tool !== 'sword'));
+    const weapon = item?.tool === 'sword' || item?.tool === 'staff' || item?.tool === 'bow';
+    const active = !!item && !weapon && (item.kind === 'seed' || item.kind === 'furniture' || item.kind === 'tool');
     if (!active || this.store.getState().uiBlocking) {
       this.cursorBox.setVisible(false);
       return;
@@ -789,7 +817,8 @@ export class WorldScene extends Phaser.Scene {
   update(time: number, delta: number): void {
     const s = this.store.getState();
     s.tickClock(delta);
-    this.move(s.uiBlocking || this.leaving);
+    this.combat?.update(time, s.uiBlocking || !!s.sleepRequest || this.leaving);
+    this.move(s.uiBlocking || this.leaving || !!s.sleepRequest);
     this.heroine.setDepth(this.heroine.y);
     this.updateCursor();
     this.updateLight(time);
@@ -805,7 +834,11 @@ export class WorldScene extends Phaser.Scene {
       if (this.cursors.down.isDown) dy += 1;
     }
     const moving = dx !== 0 || dy !== 0;
-    if (moving) {
+    const kb = this.combat?.knockback;
+    if (kb) {
+      // Pushed back by a hit: no input for a moment.
+      this.heroine.setVelocity(kb.vx, kb.vy);
+    } else if (moving) {
       this.facing = dx < 0 ? 'left' : dx > 0 ? 'right' : dy < 0 ? 'up' : 'down';
       const len = Math.hypot(dx, dy);
       this.heroine.setVelocity((dx / len) * SPEED, (dy / len) * SPEED);

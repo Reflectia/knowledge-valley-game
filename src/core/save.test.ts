@@ -214,6 +214,36 @@ describe('day, energy and sleep', () => {
   });
 });
 
+describe('combat', () => {
+  async function playing() {
+    const store = createGameStore(new SaveStore(memoryStore()), NOW);
+    await store.getState().init();
+    await store.getState().newGame('Н', { hair: 'red', skin: 'light', shirt: 'green' });
+    return store;
+  }
+
+  it('defeating an enemy gives XP and loot', async () => {
+    const store = await playing();
+    const coins = store.getState().world.state.player.coins;
+    const loot = store.getState().defeatEnemy('deadline', () => 0);
+    expect(store.getState().world.state.player.coins).toBe(coins + loot.coins);
+    expect(store.getState().world.state.player.xp).toBe(6);
+  });
+
+  it('at zero health: defeat, losses, the day ends; sleep restores health', async () => {
+    const store = await playing();
+    store.getState().damagePlayer(30);
+    expect(store.getState().world.state.player.health).toBe(BALANCE.player.maxHealth - 30);
+    store.getState().damagePlayer(500);
+    const s = store.getState();
+    expect(s.sleepRequest).toBe('defeat');
+    expect(s.lastDefeat?.coins).toBe(Math.floor(START * 0.2));
+    await store.getState().sleep();
+    expect(store.getState().world.state.player.health).toBe(BALANCE.player.maxHealth);
+    expect(store.getState().world.state.day).toBe(2);
+  });
+});
+
 describe('world actions', () => {
   async function playing() {
     const store = createGameStore(new SaveStore(memoryStore()), NOW);

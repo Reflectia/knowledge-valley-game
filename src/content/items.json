@@ -57,6 +57,29 @@
       }
     },
     {
+      "id": "staff",
+      "kind": "tool",
+      "tool": "staff",
+      "name": "Посох знань",
+      "text": "Випускає іскру, що летить до курсора.",
+      "price": 120,
+      "icon": {
+        "texture": "item-staff"
+      }
+    },
+    {
+      "id": "bow",
+      "kind": "tool",
+      "tool": "bow",
+      "name": "Лук",
+      "text": "Стріли летять далеко й без пауз на каву.",
+      "price": 100,
+      "icon": {
+        "sheet": "temp-town",
+        "frame": 118
+      }
+    },
+    {
       "id": "seed-turnip",
       "kind": "seed",
       "crop": "turnip",
@@ -441,6 +464,8 @@
   },
   "shop": {
     "buy": [
+      "staff",
+      "bow",
       "seed-turnip",
       "seed-potato",
       "seed-strawberry",

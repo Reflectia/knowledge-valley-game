@@ -2,7 +2,7 @@
 import catalog from '../content/items.json';
 
 export type ItemKind = 'tool' | 'seed' | 'crop' | 'resource' | 'furniture';
-export type ToolKind = 'hoe' | 'water' | 'axe' | 'pickaxe' | 'sword';
+export type ToolKind = 'hoe' | 'water' | 'axe' | 'pickaxe' | 'sword' | 'staff' | 'bow';
 export type Placement = 'indoor' | 'outdoor' | 'any';
 
 export interface ItemIcon {

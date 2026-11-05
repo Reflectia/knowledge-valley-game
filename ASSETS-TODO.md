@@ -64,4 +64,8 @@ Unique items (5 per pack) have no art of their own yet: the game shows one item 
 (`uniqueIcon` in `src/content/packs/*.json`: forest → seed, tower → staff, market → potion,
 forge → staff, library → book) inside the rarity frame. 25 item sprites 16×16 are needed.
 
+Combat: enemies use the owner's sprites (`enemies/*.png`). The bow icon is Tiny Town (temporary);
+the staff is the owner's staff sprite. The spark and arrow projectiles are drawn in code from
+design tokens (rune-glow, river-300, wood-700). The sword swing reuses the sword icon.
+
 Still missing, no placeholder yet: music and sound effects (planned for stage 9), exam bosses 32×32 (v0.2), house interior tiles.

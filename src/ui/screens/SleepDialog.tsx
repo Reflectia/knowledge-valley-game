@@ -1,5 +1,7 @@
 import { useTranslation } from 'react-i18next';
 
+import type { DefeatLoss } from '@/core/combat';
+import { getItem } from '@/core/items';
 import type { SleepReason } from '@/state/store';
 
 import { Ico, Overlay, Panel } from '../components/common';
@@ -8,16 +10,35 @@ import { Ico, Overlay, Panel } from '../components/common';
  * End of the day: the bed asks first; 02:00 and empty energy just explain.
  * Sleeping saves the world (nightly autosave, spec §4).
  */
-export function SleepDialog({ reason, onSleep, onStay }: { reason: SleepReason; onSleep: () => void; onStay: () => void }) {
+export function SleepDialog({
+  reason,
+  lost,
+  onSleep,
+  onStay,
+}: {
+  reason: SleepReason;
+  lost?: DefeatLoss | null;
+  onSleep: () => void;
+  onStay: () => void;
+}) {
   const { t } = useTranslation();
-  const title = reason === 'bed' ? t('sleep.bedTitle') : reason === 'late' ? t('sleep.lateTitle') : t('sleep.tiredTitle');
-  const text = reason === 'bed' ? t('sleep.bedText') : reason === 'late' ? t('sleep.lateText') : t('sleep.tiredText');
+  const title = t(`sleep.${reason}Title`);
+  const text = t(`sleep.${reason}Text`);
+  const lostList = lost
+    ? [
+        ...(lost.coins > 0 ? [t('sleep.coins', { count: lost.coins })] : []),
+        ...Object.entries(lost.items).map(([id, n]) => `${getItem(id).name} ×${n}`),
+      ]
+    : [];
   return (
     <Overlay dim>
       <Panel title={title} onClose={reason === 'bed' ? onStay : undefined} labelledBy="sleep-title" className="small-dialog">
         <p>
-          <Ico name="clock" /> {text}
+          <Ico name={reason === 'defeat' ? 'heart' : 'clock'} /> {text}
         </p>
+        {reason === 'defeat' && (
+          <p className="dv-caption">{lostList.length ? t('sleep.defeatLost', { list: lostList.join(', ') }) : t('sleep.defeatNothing')}</p>
+        )}
         <div className="dialog-actions">
           {reason === 'bed' && (
             <button type="button" className="dv-btn" onClick={onStay}>

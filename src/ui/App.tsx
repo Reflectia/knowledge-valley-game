@@ -262,6 +262,7 @@ export function App() {
       {showSleep && (
         <SleepDialog
           reason={sleepRequest}
+          lost={api.getState().lastDefeat}
           onStay={() => api.getState().cancelSleep()}
           onSleep={async () => {
             await api.getState().sleep();

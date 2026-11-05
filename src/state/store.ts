@@ -4,6 +4,7 @@ import { useStore } from 'zustand';
 import { markDone, setScore, unmarkDone } from '@/core/curriculum';
 import { deriveProgress, pruneShown, reconcile, rewardKey, type DerivedProgress } from '@/core/rewards';
 import { BALANCE } from '@/core/content';
+import { applyDefeat, applyLoot, ENEMY_DEFS, rollLoot, type DefeatLoss } from '@/core/combat';
 import { growNight } from '@/core/homestead';
 import { dueLetters, mentorLines, type Letter } from '@/core/mentors';
 import { effectsOf, learn, NO_EFFECTS, type Effects } from '@/core/skills';
@@ -24,7 +25,7 @@ import type { Curriculum, ISODate, LabKey, PlayerState, RewardEvent, Settings, W
 export const DAY_START_MINUTES = DAY.startMinutes;
 
 /** Why the day is ending: the bed (asks first), 02:00, or no energy left. */
-export type SleepReason = 'bed' | 'late' | 'tired';
+export type SleepReason = 'bed' | 'late' | 'tired' | 'defeat';
 
 /** A window the world asks the UI to open (the journal on the desk, the shop stall, the mailbox). */
 export type UiRequest = 'journal' | 'shop' | 'mail';
@@ -70,6 +71,8 @@ export interface GameState {
   sleepRequest: SleepReason | null;
   uiRequest: UiRequest | null;
   dialog: Dialog | null;
+  /** What the last defeat cost (shown in the defeat dialog). */
+  lastDefeat: DefeatLoss | null;
   /** Active skill effects (derived from learned skills and lab points). */
   effects: Effects;
 
@@ -100,6 +103,10 @@ export interface GameState {
   /** A mentor speaks (in their location or visiting the homestead). */
   talkTo(pack: string): void;
   closeDialog(): void;
+  /** An enemy hits the heroine. At zero health she is defeated (spec §4). */
+  damagePlayer(amount: number): void;
+  /** An enemy is defeated: XP (up to the ceiling) and loot. Returns the loot. */
+  defeatEnemy(enemy: string, rng?: () => number): { coins: number; items: string[] };
   maxEnergy(): number;
   maxHealth(): number;
   /** Advance the clock by real milliseconds (paused while a window is open). */
@@ -181,6 +188,7 @@ export function createGameStore(saves: SaveStore, now: () => Date = () => new Da
       sleepRequest: null,
       uiRequest: null,
       dialog: null,
+      lastDefeat: null,
       effects: NO_EFFECTS,
 
       async init() {
@@ -307,6 +315,28 @@ export function createGameStore(saves: SaveStore, now: () => Date = () => new Da
 
       closeDialog: () => set({ dialog: null }),
 
+      damagePlayer(amount) {
+        const { world, sleepRequest } = get();
+        if (sleepRequest) return;
+        const health = Math.max(0, world.state.player.health - Math.max(0, amount));
+        if (health > 0) {
+          set({ world: { ...world, state: { ...world.state, player: { ...world.state.player, health } } } });
+          return;
+        }
+        // Defeat: carried home, part of the resources lost, the day ends.
+        const { world: after, lost } = applyDefeat({ ...world.state, player: { ...world.state.player, health: 0 } });
+        set({ world: { ...world, state: after }, lastDefeat: lost, sleepRequest: 'defeat', dialog: null });
+      },
+
+      defeatEnemy(enemy, rng = Math.random) {
+        const { world, progress } = get();
+        const loot = rollLoot(enemy, rng);
+        const next = applyLoot(world.state, loot);
+        const player = gainXp(next.player, ENEMY_DEFS[enemy]?.xp ?? 0, progress.ceiling);
+        set({ world: { ...world, state: { ...next, player } } });
+        return loot;
+      },
+
       tickClock(realMs) {
         const s = get();
         if (s.uiBlocking || s.sleepRequest) return;
@@ -334,10 +364,10 @@ export function createGameStore(saves: SaveStore, now: () => Date = () => new Da
         const state = {
           ...grown,
           day: world.state.day + 1,
-          player: { ...grown.player, energy: get().maxEnergy() },
+          player: { ...grown.player, energy: get().maxEnergy(), health: get().maxHealth() },
         };
         const next = { ...world, state };
-        set((s) => ({ world: next, clockMinutes: DAY_START_MINUTES, sleepRequest: null, worldEpoch: s.worldEpoch + 1 }));
+        set((s) => ({ world: next, clockMinutes: DAY_START_MINUTES, sleepRequest: null, lastDefeat: null, worldEpoch: s.worldEpoch + 1 }));
         await persist(() => saves.saveWorld(next));
       },
 
