@@ -6,7 +6,7 @@ Outputs public/assets/interior/:
     0–15  floor, a 4×4-tile seamless patch (row-major: tile = (y % 4) * 4 + x % 4)
     16–23 log wall, 4 tiles wide × 2 tall (top row 16–19, bottom row with the baseboard 20–23)
     24–27 wall with the window (2×2: 24 25 / 26 27)
-    28–31 wall with the herb shelf (2×2: 28 29 / 30 31)
+    28–31 wall with the herb shelf (2×2: 28 29 / 30 31), self-drawn over the plain wall
 - <object>.png        furniture sprites at game size, bottom-aligned, magenta removed
 
 Tile indices are mirrored in scripts/maps/build-maps.mjs (house()).
@@ -35,7 +35,6 @@ SURFACES = [
     ("floor", (70, 260, 579, 769), (64, 64), 5),
     ("wall", (1037, 13, 2035, 505), (64, 32), 6),
     ("window", (1037, 526, 1523, 1017), (32, 32), 8),
-    ("shelf", (1549, 526, 2035, 1017), (32, 32), 8),
 ]
 
 # Objects sheet: name → (box in source px, max size in game px). Aspect is kept.
@@ -107,6 +106,87 @@ def native(src: np.ndarray, box: tuple[int, int, int, int], period: float) -> Im
     return im.crop(im.getbbox())
 
 
+# Self-drawn in the simple sheet's style (its colors, dark outline, flat fills): the chest
+# (the simple sheet has none) and the herb shelf above the bed (the sheet's one was noisy).
+INK = {
+    "K": "#2b110d",  # outline
+    "L": "#d08a33",  # light wood
+    "M": "#af6420",  # wood
+    "D": "#6c371d",  # dark wood
+    "G": "#857a72",  # iron
+    "g": "#4d4540",  # dark iron
+    "Y": "#e8a63d",  # brass
+    "V": "#5b7e3d",  # green
+    "v": "#9ead70",  # light green
+    "R": "#a33a2c",  # red
+    "r": "#d0603f",  # light red
+    "B": "#3a62a0",  # blue
+    "b": "#8fb4e0",  # light blue
+    "C": "#edddb3",  # cream
+}
+
+CHEST = [
+    "..KKKKKKKKKKKK..",
+    ".KLLLLLLLLLLLLK.",
+    ".KLLLGLLLLGLLLK.",
+    ".KLLLGLLLLGLLLK.",
+    ".KMMMGMMMMGMMMK.",
+    ".KKKKKKYYKKKKKK.",
+    ".KMMMGMYYMGMMMK.",
+    ".KMMMGMMMMGMMMK.",
+    ".KMMMGMMMMGMMMK.",
+    ".KMMMGMMMMGMMMK.",
+    ".KDDDgDDDDgDDDK.",
+    ".KKKKKKKKKKKKKK.",
+]
+
+# 32×32 over the log wall: a plank with two jars and a bottle, two herb bundles below.
+SHELF = [
+    "................................",
+    "................................",
+    "................................",
+    "................................",
+    "................................",
+    "................................",
+    "...................KK...........",
+    "...................KK...........",
+    "......KKKK........KBBK..KKKK....",
+    "......KDDK........KbBK..KRRK....",
+    "......KvVK........KBBK..KrRK....",
+    "......KVVK........KBBK..KRRK....",
+    "......KKKK........KKKK..KKKK....",
+    "...KKKKKKKKKKKKKKKKKKKKKKKKKK...",
+    "...KLLLLLLLLLLLLLLLLLLLLLLLLK...",
+    "...KMMMMMMMMMMMMMMMMMMMMMMMMK...",
+    "...KKKKKKKKKKKKKKKKKKKKKKKKKK...",
+    ".....KD.....KC.....KC.....DK....",
+    ".....KK....KVVK...KVVK....KK....",
+    "...........KvVK...KVvK..........",
+    "...........KVVK...KVVK..........",
+    "............KV.....VK...........",
+    "................................",
+    "................................",
+    "................................",
+    "................................",
+    "................................",
+    "................................",
+    "................................",
+    "................................",
+    "................................",
+    "................................",
+]
+
+
+def drawn(rows: list[str]) -> Image.Image:
+    im = Image.new("RGBA", (len(rows[0]), len(rows)))
+    for y, row in enumerate(rows):
+        for x, ch in enumerate(row):
+            if ch != ".":
+                c = INK[ch]
+                im.putpixel((x, y), (int(c[1:3], 16), int(c[3:5], 16), int(c[5:7], 16), 255))
+    return im
+
+
 def calm(idx: np.ndarray, passes: int = 2) -> np.ndarray:
     """Pixels unlike all 4 neighbours (wrapping, as tiles repeat) take the commonest neighbour."""
     for _ in range(passes):
@@ -139,6 +219,10 @@ def surfaces() -> Image.Image:
     for i in range(16):
         x, y = i % 4, i // 4
         tiles.paste(floor.crop((x * T, y * T, x * T + T, y * T + T)), ((i % 8) * T, (i // 8) * T))
+    # The herb shelf: the plain wall (its first two columns) with the drawn shelf on top.
+    shelf = parts["wall"].crop((0, 0, 2 * T, 2 * T))
+    shelf.alpha_composite(drawn(SHELF))
+    parts["shelf"] = shelf
     for i, (name, w) in enumerate([("wall", 4), ("window", 2), ("shelf", 2)]):
         part = parts[name]
         base = 16 + [0, 8, 12][i]
@@ -211,7 +295,7 @@ def main() -> None:
     tiles = surfaces()
     tiles.save(OUT / "interior-tiles.png")
     print(f"  interior/interior-tiles.png  {tiles.width}x{tiles.height}")
-    for name, im in {**objects(), **simple()}.items():
+    for name, im in {**objects(), **simple(), "chest": drawn(CHEST)}.items():
         im.save(OUT / f"{name}.png")
         print(f"  interior/{name}.png  {im.width}x{im.height}")
 

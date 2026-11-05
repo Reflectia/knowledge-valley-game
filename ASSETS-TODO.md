@@ -41,7 +41,8 @@ House interior: the owner's art (`images/interior/interior-surfaces-new.jpg`,
 floor patch, a 2-tile log wall with a window and a herb shelf, and 12 furniture sprites (bed, desk with
 the journal, bookshelf, chest, fireplace, rug, door mat, fern, palm, lamp, table with stools, clock).
 Furniture comes from the simpler sheet `interior-objects-simple-new.jpg` (sampled one drawn
-pixel = one game pixel); only the chest is still from the first sheet (the simple one has none).
+pixel = one game pixel); the chest and the herb shelf above the bed are self-drawn in the same style
+(`CHEST`, `SHELF` in `scripts/assets/build_interior.py`).
 The furniture items in the shop use the same sprites. The old self-drawn interior tiles 0–11 in
 `_temp/interior/interior-16.png` are no longer used.
 
