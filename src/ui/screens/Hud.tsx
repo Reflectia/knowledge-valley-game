@@ -85,12 +85,12 @@ export function Hud({
             <Ico name="clock" />
             {t('hud.day', { day })} · {clock(minutes)} · {t(`hud.phase.${phaseOf(minutes)}`)}
           </span>
-          <span className="hud__coins" aria-label={t('hud.coins')} title={t('hud.coins')}>
+          <span className="hud__coins" aria-label={t('hud.coins')} data-tip={t('hud.coins')}>
             <Ico name="coin" />
             {player.coins}
           </span>
         </p>
-        <div className="dv-bar dv-bar--energy" title={t('hud.energy')}>
+        <div className="dv-bar dv-bar--energy" data-tip={t('hud.energy')}>
           <Ico name="energy" />
           <span className="dv-bar__track">
             <span className="dv-bar__fill" style={{ '--value': `${energyPct}%` } as React.CSSProperties} />
@@ -99,7 +99,7 @@ export function Hud({
             {player.energy}/{maxEnergy}
           </span>
         </div>
-        <div className="dv-bar dv-bar--health" title={t('hud.health')}>
+        <div className="dv-bar dv-bar--health" data-tip={t('hud.health')}>
           <Ico name="heart" />
           <span className="dv-bar__track">
             <span className="dv-bar__fill" style={{ '--value': `${healthPct}%` } as React.CSSProperties} />
@@ -108,7 +108,7 @@ export function Hud({
             {player.health}/{maxHealth}
           </span>
         </div>
-        <div className={`dv-bar dv-bar--xp${capped ? ' is-capped' : ''}`} title={capped ? t('hud.ceilingHint') : t('hud.xp')}>
+        <div className={`dv-bar dv-bar--xp${capped ? ' is-capped' : ''}`} data-tip={capped ? t('hud.ceilingHint') : t('hud.xp')}>
           <Ico name={capped ? 'lock' : 'xp'} />
           <span className="dv-bar__track">
             <span className="dv-bar__fill" style={{ '--value': `${xpPct}%` } as React.CSSProperties} />
@@ -136,13 +136,13 @@ export function Hud({
         <button type="button" className="dv-btn dv-btn--icon" aria-label={t('hud.skills')} data-tip={t('hud.skills')} onClick={onSkills}>
           <Ico name="xp" />
         </button>
-        <button type="button" className="dv-btn dv-btn--icon" aria-label={t('hud.inventory')} title={t('hud.inventory')} onClick={onInventory}>
+        <button type="button" className="dv-btn dv-btn--icon" aria-label={t('hud.inventory')} data-tip={t('hud.inventory')} onClick={onInventory}>
           <Ico name="spark" />
         </button>
-        <button type="button" className="dv-btn dv-btn--icon" aria-label={t('hud.journal')} title={t('hud.journal')} onClick={onJournal}>
+        <button type="button" className="dv-btn dv-btn--icon" aria-label={t('hud.journal')} data-tip={t('hud.journal')} onClick={onJournal}>
           <Ico name="book" />
         </button>
-        <button type="button" className="dv-btn dv-btn--icon" aria-label={t('hud.menu')} title={t('hud.menu')} onClick={onMenu}>
+        <button type="button" className="dv-btn dv-btn--icon" aria-label={t('hud.menu')} data-tip={t('hud.menu')} onClick={onMenu}>
           <Ico name="gear" />
         </button>
       </div>
