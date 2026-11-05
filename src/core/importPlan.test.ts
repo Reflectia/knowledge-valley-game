@@ -45,7 +45,7 @@ describe('import of the spec example', () => {
   it('rows with done_date and score give retroactive rewards, on time by done date', () => {
     const { plan } = importText(SPEC_CSV);
     const { curriculum, summary } = mergePlan(EMPTY_CURRICULUM, plan!);
-    expect(summary).toEqual({ newDisciplines: 5, newLabs: 7, updatedLabs: 0, newlyDone: 3, newlyGraded: 2 });
+    expect(summary).toEqual({ newDisciplines: 5, newLabs: 7, updatedLabs: 0, newlyDone: 3, newlyGraded: 2, removedDisciplines: [], staleDisciplines: [] });
     const r = reconcile(curriculum, {}, newWorld(), T);
     const done = r.events.filter((e) => e.kind === 'done');
     expect(done.map((e) => [e.labKey, e.kind === 'done' && e.onTime])).toEqual([
@@ -62,7 +62,7 @@ describe('import of the spec example', () => {
     const first = mergePlan(EMPTY_CURRICULUM, plan!);
     const paid = reconcile(first.curriculum, {}, newWorld(), T);
     const second = mergePlan(first.curriculum, plan!);
-    expect(second.summary).toEqual({ newDisciplines: 0, newLabs: 0, updatedLabs: 0, newlyDone: 0, newlyGraded: 0 });
+    expect(second.summary).toEqual({ newDisciplines: 0, newLabs: 0, updatedLabs: 0, newlyDone: 0, newlyGraded: 0, removedDisciplines: [], staleDisciplines: [] });
     const again = reconcile(second.curriculum, paid.ledger, paid.world, T);
     expect(again.events).toEqual([]);
     expect(again.world).toEqual(paid.world);
@@ -84,6 +84,45 @@ describe('import of the spec example', () => {
     const second = mergePlan(first, moved);
     expect(second.summary.updatedLabs).toBe(1);
     expect(second.curriculum.labs['1:mpm_ai:3'].deadline).toBe('2026-11-13');
+  });
+});
+
+describe('re-import with a changed discipline_id', () => {
+  // The new plan renamed sci_res → sci_research (as in docs/examples/plan-semester1-new.csv).
+  const RENAMED = SPEC_CSV.replace(
+    '1,sci_res,Науковий процес та НДР,library,yes,2027-01-25,1,,10,2026-10-20,,',
+    '1,sci_research,Науковий процес та професійна НДР,library,yes,2027-01-25,1,,10,2026-10-20,2026-10-19,',
+  );
+
+  it('removes the old discipline when it has no progress, so the journal has no twin', () => {
+    const first = mergePlan(EMPTY_CURRICULUM, importText(SPEC_CSV).plan!).curriculum;
+    const { curriculum, summary } = mergePlan(first, importText(RENAMED).plan!);
+    expect(Object.keys(curriculum.disciplines)).not.toContain('1:sci_res');
+    expect(Object.keys(curriculum.disciplines)).toContain('1:sci_research');
+    expect(Object.keys(curriculum.labs).some((k) => k.startsWith('1:sci_res:'))).toBe(false);
+    expect(summary.removedDisciplines).toEqual(['Науковий процес та НДР']);
+    expect(summary.staleDisciplines).toEqual([]);
+  });
+
+  it('keeps an old discipline with done labs or scores and reports it', () => {
+    const first = mergePlan(EMPTY_CURRICULUM, importText(SPEC_CSV).plan!).curriculum;
+    const withProgress = setScore({ ...first, labs: { ...first.labs, '1:sci_res:1': { ...first.labs['1:sci_res:1'], doneDate: '2026-10-19' } } }, '1:sci_res:1', 8);
+    const { curriculum, summary } = mergePlan(withProgress, importText(RENAMED).plan!);
+    expect(curriculum.disciplines['1:sci_res']).toBeDefined();
+    expect(curriculum.labs['1:sci_res:1'].score).toBe(8);
+    expect(summary.removedDisciplines).toEqual([]);
+    expect(summary.staleDisciplines).toEqual(['Науковий процес та НДР']);
+  });
+
+  it('leaves other semesters alone', () => {
+    const NL = String.fromCharCode(10);
+    const first = mergePlan(EMPTY_CURRICULUM, importText(SPEC_CSV).plan!).curriculum;
+    const semester2 = SPEC_CSV.split(NL)
+      .map((line, i) => (i === 0 || !line ? line : line.replace(/^1,/, '2,')))
+      .join(NL);
+    const { curriculum, summary } = mergePlan(first, importText(semester2).plan!);
+    expect(Object.keys(curriculum.disciplines)).toHaveLength(10);
+    expect(summary.removedDisciplines).toEqual([]);
   });
 });
 

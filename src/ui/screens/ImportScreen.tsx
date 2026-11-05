@@ -13,7 +13,7 @@ import {
 } from '@/core/importPlan';
 import type { Curriculum } from '@/core/types';
 
-import { useModalFocus } from '../components/common';
+import { Ico, useModalFocus } from '../components/common';
 import { LabStatus } from '../components/LabStatus';
 import { useGame, useGameApi } from '../GameContext';
 import { dayMonth, downloadText } from '../format';
@@ -132,12 +132,21 @@ export function ImportScreen({ onClose }: { onClose: () => void }) {
         {step.kind === 'preview' && (
           <div className="import__body">
             <p className="import__lead">
-              {step.summary.newDisciplines + step.summary.newLabs + step.summary.updatedLabs + step.summary.newlyDone + step.summary.newlyGraded === 0
+              {step.summary.newDisciplines + step.summary.newLabs + step.summary.updatedLabs + step.summary.newlyDone + step.summary.newlyGraded + step.summary.removedDisciplines.length === 0
                 ? t('import.nothingNew')
                 : t('import.summary', { ...step.summary })}
             </p>
             {step.summary.newlyDone + step.summary.newlyGraded > 0 && (
               <p className="dv-caption">{t('import.retro', { done: step.summary.newlyDone, graded: step.summary.newlyGraded })}</p>
+            )}
+            {step.summary.removedDisciplines.length > 0 && (
+              <p className="dv-caption">{t('import.removed', { list: step.summary.removedDisciplines.join(', ') })}</p>
+            )}
+            {step.summary.staleDisciplines.length > 0 && (
+              <p className="dv-field__error">
+                <Ico name="warn" />
+                {t('import.stale', { list: step.summary.staleDisciplines.join(', ') })}
+              </p>
             )}
             <div className="import__pages">
               {step.plan.disciplines.map((d) => {

@@ -369,13 +369,43 @@ export interface ImportSummary {
   /** Labs that become done / graded with this import (retroactive rewards). */
   newlyDone: number;
   newlyGraded: number;
+  /**
+   * Disciplines of the file's semesters that the file no longer has (e.g. a changed
+   * discipline_id) and that have no progress: removed, so the journal has no stale twin.
+   */
+  removedDisciplines: string[];
+  /** Same, but with done labs or scores: kept, so no progress is lost; the preview warns. */
+  staleDisciplines: string[];
 }
 
 /** Upsert the plan into the current curriculum, keeping progress the file leaves empty. */
 export function mergePlan(current: Curriculum, plan: ValidatedPlan): { curriculum: Curriculum; summary: ImportSummary } {
   const disciplines = { ...current.disciplines };
   const labs = { ...current.labs };
-  const summary: ImportSummary = { newDisciplines: 0, newLabs: 0, updatedLabs: 0, newlyDone: 0, newlyGraded: 0 };
+  const summary: ImportSummary = {
+    newDisciplines: 0,
+    newLabs: 0,
+    updatedLabs: 0,
+    newlyDone: 0,
+    newlyGraded: 0,
+    removedDisciplines: [],
+    staleDisciplines: [],
+  };
+
+  // A re-import replaces the plan of the semesters it covers (spec §7 keys: semester + discipline_id).
+  const semesters = new Set(plan.disciplines.map((d) => d.semester));
+  const inFile = new Set(plan.disciplines.map((d) => d.key));
+  for (const d of Object.values(current.disciplines)) {
+    if (!semesters.has(d.semester) || inFile.has(d.key)) continue;
+    const own = Object.values(labs).filter((l) => l.disciplineKey === d.key);
+    if (own.some((l) => l.doneDate || l.score !== undefined)) {
+      summary.staleDisciplines.push(d.name);
+      continue;
+    }
+    delete disciplines[d.key];
+    for (const l of own) delete labs[l.key];
+    summary.removedDisciplines.push(d.name);
+  }
 
   for (const d of plan.disciplines) {
     if (!disciplines[d.key]) summary.newDisciplines += 1;

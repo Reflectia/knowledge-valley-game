@@ -24,3 +24,7 @@ Date: 2026-11-04.
 ## Tooling
 
 10. Vitest is added for unit tests of the game logic (not in the spec's stack, approved).
+
+## Plan import
+
+11. **Re-import replaces the plan of the semesters in the file.** A discipline of those semesters that the file no longer has (e.g. its `discipline_id` changed) is removed when it has no done labs or scores, so the journal does not show a stale twin; one with progress is kept and the preview warns. Approved by the owner after a duplicate «Наука» tab (2026-11-05).
