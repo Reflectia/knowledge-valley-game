@@ -215,9 +215,8 @@ body {
      inner line without the bevelled corners, which overlapped the name. */
   border-image-source: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAARUlEQVR4nGNkYGBg0JMW+g+i0cGlp+8YGUGS3UnG2OQZSuedZWCBcRZuv40iGe+pCqaZsGpFApQrgLsBZic6YAQR+LwJAPmZEDm7pEYwAAAAAElFTkSuQmCC);
   text-align: center;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  /* Long names (up to 16 letters) wrap instead of being cut off. */
+  overflow-wrap: anywhere;
 }
 .hud__title {
   margin: 0;
@@ -268,7 +267,7 @@ body {
   font: 16px/28px var(--font-display);
 }
 .hud__status .dv-levels__ceiling {
-  height: 24px;
+  min-height: 24px;
   font-size: 16px;
 }
 .hud__hint {
@@ -653,9 +652,7 @@ body {
 .mail__item-title {
   font-weight: 700;
   line-height: 24px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow-wrap: anywhere;
 }
 .mail .dv-letter {
   background: var(--parchment-50);
@@ -713,7 +710,7 @@ body {
   top: -12px;
   right: -12px;
   min-width: 16px;
-  height: 16px;
+  min-height: 16px;
   padding: 0 2px;
   display: grid;
   place-items: center;

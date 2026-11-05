@@ -176,6 +176,17 @@ export function useModalFocus(ref: RefObject<HTMLElement>) {
       // Back to the control that opened the layer (if it is still there and usable).
       if (previous && previous.isConnected && !previous.closest('[inert]') && !layer.contains(previous)) {
         previous.focus({ preventScroll: true });
+      } else {
+        // The opener is gone (e.g. the window re-rendered): stay in the window that is still open.
+        const top = modalStack[modalStack.length - 1];
+        if (top && !top.contains(document.activeElement)) {
+          const dialog = top.matches('[role="dialog"]') ? top : top.querySelector<HTMLElement>('[role="dialog"]');
+          const target = dialog ?? focusables(top)[0];
+          if (target) {
+            if (!target.hasAttribute('tabindex') && !target.matches(FOCUSABLE)) target.tabIndex = -1;
+            target.focus({ preventScroll: true });
+          }
+        }
       }
     };
   }, [ref]);
