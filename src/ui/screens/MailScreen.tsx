@@ -6,6 +6,7 @@ import { getPack } from '@/core/content';
 import { Ico, Panel, assetUrl } from '../components/common';
 import { useGame } from '../GameContext';
 import { dayMonth } from '../format';
+import { loc } from '@/i18n';
 
 /** Mailbox (spec §8 screen 8): mentor letters, newest first; opening one marks it read. */
 export function MailScreen({ onClose, onJournal }: { onClose: () => void; onJournal: () => void }) {
@@ -39,7 +40,7 @@ export function MailScreen({ onClose, onJournal }: { onClose: () => void; onJour
                   <span className="mail__item-text">
                     <span className="mail__item-title">{l.title}</span>
                     <span className="dv-caption">
-                      {getPack(l.pack).mentor.name.uk} · {dayMonth(l.sentOn)}
+                      {loc(getPack(l.pack).mentor.name)} · {dayMonth(l.sentOn)}
                     </span>
                   </span>
                   {!l.read && <span className="dv-chip dv-chip--graded mail__new">{t('mail.unread')}</span>}
@@ -51,7 +52,7 @@ export function MailScreen({ onClose, onJournal }: { onClose: () => void; onJour
             <article className="dv-letter">
               <img className="dv-letter__seal dv-px" src={assetUrl('wax-seal')} alt="" />
               <div className="dv-letter__head">
-                <span>{t('mail.from', { name: getPack(open.pack).mentor.name.uk })}</span>
+                <span>{t('mail.from', { name: loc(getPack(open.pack).mentor.name) })}</span>
                 <span>{dayMonth(open.sentOn)}</span>
               </div>
               <h3 className="dv-letter__title">{open.title}</h3>

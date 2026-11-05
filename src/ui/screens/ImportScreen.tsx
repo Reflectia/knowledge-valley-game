@@ -17,6 +17,7 @@ import { useModalFocus } from '../components/common';
 import { LabStatus } from '../components/LabStatus';
 import { useGame, useGameApi } from '../GameContext';
 import { dayMonth, downloadText } from '../format';
+import { loc } from '@/i18n';
 
 type Step =
   | { kind: 'idle' }
@@ -148,7 +149,7 @@ export function ImportScreen({ onClose }: { onClose: () => void }) {
                   <article key={d.key} className="dv-page import__page">
                     <h3 className="dv-page__title">{d.name}</h3>
                     <p className="dv-page__sub">
-                      {pack.location.name.uk} · {t('import.labsCount', { count: labs.length })} ·{' '}
+                      {loc(pack.location.name)} · {t('import.labsCount', { count: labs.length })} ·{' '}
                       {d.hasExam && d.examDate ? t('import.exam', { date: dayMonth(d.examDate) }) : t('import.noExam')}
                     </p>
                     {labs.map((l) => (

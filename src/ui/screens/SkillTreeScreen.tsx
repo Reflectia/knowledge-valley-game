@@ -7,6 +7,7 @@ import { BRANCHES, activeSkills, freePoints, skillState } from '@/core/skills';
 import { Ico, Panel } from '../components/common';
 import { showToast } from '../components/Toasts';
 import { useGame } from '../GameContext';
+import { loc } from '@/i18n';
 
 const STATE_ICON = { learned: 'check', available: 'spark', locked: 'lock' } as const;
 
@@ -31,7 +32,7 @@ export function SkillTreeScreen({ onClose }: { onClose: () => void }) {
           return (
             <section key={branch} className="skills__branch">
               <header className="skills__head">
-                <span className="skills__branch-name">{pack?.branch.name.uk ?? branch}</span>
+                <span className="skills__branch-name">{loc(pack?.branch.name) ?? branch}</span>
                 <span className="dv-caption">{t('skills.branchPoints', { free: freePoints(branch, learned, points), total })}</span>
               </header>
               <div className="skills__chain">

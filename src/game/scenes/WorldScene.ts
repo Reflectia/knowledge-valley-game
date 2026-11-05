@@ -8,7 +8,7 @@ import { getItem, ITEMS } from '@/core/items';
 import { MENTORS, visitorsToday } from '@/core/mentors';
 import { todayIso } from '@/core/rules';
 import { ambientAt, darkness } from '@/core/time';
-import i18n from '@/i18n';
+import i18n, { loc } from '@/i18n';
 import type { GameState } from '@/state/store';
 import { showToast } from '@/ui/components/Toasts';
 
@@ -90,6 +90,8 @@ export class WorldScene extends Phaser.Scene {
   private revivalFx: Phaser.FX.ColorMatrix | null = null;
   private leaving = false;
   private lastNotice = 0;
+  /** Last world action came from E/Q: aim at the tile in front of her, not at the mouse. */
+  private keyAim = false;
   private lastInset = 0;
   private unsubscribe: (() => void)[] = [];
 
@@ -263,7 +265,12 @@ export class WorldScene extends Phaser.Scene {
     // scrolls (overflow: hidden). Capturing them would stop Space from pressing a focused UI
     // button and arrows from moving a slider, even while a window is open (WCAG 2.1.1).
     this.input.keyboard!.clearCaptures();
+    // Keyboard alternative to the mouse (WCAG 2.1.1): E is the main action (like the left button),
+    // Q the secondary one (like the right button). No capture, so they still type in text fields.
+    this.input.keyboard!.addKey('E', false).on('down', () => this.onKeyAction(false));
+    this.input.keyboard!.addKey('Q', false).on('down', () => this.onKeyAction(true));
     this.input.on(Phaser.Input.Events.POINTER_DOWN, this.onPointer, this);
+    this.input.on(Phaser.Input.Events.POINTER_MOVE, this.onPointerMove, this);
     this.input.mouse?.disableContextMenu();
 
     this.announce();
@@ -287,6 +294,7 @@ export class WorldScene extends Phaser.Scene {
       this.unsubscribe.forEach((u) => u());
       this.scale.off(Phaser.Scale.Events.RESIZE, this.fitCamera, this);
       this.input.off(Phaser.Input.Events.POINTER_DOWN, this.onPointer, this);
+      this.input.off(Phaser.Input.Events.POINTER_MOVE, this.onPointerMove, this);
     });
   }
 
@@ -325,7 +333,9 @@ export class WorldScene extends Phaser.Scene {
   }
 
   private packOfMap(): string | null {
-    const list = (this.map.properties as { name: string; value: unknown }[] | undefined) ?? [];
+    // Tiled gives an array; Phaser leaves {} when a map has none.
+    const props = this.map.properties as unknown;
+    const list = Array.isArray(props) ? (props as { name: string; value: unknown }[]) : [];
     const p = list.find((x) => x.name === 'pack');
     return p ? String(p.value) : null;
   }
@@ -448,7 +458,7 @@ export class WorldScene extends Phaser.Scene {
     const pack = this.packOfMap();
     if (!pack) return;
     const { stage } = this.revivalOf(pack);
-    showToast({ icon: 'spark', title: getPack(pack).location.name.uk, text: i18n.t('world.revival', { stage }) });
+    showToast({ icon: 'spark', title: loc(getPack(pack).location.name), text: i18n.t('world.revival', { stage }) });
   }
 
   // ------------------------------------------------------------------ actions
@@ -468,7 +478,7 @@ export class WorldScene extends Phaser.Scene {
   private tryExit(exit: { target: MapId; spawn: string; requiresPack?: string }): void {
     if (this.leaving) return;
     if (exit.requiresPack && !this.revivalOf(exit.requiresPack).available) {
-      this.notice('world.pathFog', { name: getPack(exit.requiresPack).location.name.uk });
+      this.notice('world.pathFog', { name: loc(getPack(exit.requiresPack).location.name) });
       return;
     }
     this.goTo(exit.target, exit.spawn);
@@ -488,13 +498,68 @@ export class WorldScene extends Phaser.Scene {
   private onPointer(pointer: Phaser.Input.Pointer): void {
     const s = this.store.getState();
     if (s.uiBlocking || this.leaving) return;
+    this.keyAim = false;
     const world = pointer.positionToCamera(this.cameras.main) as Phaser.Math.Vector2;
     if (pointer.rightButtonDown()) {
-      if (this.combat) this.combat.castSpell();
-      else this.onPlace(world);
+      this.secondaryAt(world);
       return;
     }
     if (!pointer.leftButtonDown()) return;
+    this.primaryAt(world);
+  }
+
+  private onPointerMove(): void {
+    this.keyAim = false;
+  }
+
+  /** E / Q: act in front of the heroine (or on the nearest thing she can reach). */
+  private onKeyAction(secondary: boolean): void {
+    if (this.store.getState().uiBlocking || this.leaving) return;
+    this.keyAim = true;
+    const front = this.frontPoint();
+    if (secondary) {
+      this.secondaryAt(front);
+      return;
+    }
+    // A weapon attacks where she looks; otherwise the bed, journal, shop or a mentor within reach comes first.
+    const tool = ITEMS[this.selectedItem() ?? '']?.tool;
+    const weapon = tool === 'sword' || tool === 'staff' || tool === 'bow';
+    const near = weapon ? null : this.nearestInReach();
+    this.primaryAt(near ? new Phaser.Math.Vector2(near.centerX, near.centerY) : front);
+  }
+
+  /** Centre of the tile in front of her feet. */
+  private frontPoint(): Phaser.Math.Vector2 {
+    const step = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] }[this.facing];
+    const tx = Math.floor(this.heroine.x / T) + step[0];
+    const ty = Math.floor((this.heroine.y - 1) / T) + step[1];
+    return new Phaser.Math.Vector2(tx * T + T / 2, ty * T + T / 2);
+  }
+
+  /** The closest bed / journal / shop / mailbox or mentor within reach. */
+  private nearestInReach(): Phaser.Geom.Rectangle | null {
+    let best: Phaser.Geom.Rectangle | null = null;
+    let bestDist = Infinity;
+    for (const rect of [...this.interacts.map((i) => i.rect), ...this.mentorTalk.map((m) => m.rect)]) {
+      if (!this.inReachRect(rect)) continue;
+      const d = Phaser.Math.Distance.Between(this.heroine.x, this.heroine.y - 4, rect.centerX, rect.centerY);
+      if (d < bestDist) {
+        best = rect;
+        bestDist = d;
+      }
+    }
+    return best;
+  }
+
+  /** Right button / Q: the spell in a fight, otherwise place or pick up furniture. */
+  private secondaryAt(world: Phaser.Math.Vector2): void {
+    if (this.combat) this.combat.castSpell();
+    else this.onPlace(world);
+  }
+
+  /** Left button / E at a world point. */
+  private primaryAt(world: Phaser.Math.Vector2): void {
+    const s = this.store.getState();
     // 1) Things to interact with (bed, journal, shop) under the cursor.
     for (const it of this.interacts) {
       if (!Phaser.Geom.Rectangle.Contains(it.rect, world.x, world.y)) continue;
@@ -681,7 +746,7 @@ export class WorldScene extends Phaser.Scene {
     const level = d ? (s.progress.disciplines[d.key]?.buildingLevel ?? 0) : 0;
     showToast({
       icon: 'book',
-      title: p.building.name.uk,
+      title: loc(p.building.name),
       text: !d ? i18n.t('world.buildingNoPlan') : level > 0 ? i18n.t('world.buildingLevel', { level }) : i18n.t('world.buildingPlot'),
     });
   }
@@ -828,7 +893,7 @@ export class WorldScene extends Phaser.Scene {
       this.cursorBox.setVisible(false);
       return;
     }
-    const p = this.input.activePointer.positionToCamera(this.cameras.main) as Phaser.Math.Vector2;
+    const p = this.keyAim ? this.frontPoint() : (this.input.activePointer.positionToCamera(this.cameras.main) as Phaser.Math.Vector2);
     const tx = Math.floor(p.x / T);
     const ty = Math.floor(p.y / T);
     this.cursorBox.setPosition(tx * T, ty * T).setVisible(true);

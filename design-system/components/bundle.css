@@ -45,7 +45,7 @@
 .dv-btn--primary { --frame: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAYAAABWdVznAAAAR0lEQVR42mNkYGBg0JMW+s9ABLj09B0ji5600H+ZCDkGosAKhv8sDAwMDH9+/2MgFjAxkAhGpAYWBgYGhu+ff9HOBkZSkwYAc5QRidinlBUAAAAASUVORK5CYII=); color: var(--ink-on-accent); }
 .dv-btn--primary:hover, .dv-btn--primary.is-hover { --frame: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAYAAABWdVznAAAAYElEQVR42mNkYGBg0JMW+s9ABLj09B0ji5600H+7ehMGokDjmf8sDAwMDPduvmIgFjDBGKEFi3AqQpZj1JMW+i8TIUeU6U9WPELYQLKTBo8GFgYGBoY/v//RzgZGUpMGAKMOGXFy0OW9AAAAAElFTkSuQmCC); }
 .dv-btn--primary:active, .dv-btn--primary.is-pressed { --frame: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAYAAABWdVznAAAARUlEQVR42mNkYGBg0JMW+s9ABLj09B0ji5600H8GfR5i1DPoMTD8Z2IgEbAwMDAw8ItzEaX4I8MXBpJtGNVADGAkNWkAAODnDPLxgJATAAAAAElFTkSuQmCC); }
-.dv-btn--icon { --frame: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAYAAABWdVznAAAASUlEQVR42mNkYGBg0JMW+s9ABLj09B0jo5600P/uJGNi1DOUzjvLwMLAwMBw8cZrBmIBEwOJYERqYGFgYGC4cP8D7WxgJDVpAAAnIxGnS6iJAwAAAABJRU5ErkJggg==); min-width: 40px; width: 40px; min-height: 40px; height: 40px; padding: 0; color: var(--ink-on-wood); }
+.dv-btn--icon { --frame: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAYAAABWdVznAAAASUlEQVR42mNkYGBg0JMW+s9ABLj09B0jo5600P/uJGNi1DOUzjvLwMLAwMBw8cZrBmIBEwOJYERqYGFgYGC4cP8D7WxgJDVpAAAnIxGnS6iJAwAAAABJRU5ErkJggg==); min-width: 44px; width: 44px; min-height: 44px; height: 44px; padding: 0; color: var(--ink-on-wood); }
 .dv-btn--icon:hover, .dv-btn--icon.is-hover { --frame: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAYAAABWdVznAAAAXElEQVR42mNkYGBg0JMW+s9ABLj09B0jo5600P/VrSHEqGcIrV7DwMLAwMBw8MAlBmIBE4zB2jwLpyJkObiG37VpODUgyzExkAgGoQYWBgYGhgNXXtDOBkZSkwYAuBUXQzuUexYAAAAASUVORK5CYII=); }
 .dv-btn--icon:active, .dv-btn--icon.is-pressed { --frame: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAYAAABWdVznAAAAOUlEQVR42mNkYGBg0JMW+s9ABLj09B0jI7GKYYCJgUTAwsDAwKAjyUeU4ivPP5Fuw6gGYgAjqUkDAI3yDHKV8a23AAAAAElFTkSuQmCC); padding: 2px 0 0; }
 /* On wooden icon buttons dark icons get lighter shades of their own colours (≥ 3:1 on wood-500/400/700). */
@@ -199,9 +199,10 @@
 .dv-slider__value { font: 700 24px/32px var(--font-body); text-align: right; }
 
 /* ---------- language toggle ---------- */
-.dv-lang { display: inline-flex; align-items: center; gap: 8px; }
-.dv-lang__group { display: inline-flex; gap: 0; }
+.dv-lang { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.dv-lang__group { display: inline-flex; flex-wrap: wrap; gap: 8px; }
 .dv-lang__group .dv-btn { min-width: 72px; }
+.dv-lang__group .dv-btn[aria-pressed="true"]:hover { --frame: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAYAAABWdVznAAAAYElEQVR42mNkYGBg0JMW+s9ABLj09B0ji5600H+7ehMGokDjmf8sDAwMDPduvmIgFjDBGKEFi3AqQpZj1JMW+i8TIUeU6U9WPELYQLKTBo8GFgYGBoY/v//RzgZGUpMGAKMOGXFy0OW9AAAAAElFTkSuQmCC); }
 .dv-lang__group .dv-btn[aria-pressed="true"] { --frame: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAYAAABWdVznAAAAR0lEQVR42mNkYGBg0JMW+s9ABLj09B0ji5600H+ZCDkGosAKhv8sDAwMDH9+/2MgFjAxkAhGpAYWBgYGhu+ff9HOBkZSkwYAc5QRidinlBUAAAAASUVORK5CYII=); color: var(--ink-on-accent); }
 
 /* ---------- notification ---------- */

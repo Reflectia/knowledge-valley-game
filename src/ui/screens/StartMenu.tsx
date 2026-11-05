@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Ico, Overlay, Panel, FileButton, useEscape } from '../components/common';
@@ -120,7 +120,6 @@ function StartDialog({
       <Overlay dim>
         <Panel title={t('settings.language')} onClose={onClose} labelledBy="language-title" className="small-dialog">
           <LanguageToggle />
-          <p className="dv-caption">{t('start.languageSoon')}</p>
         </Panel>
       </Overlay>
     );
@@ -145,6 +144,7 @@ function StartDialog({
 /** УКР / ENG (LanguageToggle README). v0.1 is Ukrainian only, so ENG is disabled. */
 export function LanguageToggle() {
   const { t } = useTranslation();
+  const soon = useId();
   return (
     <div className="dv-lang">
       <Ico name="globe" />
@@ -152,9 +152,13 @@ export function LanguageToggle() {
         <button type="button" className="dv-btn" aria-pressed="true">
           УКР
         </button>
-        <button type="button" className="dv-btn" aria-pressed="false" disabled title={t('start.languageSoon')}>
+        {/* Why it is disabled is shown as text, not only in a hover title (WCAG 1.3.1). */}
+        <button type="button" className="dv-btn" aria-pressed="false" disabled aria-describedby={soon}>
           ENG
         </button>
+      </span>
+      <span id={soon} className="dv-caption">
+        {t('start.languageSoon')}
       </span>
     </div>
   );

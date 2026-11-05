@@ -8,6 +8,7 @@ import { ITEMS, isConsumable } from '@/core/items';
 import { Ico } from '../components/common';
 import { ItemIcon } from '../components/ItemIcon';
 import { useGame } from '../GameContext';
+import { loc } from '@/i18n';
 
 export function phaseOf(minutes: number): 'morning' | 'day' | 'evening' | 'night' {
   const h = minutes / 60;
@@ -80,7 +81,7 @@ export function Hud({
     <div className="hud">
       <section className="dv-panel hud__status" aria-label={player.name}>
         <span className="dv-nameplate hud__name">{player.name}</span>
-        <p className="hud__title">{title.uk}</p>
+        <p className="hud__title">{loc(title)}</p>
         <p className="hud__line">
           <span className="hud__time">
             <Ico name="clock" />

@@ -9,6 +9,7 @@ import { RARITIES, type Curriculum, type Rarity, type RewardEvent } from '@/core
 import { Ico, Overlay, assetUrl } from '../components/common';
 import { useGame } from '../GameContext';
 import { scoreText } from '../format';
+import { loc } from '@/i18n';
 
 type Done = Extract<RewardEvent, { kind: 'done' }>;
 type Graded = Extract<RewardEvent, { kind: 'graded' }>;
@@ -52,8 +53,8 @@ function ItemSlot({ itemId, rarity, large = false }: { itemId: string; rarity: R
       className={`dv-slot dv-slot--${rarity}${large ? ' dv-slot--lg' : ''}`}
       tabIndex={0}
       role="img"
-      aria-label={`${item?.name.uk ?? ''}, ${t(`rarity.${rarity}`)}`}
-      data-tip={item?.name.uk}
+      aria-label={`${loc(item?.name) ?? ''}, ${t(`rarity.${rarity}`)}`}
+      data-tip={loc(item?.name)}
       data-tip-rarity={rarity}
     >
       <img src={icon} alt="" />
@@ -76,13 +77,13 @@ function DoneLines({ done }: { done: Done[] }) {
     shields += d.shieldCharges;
     for (const [id, n] of Object.entries(d.resources)) resources.set(id, (resources.get(id) ?? 0) + n);
   }
-  const resourceName = (id: string) => Object.values(PACKS).find((p) => p.resource.id === id)?.resource.name.uk ?? id;
+  const resourceName = (id: string) => loc(Object.values(PACKS).find((p) => p.resource.id === id)?.resource.name) ?? id;
   return (
     <ul className="reward__lines">
       {[...branches].map(([branch, n]) => (
         <li key={branch}>
           <Ico name="spark" />
-          {t('reward.skillPoint', { count: n, branch: packByBranch(branch)?.branch.name.uk ?? branch })}
+          {t('reward.skillPoint', { count: n, branch: loc(packByBranch(branch)?.branch.name) ?? branch })}
         </li>
       ))}
       {coins > 0 && (
@@ -124,7 +125,7 @@ function SingleReward({ events, curriculum, onTake }: { events: RewardEvent[]; c
         <>
           <ItemSlot itemId={graded.itemId} rarity={graded.rarity} large />
           <h2 className="dv-reward__name" id="reward-title">
-            {item?.name.uk}
+            {loc(item?.name)}
           </h2>
           <span className={`dv-reward__meta dv-rarity--${graded.rarity}`}>
             <Ico name={`r-${graded.rarity}`} />

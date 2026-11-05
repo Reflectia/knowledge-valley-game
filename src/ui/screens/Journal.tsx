@@ -6,9 +6,10 @@ import { isOnTime, rarityFor, todayIso } from '@/core/rules';
 import type { Lab } from '@/core/types';
 
 import { LabStatus } from '../components/LabStatus';
-import { Ico, Panel } from '../components/common';
+import { Ico, Panel, tabPanelProps, tabProps } from '../components/common';
 import { useGame } from '../GameContext';
 import { dayMonth } from '../format';
+import { loc } from '@/i18n';
 
 type Edit = { key: string; mode: 'date' | 'score' } | null;
 
@@ -60,14 +61,15 @@ export function Journal({ onClose, onImport }: { onClose: () => void; onImport: 
           <button
             key={d.key}
             type="button"
-            role="tab"
             className="dv-tab"
-            aria-selected={d.key === current.key}
-            title={d.name}
+            {...tabProps('journal', i, disciplines.indexOf(current), disciplines.length, setTab)}
+            // The tab shows the branch; the full discipline name is in the name and the tooltip.
+            aria-label={`${loc(getPack(d.pack).branch.name)}: ${d.name}`}
+            data-tip={d.name}
             onClick={() => setTab(i)}
           >
             <Ico name="book" />
-            {getPack(d.pack).branch.name.uk}
+            {loc(getPack(d.pack).branch.name)}
           </button>
         ))}
       </div>
@@ -81,14 +83,14 @@ export function Journal({ onClose, onImport }: { onClose: () => void; onImport: 
             ))}
           </div>
         )}
-        <div className="dv-book">
+        <div className="dv-book" {...tabPanelProps('journal', disciplines.indexOf(current))}>
           <article className="dv-page journal__page">
             <h3 className="dv-page__title">{current.name}</h3>
             <p className="dv-page__sub">
-              {pack.location.name.uk} · {t('journal.stage', { stage: p.revivalStage })} ·{' '}
+              {loc(pack.location.name)} · {t('journal.stage', { stage: p.revivalStage })} ·{' '}
               {p.buildingLevel > 0
-                ? t('journal.building', { name: pack.building.name.uk, level: p.buildingLevel })
-                : t('journal.buildingNone', { name: pack.building.name.uk })}
+                ? t('journal.building', { name: loc(pack.building.name), level: p.buildingLevel })
+                : t('journal.buildingNone', { name: loc(pack.building.name) })}
             </p>
             <LabList labs={labs.slice(0, LEFT_PAGE_LABS)} />
           </article>

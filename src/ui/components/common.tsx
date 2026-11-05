@@ -1,4 +1,4 @@
-import { useEffect, useRef, type CSSProperties, type ReactNode, type RefObject } from 'react';
+import { useEffect, useRef, type CSSProperties, type KeyboardEvent as ReactKeyboardEvent, type ReactNode, type RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { ASSETS } from '@/game/assets/manifest';
@@ -93,7 +93,7 @@ const FOCUSABLE =
   'button:not([disabled]), [href], input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 function focusables(root: HTMLElement): HTMLElement[] {
-  return [...root.querySelectorAll<HTMLElement>(FOCUSABLE)].filter((el) => el.getClientRects().length > 0);
+  return [...root.querySelectorAll<HTMLElement>(FOCUSABLE)].filter((el) => el.tabIndex >= 0 && el.getClientRects().length > 0);
 }
 
 // Open modal layers, innermost last. Only the top one is interactive.
@@ -242,4 +242,35 @@ export function useEscape(fn: () => void) {
     window.addEventListener('keydown', onKey, true);
     return () => window.removeEventListener('keydown', onKey, true);
   }, []);
+}
+
+/**
+ * ARIA tabs (WAI-ARIA Authoring Practices): only the selected tab is in the Tab order;
+ * ←/→ move to the previous/next tab and select it, Home/End go to the first/last.
+ * Put `tabPanelProps` on the element that shows the selected tab's content.
+ */
+export function tabProps(idBase: string, index: number, selected: number, count: number, select: (i: number) => void) {
+  return {
+    role: 'tab' as const,
+    id: `${idBase}-tab-${index}`,
+    'aria-selected': index === selected,
+    'aria-controls': `${idBase}-panel`,
+    tabIndex: index === selected ? 0 : -1,
+    onKeyDown: (e: ReactKeyboardEvent<HTMLElement>) => {
+      const next =
+        e.key === 'ArrowRight' ? (index + 1) % count
+        : e.key === 'ArrowLeft' ? (index - 1 + count) % count
+        : e.key === 'Home' ? 0
+        : e.key === 'End' ? count - 1
+        : -1;
+      if (next < 0) return;
+      e.preventDefault();
+      select(next);
+      (e.currentTarget.parentElement?.children[next] as HTMLElement | undefined)?.focus();
+    },
+  };
+}
+
+export function tabPanelProps(idBase: string, selected: number) {
+  return { role: 'tabpanel' as const, id: `${idBase}-panel`, 'aria-labelledby': `${idBase}-tab-${selected}` };
 }

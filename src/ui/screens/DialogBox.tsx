@@ -5,6 +5,7 @@ import { getPack } from '@/core/content';
 import type { Dialog } from '@/state/store';
 
 import { assetUrl } from '../components/common';
+import { loc } from '@/i18n';
 
 /**
  * Mentor dialog at the bottom of the screen (DialogBox README): portrait ×2, name
@@ -22,7 +23,7 @@ export function DialogBox({ dialog, onClose, onJournal }: { dialog: Dialog; onCl
       <section
         className="dv-panel dv-dialog"
         role="dialog"
-        aria-label={pack.mentor.name.uk}
+        aria-label={loc(pack.mentor.name)}
         onClick={(e) => {
           if ((e.target as HTMLElement).closest('button')) return;
           if (!last) next();
@@ -32,7 +33,7 @@ export function DialogBox({ dialog, onClose, onJournal }: { dialog: Dialog; onCl
           <img src={assetUrl(pack.mentor.portrait)} alt="" />
         </span>
         <div>
-          <span className="dv-nameplate hud__name">{pack.mentor.name.uk}</span>
+          <span className="dv-nameplate hud__name">{loc(pack.mentor.name)}</span>
           <p className="dv-dialog__text" aria-live="polite">
             {dialog.lines[i]}
           </p>

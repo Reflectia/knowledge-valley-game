@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { sfx } from '@/audio';
 import type { RarityThresholds, UiScale, Volume } from '@/core/types';
 
-import { FileButton, Ico, Panel } from '../components/common';
+import { FileButton, Ico, Panel, tabPanelProps, tabProps } from '../components/common';
 import { showToast } from '../components/Toasts';
 import { useGame } from '../GameContext';
 import { downloadText } from '../format';
@@ -24,17 +24,25 @@ export function SettingsScreen({ onClose, onImportPlan }: { onClose: () => void;
   return (
     <div className="settings-wrap">
       <div className="dv-tabs" role="tablist">
-        {tabs.map((x) => (
-          <button key={x.id} type="button" role="tab" className="dv-tab" aria-selected={tab === x.id} onClick={() => setTab(x.id)}>
+        {tabs.map((x, i) => (
+          <button
+            key={x.id}
+            type="button"
+            className="dv-tab"
+            {...tabProps('settings', i, tabs.findIndex((y) => y.id === tab), tabs.length, (n) => setTab(tabs[n].id))}
+            onClick={() => setTab(x.id)}
+          >
             <Ico name={x.icon} />
             {t(`settings.tabs.${x.id}`)}
           </button>
         ))}
       </div>
       <Panel title={t('settings.title')} onClose={onClose} labelledBy="settings-title" className="settings">
-        {tab === 'sound' && <SoundTab />}
-        {tab === 'game' && <GameTab />}
-        {tab === 'save' && <SaveTab onImportPlan={onImportPlan} />}
+        <div {...tabPanelProps('settings', tabs.findIndex((y) => y.id === tab))}>
+          {tab === 'sound' && <SoundTab />}
+          {tab === 'game' && <GameTab />}
+          {tab === 'save' && <SaveTab onImportPlan={onImportPlan} />}
+        </div>
       </Panel>
     </div>
   );

@@ -9,6 +9,7 @@ import { ItemIcon } from '../components/ItemIcon';
 import { Ico, Panel, assetUrl } from '../components/common';
 import { useGame } from '../GameContext';
 import { scoreText } from '../format';
+import { loc } from '@/i18n';
 
 const GROUPS: { kind: ItemKind; key: string }[] = [
   { kind: 'tool', key: 'tools' },
@@ -84,15 +85,15 @@ export function InventoryScreen({ onClose }: { onClose: () => void }) {
                       // Focusable so the keyboard can read it too (the info panel shows it).
                       tabIndex={0}
                       role="img"
-                      aria-label={`${info?.name.uk ?? ''}, ${t(`rarity.${u.rarity}`)}`}
-                      data-tip={info?.name.uk}
+                      aria-label={`${loc(info?.name) ?? ''}, ${t(`rarity.${u.rarity}`)}`}
+                      data-tip={loc(info?.name)}
                       data-tip-rarity={u.rarity}
                       onMouseEnter={() => setHover(`u:${u.labKey}`)}
                       onMouseLeave={() => setHover(null)}
                       onFocus={() => setHover(`u:${u.labKey}`)}
                       onBlur={() => setHover(null)}
                     >
-                      {info && <img src={assetUrl(info.pack.uniqueIcon)} alt={info.name.uk} />}
+                      {info && <img src={assetUrl(info.pack.uniqueIcon)} alt={loc(info.name)} />}
                       <span className="dv-slot__badge">
                         <Ico name={`r-${u.rarity}`} />
                       </span>
@@ -119,7 +120,7 @@ export function InventoryScreen({ onClose }: { onClose: () => void }) {
             const disc = lab ? curriculum.disciplines[lab.disciplineKey] : undefined;
             return (
               <>
-                <p className="dv-tooltip__title">{info?.name.uk}</p>
+                <p className="dv-tooltip__title">{loc(info?.name)}</p>
                 <p className={`dv-tooltip__meta dv-rarity--${shownUnique.rarity}`}>
                   <Ico name={`r-${shownUnique.rarity}`} /> {t(`rarity.${shownUnique.rarity}`)}
                 </p>

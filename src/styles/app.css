@@ -232,8 +232,14 @@ body {
   justify-content: space-between;
   gap: var(--space-4);
   margin: 0;
-  font-size: 16px;
-  line-height: 28px;
+  /* HUD numbers use the body size (24 px): Tiny5 at 16 px is too small to read at a glance. */
+  font-size: 24px;
+  line-height: 32px;
+  /* Day and time stay on one line; the coins move under them when both do not fit. */
+  flex-wrap: wrap;
+}
+.hud__time {
+  white-space: nowrap;
 }
 .hud__time,
 .hud__coins {
@@ -252,9 +258,7 @@ body {
   height: 14px;
 }
 .hud__status .dv-bar__value {
-  min-width: 64px;
-  font-size: 16px;
-  line-height: 28px;
+  min-width: 88px;
 }
 .hud__levels {
   display: flex;
@@ -297,12 +301,14 @@ body {
   padding: 0;
   background-color: transparent;
 }
+/* Slot number: in the corner with a dark pixel outline (like the item count), so it reads over any icon. */
 .hud__key {
   position: absolute;
-  top: 0;
-  left: 4px;
-  font: 700 16px/16px var(--font-body);
-  color: var(--ink-muted);
+  top: -10px;
+  left: -6px;
+  font: 700 24px/24px var(--font-body);
+  color: var(--parchment-50);
+  text-shadow: 2px 0 var(--wood-900), -2px 0 var(--wood-900), 0 2px var(--wood-900), 0 -2px var(--wood-900);
 }
 
 /* ------------------------------------------------------------ toasts */
@@ -342,6 +348,14 @@ body {
 }
 .toasts .dv-toast {
   pointer-events: auto;
+}
+/* A notice with an action is a <button>: keep the toast look. */
+button.dv-toast {
+  appearance: none;
+  margin: 0;
+  font: inherit;
+  text-align: left;
+  background-color: transparent;
 }
 .dv-toast.is-clickable:hover .dv-toast__title {
   text-decoration: underline;

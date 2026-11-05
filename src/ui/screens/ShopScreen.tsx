@@ -6,11 +6,12 @@ import { buy, sell } from '@/core/homestead';
 import { ITEMS, SHOP_BUY } from '@/core/items';
 
 import { ItemIcon } from '../components/ItemIcon';
-import { Ico, Panel } from '../components/common';
+import { Ico, Panel, tabPanelProps, tabProps } from '../components/common';
 import { showToast } from '../components/Toasts';
 import { useGame } from '../GameContext';
 
 type Tab = 'buy' | 'sell';
+const SHOP_TABS: Tab[] = ['buy', 'sell'];
 
 /** The homestead shop: buy seeds and furniture, sell harvest and resources. */
 export function ShopScreen({ onClose }: { onClose: () => void }) {
@@ -31,8 +32,14 @@ export function ShopScreen({ onClose }: { onClose: () => void }) {
   return (
     <div className="shop-wrap">
       <div className="dv-tabs" role="tablist">
-        {(['buy', 'sell'] as Tab[]).map((x) => (
-          <button key={x} type="button" role="tab" className="dv-tab" aria-selected={tab === x} onClick={() => setTab(x)}>
+        {SHOP_TABS.map((x, i) => (
+          <button
+            key={x}
+            type="button"
+            className="dv-tab"
+            {...tabProps('shop', i, SHOP_TABS.indexOf(tab), SHOP_TABS.length, (n) => setTab(SHOP_TABS[n]))}
+            onClick={() => setTab(x)}
+          >
             <Ico name={x === 'buy' ? 'coin' : 'spark'} />
             {t(`shop.${x}`)}
           </button>
@@ -43,6 +50,7 @@ export function ShopScreen({ onClose }: { onClose: () => void }) {
           <Ico name="coin" /> {coins}
           {discount > 0 && <span className="dv-chip dv-chip--done">{t('shop.discount', { pct: Math.round(discount * 100) })}</span>}
         </p>
+        <div {...tabPanelProps('shop', SHOP_TABS.indexOf(tab))}>
         <ul className="shop__list">
           {tab === 'buy' &&
             forSale.map((id) => {
@@ -116,6 +124,7 @@ export function ShopScreen({ onClose }: { onClose: () => void }) {
               );
             })}
         </ul>
+        </div>
       </Panel>
     </div>
   );

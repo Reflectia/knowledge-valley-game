@@ -4,7 +4,7 @@ import type { DefeatLoss } from '@/core/combat';
 import { getItem } from '@/core/items';
 import type { SleepReason } from '@/state/store';
 
-import { Ico, Overlay, Panel } from '../components/common';
+import { Ico, Overlay, Panel, useEscape } from '../components/common';
 
 /**
  * End of the day: the bed asks first; 02:00 and empty energy just explain.
@@ -22,6 +22,10 @@ export function SleepDialog({
   onStay: () => void;
 }) {
   const { t } = useTranslation();
+  // Esc means «stay up» at the bed (like the close button); forced sleep has nothing to cancel.
+  useEscape(() => {
+    if (reason === 'bed') onStay();
+  });
   const title = t(`sleep.${reason}Title`);
   const text = t(`sleep.${reason}Text`);
   const lostList = lost
