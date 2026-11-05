@@ -28,3 +28,7 @@ Date: 2026-11-04.
 ## Plan import
 
 11. **Re-import replaces the plan of the semesters in the file.** A discipline of those semesters that the file no longer has (e.g. its `discipline_id` changed) is removed when it has no done labs or scores, so the journal does not show a stale twin; one with progress is kept and the preview warns. Approved by the owner after a duplicate «Наука» tab (2026-11-05).
+
+## Homestead
+
+12. **The trading stall stays (addition to the spec).** The spec only has «Крамниця» as the `market` discipline building (5 upgrade levels, grows with labs) and mentions «знижки в крамниці» and seeds/furniture/weapons earned by play, but no trading place or shop screen. Buying and selling happen at a stall on the homestead (`shop` object in `scripts/maps/build-maps.mjs`), available from day one; the «Крамниця» building has no trade. Approved by the owner (2026-11-05).
