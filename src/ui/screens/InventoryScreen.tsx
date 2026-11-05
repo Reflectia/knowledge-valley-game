@@ -58,6 +58,8 @@ export function InventoryScreen({ onClose }: { onClose: () => void }) {
                       onClick={() => setPicked(picked === id ? null : id)}
                       onMouseEnter={() => setHover(id)}
                       onMouseLeave={() => setHover(null)}
+                      onFocus={() => setHover(id)}
+                      onBlur={() => setHover(null)}
                     >
                       <ItemIcon id={id} />
                       {isConsumable(id) && <span className="dv-slot__count">{n}</span>}
@@ -79,11 +81,16 @@ export function InventoryScreen({ onClose }: { onClose: () => void }) {
                     <span
                       key={u.labKey}
                       className={`dv-slot dv-slot--${u.rarity}`}
-                      aria-label={info?.name.uk}
+                      // Focusable so the keyboard can read it too (the info panel shows it).
+                      tabIndex={0}
+                      role="img"
+                      aria-label={`${info?.name.uk ?? ''}, ${t(`rarity.${u.rarity}`)}`}
                       data-tip={info?.name.uk}
                       data-tip-rarity={u.rarity}
                       onMouseEnter={() => setHover(`u:${u.labKey}`)}
                       onMouseLeave={() => setHover(null)}
+                      onFocus={() => setHover(`u:${u.labKey}`)}
+                      onBlur={() => setHover(null)}
                     >
                       {info && <img src={assetUrl(info.pack.uniqueIcon)} alt={info.name.uk} />}
                       <span className="dv-slot__badge">

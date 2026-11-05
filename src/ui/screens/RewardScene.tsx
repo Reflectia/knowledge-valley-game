@@ -47,12 +47,19 @@ function ItemSlot({ itemId, rarity, large = false }: { itemId: string; rarity: R
   const item = uniqueItem(itemId);
   const icon = item ? assetUrl(item.pack.uniqueIcon) : assetUrl('item-book');
   return (
-    <span className={`dv-slot dv-slot--${rarity}${large ? ' dv-slot--lg' : ''}`} data-tip={item?.name.uk} data-tip-rarity={rarity}>
-      <img src={icon} alt={item?.name.uk ?? ''} />
+    // Focusable so keyboard players can read the name in the tooltip too.
+    <span
+      className={`dv-slot dv-slot--${rarity}${large ? ' dv-slot--lg' : ''}`}
+      tabIndex={0}
+      role="img"
+      aria-label={`${item?.name.uk ?? ''}, ${t(`rarity.${rarity}`)}`}
+      data-tip={item?.name.uk}
+      data-tip-rarity={rarity}
+    >
+      <img src={icon} alt="" />
       <span className="dv-slot__badge">
         <Ico name={`r-${rarity}`} />
       </span>
-      <span className="visually-hidden">{t(`rarity.${rarity}`)}</span>
     </span>
   );
 }

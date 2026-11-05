@@ -37,6 +37,7 @@ export function SkillTreeScreen({ onClose }: { onClose: () => void }) {
               <div className="skills__chain">
                 {chain.map((skill, i) => {
                   const state = skillState(skill.id, learned, points);
+                  const text = skill.later ? `${skill.text} ${t(`skills.later.${skill.later}`)}` : skill.text;
                   return (
                     <Fragment key={skill.id}>
                       {i > 0 && <span className={`dv-tree__link${active.has(skill.id) ? ' is-learned' : ''}`} aria-hidden />}
@@ -46,7 +47,8 @@ export function SkillTreeScreen({ onClose }: { onClose: () => void }) {
                         // aria-disabled (not disabled) so the tooltip still shows on hover.
                         aria-disabled={state !== 'available'}
                         data-tip={skill.name}
-                        data-tip-text={skill.later ? `${skill.text} ${t(`skills.later.${skill.later}`)}` : skill.text}
+                        data-tip-text={text}
+                        aria-describedby={`skill-${skill.id}-text`}
                         onClick={async () => {
                           if (state === 'available' && (await learnSkill(skill.id))) showToast({ icon: 'spark', title: t('skills.learnedToast', { name: skill.name }) });
                         }}
@@ -60,6 +62,9 @@ export function SkillTreeScreen({ onClose }: { onClose: () => void }) {
                           {state !== 'learned' ? ` · ${t('skills.cost', { count: skill.cost })}` : ''}
                         </span>
                       </button>
+                      <span id={`skill-${skill.id}-text`} className="visually-hidden">
+                        {text}
+                      </span>
                     </Fragment>
                   );
                 })}
