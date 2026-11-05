@@ -70,8 +70,8 @@ export const ENEMIES = ['beetle', 'deadline', 'ghost', 'magpie', 'moth', 'slime'
 export const ITEMS = ['book', 'potion', 'seed', 'staff'] as const;
 export const BIOMES = ['forest', 'tower', 'market', 'forge', 'library'] as const;
 
-/** Discipline buildings with the owner's art (scripts/assets/build_buildings.py); the rest use temporary tiles. */
-export const BUILDING_ART: readonly string[] = ['forest', 'market', 'library'];
+/** Discipline buildings with the owner's art (scripts/assets/build_buildings.py); a pack without art uses temporary tiles. */
+export const BUILDING_ART: readonly string[] = ['forest', 'tower', 'market', 'forge', 'library'];
 export const buildingKey = (pack: string, level: number) => `building-${pack}-${level}`;
 
 export const MAPS = ['homestead', 'house', 'forest', 'tower', 'market', 'forge', 'library'] as const;

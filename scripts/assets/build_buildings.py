@@ -50,6 +50,24 @@ SHEETS: dict[str, dict] = {
             (2440, 40, 3135, 806),
         ],
     },
+    "tower": {
+        "levels": [
+            (50, 1020, 570, 1385),
+            (625, 668, 956, 1320),
+            (1105, 528, 1470, 1362),
+            (1555, 245, 2085, 1378),
+            (2130, 15, 2710, 1400),
+        ],
+    },
+    "forge": {
+        "levels": [
+            (70, 712, 694, 1112),
+            (770, 646, 1130, 1130),
+            (1168, 270, 1690, 1168),
+            (1740, 368, 2330, 1150),
+            (2350, 30, 3136, 1175),
+        ],
+    },
     "library": {
         "blank": [(1320, 590, 1640, 692)],  # a cloud between levels 3 and 4
         "levels": [
@@ -102,12 +120,15 @@ def cut(src: np.ndarray, box: tuple[int, int, int, int]) -> tuple[np.ndarray, np
 def defringe(idx: np.ndarray, palette: np.ndarray) -> np.ndarray:
     """Magenta-tinted pixels on the outer edge (JPEG bleed) become transparent."""
     p = palette
-    pink = (p[:, 0] > 140) & (p[:, 2] > 110) & (p[:, 1] < 0.65 * np.minimum(p[:, 0], p[:, 2]))
+    pink = (p[:, 0] > 100) & (p[:, 2] > 80) & (p[:, 1] < 0.6 * np.minimum(p[:, 0], p[:, 2]))
     out = idx.copy()
-    for _ in range(2):
+    for _ in range(3):
         clear = np.pad(out < 0, 1, constant_values=True)
         near = clear[:-2, 1:-1] | clear[2:, 1:-1] | clear[1:-1, :-2] | clear[1:-1, 2:]
         out[(out >= 0) & near & pink[np.maximum(out, 0)]] = -1
+    # Pure background magenta is never part of a building (potions and smoke are darker).
+    pure = (p[:, 0] > 190) & (p[:, 2] > 170) & (p[:, 1] < 60) & (np.abs(p[:, 0] - p[:, 2]) < 50)
+    out[(out >= 0) & pure[np.maximum(out, 0)]] = -1
     return out
 
 

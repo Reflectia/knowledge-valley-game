@@ -76,13 +76,12 @@ and `sfx/<name>.ogg`. The night music is the day track through a low-pass filter
 at runtime); real night arrangements can replace it later (would need a `music/<place>-night.ogg`
 and a small change in `src/audio/engine.ts`). Footsteps are one surface (no grass/stone variants).
 
-Discipline buildings: **forest, market, library** use the owner's art
+Discipline buildings: all five packs use the owner's art
 (`images/buildings/building-<pack>-new.jpg` → `public/assets/buildings/<pack>-1..5.png`,
 `scripts/assets/build_buildings.py`; level 5 fits 88×144 px, one scale per building).
 Sheet choices: forest has 6 drawings — level 4 is the lower-middle one (the lower-left wide
 glasshouse is unused); library has two variants of levels 1–2 — the lower ones are used.
-**tower and forge** still use the Tiny Town tiles: their sheets were generated over the start-menu
-landscape (mountains, hills, a magenta haze around the buildings), so they cannot be keyed out
-cleanly — regenerate them on a flat #FF00FF background with no scenery.
+The Tiny Town building tiles (`src/game/world/buildings.ts`) remain only as a fallback for
+future packs without art.
 
 Still missing, no placeholder yet: exam bosses 32×32 (v0.2), house interior tiles.
