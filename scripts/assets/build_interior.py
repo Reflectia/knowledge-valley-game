@@ -17,7 +17,7 @@ import sys
 from pathlib import Path
 
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageFilter
 
 sys.path.insert(0, str(Path(__file__).parent))
 from build_buildings import cut, defringe  # noqa: E402
@@ -28,12 +28,14 @@ SRC = ROOT / "images/interior"
 OUT = ROOT / "public/assets/interior"
 T = 16
 
-# Surfaces sheet (source px, inside the magenta separators): box → size in game px.
+# Surfaces sheet (source px, inset from the magenta separators): box → size in game px, colors.
+# The floor uses 8 planks of the patch (gap to gap, x 70–579), so a plank is 8 px wide and the
+# tile wraps on a plank gap; the whole patch would give 4 px planks that read as noise.
 SURFACES = [
-    ("floor", (7, 7, 1017, 1017), (64, 64)),
-    ("wall", (1031, 7, 2041, 505), (64, 32)),
-    ("window", (1031, 520, 1529, 1017), (32, 32)),
-    ("shelf", (1543, 520, 2041, 1017), (32, 32)),
+    ("floor", (70, 260, 579, 769), (64, 64), 5),
+    ("wall", (1037, 13, 2035, 505), (64, 32), 6),
+    ("window", (1037, 526, 1523, 1017), (32, 32), 8),
+    ("shelf", (1549, 526, 2035, 1017), (32, 32), 8),
 ]
 
 # Objects sheet: name → (box in source px, max size in game px). Aspect is kept.
@@ -53,21 +55,33 @@ OBJECTS: dict[str, tuple[tuple[int, int, int, int], tuple[int, int]]] = {
 }
 
 
-def downscale(rgb: np.ndarray, fg: np.ndarray, size: tuple[int, int], colors: int, dark: float) -> Image.Image:
-    palette = kmeans_colors(rgb[fg], colors)
-    labels = np.zeros(fg.shape, dtype=np.int32)
-    labels[fg] = assign(rgb[fg], palette)
-    idx = majority_downscale(labels, fg, size[0], size[1], 0.5, palette, dark)
-    return to_image(defringe(idx, palette) if not fg.all() else idx, palette)
+def calm(idx: np.ndarray, passes: int = 2) -> np.ndarray:
+    """Pixels unlike all 4 neighbours (wrapping, as tiles repeat) take the commonest neighbour."""
+    for _ in range(passes):
+        p = np.pad(idx, 1, mode="wrap")
+        nb = np.stack([p[:-2, 1:-1], p[2:, 1:-1], p[1:-1, :-2], p[1:-1, 2:]])
+        out = idx.copy()
+        for y, x in zip(*np.nonzero((nb != idx).all(0))):
+            v, c = np.unique(nb[:, y, x], return_counts=True)
+            out[y, x] = v[c.argmax()]
+        idx = out
+    return idx
+
+
+def surface(crop: Image.Image, size: tuple[int, int], colors: int) -> Image.Image:
+    """Smooth, average down to the game size, then a few flat colors: calm, readable tiles."""
+    small = np.asarray(crop.filter(ImageFilter.MedianFilter(9)).resize(size, Image.BOX)).reshape(-1, 3).astype(np.float64)
+    palette = kmeans_colors(small, colors)
+    idx = calm(assign(small, palette).reshape(size[1], size[0]))
+    rgba = np.full((size[1], size[0], 4), 255, dtype=np.uint8)
+    rgba[..., :3] = palette[idx].round().astype(np.uint8)
+    return Image.fromarray(rgba, "RGBA")
 
 
 def surfaces() -> Image.Image:
-    src = np.asarray(Image.open(SRC / "interior-surfaces-new.jpg").convert("RGB"))
+    src = Image.open(SRC / "interior-surfaces-new.jpg").convert("RGB")
     tiles = Image.new("RGBA", (8 * T, 4 * T))
-    parts = {}
-    for name, (l, t, r, b), size in SURFACES:
-        crop = src[t:b, l:r]
-        parts[name] = downscale(crop, np.ones(crop.shape[:2], dtype=bool), size, 20, 1.5)
+    parts = {name: surface(src.crop(box), size, colors) for name, box, size, colors in SURFACES}
     # Floor 0–15: rows 0–1 of the sheet; wall 16–23: row 2; window and shelf 24–31: row 3.
     floor = parts["floor"]
     for i in range(16):
