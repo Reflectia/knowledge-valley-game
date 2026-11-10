@@ -126,6 +126,8 @@ export interface WorldState {
   /** Garden tiles on the homestead by "x,y". */
   plots: Record<string, Plot>;
   decor: Placed[];
+  /** Discipline keys whose exam trophy is already in the world (exam.payTrophies). */
+  trophies?: string[];
 }
 
 /** One reward moment for the reward scene (single or batched retroactive). */

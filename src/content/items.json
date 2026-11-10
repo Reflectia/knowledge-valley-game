@@ -394,6 +394,66 @@
         "sheet": "homestead-tiles",
         "frame": 1
       }
+    },
+    {
+      "id": "trophy-forest",
+      "kind": "furniture",
+      "place": "indoor",
+      "collides": true,
+      "trophy": true,
+      "name": "Золотий жолудь",
+      "text": "Трофей за іспит у Зачарованому лісі.",
+      "icon": {
+        "texture": "item-trophy-forest"
+      }
+    },
+    {
+      "id": "trophy-tower",
+      "kind": "furniture",
+      "place": "indoor",
+      "collides": true,
+      "trophy": true,
+      "name": "Кришталева сніжинка",
+      "text": "Трофей за іспит у Кришталевій вежі.",
+      "icon": {
+        "texture": "item-trophy-tower"
+      }
+    },
+    {
+      "id": "trophy-market",
+      "kind": "furniture",
+      "place": "indoor",
+      "collides": true,
+      "trophy": true,
+      "name": "Золоті терези",
+      "text": "Трофей за іспит на Ярмарковій площі.",
+      "icon": {
+        "texture": "item-trophy-market"
+      }
+    },
+    {
+      "id": "trophy-forge",
+      "kind": "furniture",
+      "place": "indoor",
+      "collides": true,
+      "trophy": true,
+      "name": "Золоте ковадло",
+      "text": "Трофей за іспит у Гірській кузні.",
+      "icon": {
+        "texture": "item-trophy-forge"
+      }
+    },
+    {
+      "id": "trophy-library",
+      "kind": "furniture",
+      "place": "indoor",
+      "collides": true,
+      "trophy": true,
+      "name": "Зоряне перо",
+      "text": "Трофей за іспит у Бібліотеці-обсерваторії.",
+      "icon": {
+        "texture": "item-trophy-library"
+      }
     }
   ],
   "crops": [

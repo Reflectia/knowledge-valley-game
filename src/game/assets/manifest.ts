@@ -75,6 +75,13 @@ export const BIOMES = ['forest', 'tower', 'market', 'forge', 'library'] as const
 export const BUILDING_ART: readonly string[] = ['forest', 'tower', 'market', 'forge', 'library'];
 export const buildingKey = (pack: string, level: number) => `building-${pack}-${level}`;
 
+/**
+ * Exam bosses with their own 32×32 art (public/assets/bosses/<pack>.png). Until a pack is listed,
+ * its boss is the biome enemy drawn ×2 (bosses.json `placeholder`).
+ */
+export const BOSS_ART: readonly string[] = [];
+export const bossKey = (pack: string) => `boss-${pack}`;
+
 /** Furniture sprites of the house (images/interior/interior-objects-new.jpg). */
 export const INTERIOR_OBJECTS = ['bed', 'desk', 'bookshelf', 'chest', 'fireplace', 'rug', 'doormat', 'fern', 'palm', 'lamp', 'table', 'clock'] as const;
 
@@ -98,6 +105,9 @@ export const ASSETS: Record<string, Asset> = {
   ),
   // Tools in the sword cursor's style (scripts/assets/build_tools.py); the sword is that cursor.
   ...Object.fromEntries(TOOL_ICONS.map((id) => [`item-${id}`, img(pub(`items/${id}.png`))])),
+  // Exam trophies, temporary self-drawn cups (scripts/assets/build_trophies.py).
+  ...Object.fromEntries(BIOMES.map((id) => [`item-trophy-${id}`, img(pub(`items/trophy-${id}.png`))])),
+  ...Object.fromEntries(BOSS_ART.map((id) => [bossKey(id), img(pub(`bosses/${id}.png`))])),
   ...Object.fromEntries(
     BIOMES.map((id) => [
       `portrait-${id}`,

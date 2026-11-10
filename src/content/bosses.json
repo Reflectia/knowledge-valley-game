@@ -1,0 +1,70 @@
+{
+  "_comment": "Exam bosses (spec §4), one per pack. Combat is the v0.1 light combat with bigger numbers. sprite = the owner's boss art (32×32) when it exists; until then placeholder = a biome enemy drawn ×2. Names, texts and trophies are drafts for the owner to edit (docs/gemini-prompt-bosses.md).",
+  "shield": {
+    "_comment": "Each knowledge-shield charge (an on-time lab) blocks one boss hit.",
+    "hitsPerCharge": 1
+  },
+  "leash": 64,
+  "bosses": {
+    "forest": {
+      "name": "Перенавчений Пень",
+      "text": "Запам'ятав кожен листок у лісі, а нового не впізнає.",
+      "placeholder": "sprout",
+      "hp": 36,
+      "damage": 12,
+      "speed": 22,
+      "aggro": 112,
+      "xp": 30,
+      "coins": 60,
+      "trophy": "trophy-forest"
+    },
+    "tower": {
+      "name": "Галюцинуючий Голем",
+      "text": "Впевнено бачить те, чого немає.",
+      "placeholder": "wisp",
+      "hp": 36,
+      "damage": 12,
+      "speed": 24,
+      "aggro": 112,
+      "xp": 30,
+      "coins": 60,
+      "trophy": "trophy-tower"
+    },
+    "market": {
+      "name": "Беклог-Мімік",
+      "text": "Що більше задач ковтає, то повільніше ходить.",
+      "placeholder": "magpie",
+      "hp": 36,
+      "damage": 12,
+      "speed": 22,
+      "aggro": 112,
+      "xp": 30,
+      "coins": 60,
+      "trophy": "trophy-market"
+    },
+    "forge": {
+      "name": "Моноліт-Спагеті",
+      "text": "Усе з усім зв'язано, і ніхто не знає як.",
+      "placeholder": "beetle",
+      "hp": 40,
+      "damage": 12,
+      "speed": 18,
+      "aggro": 112,
+      "xp": 30,
+      "coins": 60,
+      "trophy": "trophy-forge"
+    },
+    "library": {
+      "name": "Рецензент Номер Два",
+      "text": "Прочитав лише анотацію, але має зауваження.",
+      "placeholder": "moth",
+      "hp": 36,
+      "damage": 12,
+      "speed": 24,
+      "aggro": 112,
+      "xp": 30,
+      "coins": 60,
+      "trophy": "trophy-library"
+    }
+  }
+}

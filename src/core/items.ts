@@ -29,6 +29,8 @@ export interface ItemDef {
   collides?: boolean;
   /** Sold only after the Architecture skill «Креслення». */
   blueprint?: boolean;
+  /** Exam trophy (stage 11): never sold or bought, only won. */
+  trophy?: boolean;
 }
 
 export interface CropDef {

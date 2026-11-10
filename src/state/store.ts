@@ -5,6 +5,7 @@ import { markDone, setScore, unmarkDone } from '@/core/curriculum';
 import { deriveProgress, pruneShown, reconcile, rewardKey, type DerivedProgress } from '@/core/rewards';
 import { BALANCE } from '@/core/content';
 import { applyDefeat, applyLoot, ENEMY_DEFS, rollLoot, type DefeatLoss } from '@/core/combat';
+import { bossFor, examState, payTrophies } from '@/core/exam';
 import { growNight } from '@/core/homestead';
 import { dueLetters, mentorLines, type Letter } from '@/core/mentors';
 import { effectsOf, learn, NO_EFFECTS, type Effects } from '@/core/skills';
@@ -34,6 +35,14 @@ export type UiRequest = 'journal' | 'shop' | 'mail';
 export interface Dialog {
   pack: string;
   lines: string[];
+}
+
+/** An exam boss just beaten: the victory scene shows it (session only; the win itself is saved). */
+export interface ExamVictory {
+  disciplineKey: string;
+  pack: string;
+  coins: number;
+  xp: number;
 }
 
 /** Actions that cost energy and give experience (balance.json `actions`). */
@@ -75,6 +84,7 @@ export interface GameState {
   lastDefeat: DefeatLoss | null;
   /** Active skill effects (derived from learned skills and lab points). */
   effects: Effects;
+  examVictory: ExamVictory | null;
 
   init(): Promise<void>;
   newGame(name: string, appearance: PlayerState['appearance']): Promise<void>;
@@ -107,6 +117,12 @@ export interface GameState {
   damagePlayer(amount: number): void;
   /** An enemy is defeated: XP (up to the ceiling) and loot. Returns the loot. */
   defeatEnemy(enemy: string, rng?: () => number): { coins: number; items: string[] };
+  /**
+   * The exam boss of a discipline is beaten (spec §4): the victory is saved at once, the trophy
+   * goes to the bag, plus coins and XP. Does nothing unless the boss is ready today.
+   */
+  winExam(disciplineKey: string): Promise<boolean>;
+  closeExamVictory(): void;
   maxEnergy(): number;
   maxHealth(): number;
   /** Advance the clock by real milliseconds (paused while a window is open). */
@@ -160,9 +176,11 @@ export function createGameStore(saves: SaveStore, now: () => Date = () => new Da
       // Silent changes (new thresholds) count as seen, so they never pop up later.
       const labs = { ...incoming, shownRewards: silent ? [...new Set([...shown, ...r.events.map(rewardKey)])] : shown };
       const progress = deriveProgress(labs.curriculum, thresholds);
+      // Trophies of won exams: paid once, also after a reload (the world is saved at night).
+      const state = payTrophies(r.world, labs.exams ?? {});
       set((s) => ({
         labs,
-        world: { state: r.world, ledger: r.ledger },
+        world: { state, ledger: r.ledger },
         progress,
         effects: effectsOf(labs.skills ?? [], progress.skillPoints),
         pendingRewards: [...s.pendingRewards.filter((e) => !fresh.some((f) => rewardKey(f) === rewardKey(e))), ...fresh],
@@ -190,6 +208,7 @@ export function createGameStore(saves: SaveStore, now: () => Date = () => new Da
       dialog: null,
       lastDefeat: null,
       effects: NO_EFFECTS,
+      examVictory: null,
 
       async init() {
         let file;
@@ -336,6 +355,28 @@ export function createGameStore(saves: SaveStore, now: () => Date = () => new Da
         set({ world: { ...world, state: { ...next, player } } });
         return loot;
       },
+
+      async winExam(key) {
+        const { labs, world, progress } = get();
+        const d = labs.curriculum.disciplines[key];
+        const today = todayIso(now());
+        const won = labs.exams ?? {};
+        if (!d || examState(d, progress.disciplines[key], today, won) !== 'ready') return false;
+        const boss = bossFor(d.pack)!;
+        const exams = { ...won, [key]: { date: today, pack: d.pack } };
+        const nextLabs = { ...labs, exams };
+        const paid = payTrophies(world.state, exams);
+        const player = gainXp({ ...paid.player, coins: paid.player.coins + boss.coins }, boss.xp, progress.ceiling);
+        set({
+          labs: nextLabs,
+          world: { ...world, state: { ...paid, player } },
+          examVictory: { disciplineKey: key, pack: d.pack, coins: boss.coins, xp: boss.xp },
+        });
+        await persist(() => saves.saveLabs(nextLabs));
+        return true;
+      },
+
+      closeExamVictory: () => set({ examVictory: null }),
 
       tickClock(realMs) {
         const s = get();

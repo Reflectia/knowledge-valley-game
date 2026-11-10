@@ -12,6 +12,7 @@
  */
 import { BALANCE } from './content';
 import { EMPTY_CURRICULUM } from './curriculum';
+import type { ExamsWon } from './exam';
 import { STARTER, TOOLBAR_SIZE } from './items';
 import type { Letter } from './mentors';
 import type { Curriculum, RewardLedger, Settings, WorldState } from './types';
@@ -30,6 +31,8 @@ export interface LabsRecord {
   mail: Letter[];
   /** Per pack: how many done labs the mentor has already praised. */
   mentorSeen: Record<string, number>;
+  /** Exam bosses beaten (stage 11). Saved at once, like the labs: a victory is never lost. */
+  exams: ExamsWon;
 }
 
 export interface WorldRecord {
@@ -81,7 +84,7 @@ export function defaultSettings(now = new Date()): Settings {
 }
 
 export function newLabs(now = new Date()): LabsRecord {
-  return { curriculum: EMPTY_CURRICULUM, settings: defaultSettings(now), skills: [], mail: [], mentorSeen: {} };
+  return { curriculum: EMPTY_CURRICULUM, settings: defaultSettings(now), skills: [], mail: [], mentorSeen: {}, exams: {} };
 }
 
 // ----------------------------------------------------------------- migrations
@@ -134,6 +137,8 @@ export function migrate(
   file.labs.skills ??= [];
   file.labs.mail ??= [];
   file.labs.mentorSeen ??= {};
+  // Stage 11: exam bosses beaten.
+  file.labs.exams ??= {};
   return file;
 }
 
