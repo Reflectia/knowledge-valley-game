@@ -19,8 +19,7 @@ Visual check: `docs/assets-preview.png` (old design-system PNG next to the new c
 | Homestead house, 2 blossom trees, lamp post | `public/assets/homestead/*.png` | `lighting/homestead-day-night-new.jpg` (day half) | Cut at 1/8 so the door matches the heroine's height. |
 | Lit window (night overlay) | `public/assets/homestead/window-lit.png` | same file, night half | The rest of the night look comes from lighting. |
 | Homestead tiles: grass, grass with flowers, path | `public/assets/homestead/homestead-tiles-16.png` | same file | Cut from the scene; **not seamless** — replace with drawn tiles. |
-
-Biome tiles (`images/tiles/*-tileset-16.png`) stay from the design system: the new biome images are in `images/previews/` and are previews only.
+| Biome tilesets ×5 (ground, path, special surface, prop, prop on transparency) | `public/assets/tiles/<biome>-tileset-16.png` | `previews/Biomes/<biome>-palette-tiles-stages-new.jpg` (row of sample tiles) | `scripts/assets/build_biome_tiles.py`. Surfaces sampled on the 16×16 art grid; props (anvil, books, apple crate, crystals) redrawn by hand at 16×16 because the sheets draw them at ~32×32; the forest tree is sampled. Surfaces are single samples, **not checked for seams**. Revival stages on the sheets are unused (filter in the game). The owner approved using these sheets although they sit in `previews/`. |
 
 ## Temporary third-party placeholders — to replace
 

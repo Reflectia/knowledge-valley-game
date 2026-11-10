@@ -103,8 +103,13 @@ export const ASSETS: Record<string, Asset> = {
   ),
   emblem: img(pub('portraits/emblem.png')),
 
-  // Biome tiles stay from the design system (the new biome images are previews only).
-  ...Object.fromEntries(BIOMES.map((id) => [`tiles-${id}`, sheet(designPng(`tiles/${id}-tileset-16.png`), 16, 16, 5)])),
+  // Biome tiles from the owner's biome sheets (scripts/assets/build_biome_tiles.py).
+  ...Object.fromEntries(
+    BIOMES.map((id) => [
+      `tiles-${id}`,
+      sheet(pub(`tiles/${id}-tileset-16.png`), 16, 16, 5, { fallback: designPng(`tiles/${id}-tileset-16.png`) }),
+    ]),
+  ),
 
   // Homestead, cut from homestead-day-night-new.jpg.
   'homestead-tiles': sheet(pub('homestead/homestead-tiles-16.png'), 16, 16, 3),

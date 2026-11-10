@@ -7,6 +7,7 @@ Requires Python 3.10+ with Pillow and numpy (`pip install pillow numpy`). Run fr
 | --- | --- |
 | `build_heroine.py` | Heroine sheet (4 walk frames × down/up/right) and palette-swap tables |
 | `build_sprites.py [enemies items portraits start homestead]` | Everything else; no arguments = all |
+| `build_biome_tiles.py` | Biome tilesets (`public/assets/tiles/`): sampled surfaces, hand-drawn props |
 | `preview.py` | `docs/assets-preview.png`: old design-system PNG next to the new cut |
 | `pixelize.py` | Shared pipeline (background removal, k-means palette, block majority downscale, grid sampling) |
 
