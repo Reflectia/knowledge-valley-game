@@ -264,12 +264,19 @@ export class Combat {
   /** The sword sweeps across the attack direction. */
   private swing(tool: string, origin: { x: number; y: number }, angle: number): void {
     const icon = getItem(tool).icon;
-    if (icon.sheet === undefined || icon.frame === undefined) return;
-    const blade = this.scene.add
-      .image(origin.x + Math.cos(angle) * 10, origin.y + Math.sin(angle) * 10, icon.sheet, icon.frame)
-      .setDepth(origin.y + 30)
-      .setRotation(angle - 0.9);
-    this.scene.tweens.add({ targets: blade, rotation: angle + 0.9, duration: 140, onComplete: () => blade.destroy() });
+    const x = origin.x + Math.cos(angle) * 10;
+    const y = origin.y + Math.sin(angle) * 10;
+    let blade: Phaser.GameObjects.Image;
+    // The sword icon (the start-menu sword) points to the upper left: turn it to the attack direction.
+    let turn = 0;
+    if (icon.texture) {
+      blade = this.scene.add.image(x, y, icon.texture);
+      turn = (3 * Math.PI) / 4;
+    } else if (icon.sheet !== undefined && icon.frame !== undefined) {
+      blade = this.scene.add.image(x, y, icon.sheet, icon.frame);
+    } else return;
+    blade.setDepth(origin.y + 30).setRotation(angle + turn - 0.9);
+    this.scene.tweens.add({ targets: blade, rotation: angle + turn + 0.9, duration: 140, onComplete: () => blade.destroy() });
   }
 
   /** «Іскра знань» (Science skill): hits every enemy around the heroine. */

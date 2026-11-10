@@ -99,7 +99,12 @@ export function App() {
       });
   }, [screen, curriculum, day, api, t]);
 
-  // Over the world the cursor shows the selected toolbar item; menus keep the sword.
+  // The sword cursor belongs to the start menu (app.css); elsewhere the parchment arrow.
+  useEffect(() => {
+    document.body.dataset.screen = screen;
+  }, [screen]);
+
+  // Over the world the cursor shows the selected toolbar item; menus keep the arrow.
   useEffect(() => {
     const canvas = document.querySelector<HTMLCanvasElement>('#game canvas');
     if (!canvas) return;

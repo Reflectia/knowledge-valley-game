@@ -68,6 +68,7 @@ const sheet = (
 
 export const ENEMIES = ['beetle', 'deadline', 'ghost', 'magpie', 'moth', 'slime', 'sprout', 'wisp'] as const;
 export const ITEMS = ['book', 'potion', 'seed', 'staff'] as const;
+export const TOOL_ICONS = ['sword', 'hoe', 'watering-can', 'axe', 'pickaxe'] as const;
 export const BIOMES = ['forest', 'tower', 'market', 'forge', 'library'] as const;
 
 /** Discipline buildings with the owner's art (scripts/assets/build_buildings.py); a pack without art uses temporary tiles. */
@@ -95,6 +96,8 @@ export const ASSETS: Record<string, Asset> = {
   ...Object.fromEntries(
     ITEMS.map((id) => [`item-${id}`, img(pub(`items/${id}.png`), designPng(`items/${id}-16.png`))]),
   ),
+  // Tools in the sword cursor's style (scripts/assets/build_tools.py); the sword is that cursor.
+  ...Object.fromEntries(TOOL_ICONS.map((id) => [`item-${id}`, img(pub(`items/${id}.png`))])),
   ...Object.fromEntries(
     BIOMES.map((id) => [
       `portrait-${id}`,

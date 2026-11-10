@@ -7,7 +7,12 @@ body {
   height: 100%;
   overflow: hidden;
   background: var(--wood-900);
-  /* Sword cursor from the start-menu art; hotspot at the tip (top-left). */
+  /* Parchment arrow in the game (the sword would be mistaken for the weapon); hotspot at the tip. */
+  cursor: url('/assets/ui/cursor-arrow-32.png') 2 2, default;
+}
+
+/* Sword cursor from the start-menu art, on the start menu only; hotspot at the tip (top-left). */
+body[data-screen='start'] {
   cursor: url('/assets/ui/cursor-sword-32.png') 0 0, default;
 }
 

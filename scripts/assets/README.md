@@ -7,6 +7,7 @@ Requires Python 3.10+ with Pillow and numpy (`pip install pillow numpy`). Run fr
 | --- | --- |
 | `build_heroine.py` | Heroine sheet (4 walk frames × down/up/right) and palette-swap tables |
 | `build_sprites.py [enemies items portraits start homestead]` | Everything else; no arguments = all |
+| `build_tools.py` | Tool icons (hoe, watering can, axe, pickaxe; sword = sword cursor) and the in-game arrow cursor |
 | `build_mentors.py [--review]` | Mentor world sprites 16×32 (`public/assets/mentors/`), hand-drawn after the portraits |
 | `build_biome_tiles.py` | Biome tilesets (`images/biomes/`): sampled surfaces, hand-drawn props |
 

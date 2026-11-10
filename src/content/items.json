@@ -8,8 +8,7 @@
       "name": "Сапка",
       "text": "Розпушує землю на городі.",
       "icon": {
-        "sheet": "temp-farm",
-        "frame": 88
+        "texture": "item-hoe"
       }
     },
     {
@@ -19,8 +18,7 @@
       "name": "Лійка",
       "text": "Політа рослина за ніч підросте.",
       "icon": {
-        "sheet": "temp-farm",
-        "frame": 84
+        "texture": "item-watering-can"
       }
     },
     {
@@ -30,8 +28,7 @@
       "name": "Сокира",
       "text": "Для дерев і дерев'яного реквізиту.",
       "icon": {
-        "sheet": "temp-farm",
-        "frame": 87
+        "texture": "item-axe"
       }
     },
     {
@@ -41,8 +38,7 @@
       "name": "Кайло",
       "text": "Для каменю, кристалів і металу.",
       "icon": {
-        "sheet": "temp-town",
-        "frame": 115
+        "texture": "item-pickaxe"
       }
     },
     {
@@ -52,8 +48,7 @@
       "name": "Меч",
       "text": "Знадобиться проти Монстра Дедлайну.",
       "icon": {
-        "sheet": "temp-dungeon",
-        "frame": 104
+        "texture": "item-sword"
       }
     },
     {

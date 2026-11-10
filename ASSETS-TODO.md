@@ -15,7 +15,9 @@ Visual check: `docs/assets-preview.png` (old design-system PNG next to the new c
 | Start menu backdrop 475×265 | `public/assets/ui/start-bg.png` | `backdrops/start-menu-new.jpg` | One pixel per art cell (grid 5.78 px), 64 colours. `scripts/assets/build_start_menu.py`. |
 | Start menu title 213×75 | `public/assets/ui/start-title.png` | `backdrops/start-menu-interface-new.jpg` | Keyed out of the sky (the assets sheet draws it on a plaque, the reference does not). |
 | Start menu panel 117×55 (9-slice) | `public/assets/ui/start-panel.png` | `backdrops/start-menu-assets-new.jpg` («Нова гра» button) | Centre filled with plain parchment; edges repeat when the panel is taller. |
-| Mouse cursor (sword) | `public/assets/ui/cursor-sword-16.png`, `-32.png` | same file, right panel | Thin at 16 px; the gold guard is barely visible. |
+| Mouse cursor (sword), start menu only | `public/assets/ui/cursor-sword-16.png`, `-32.png` | same file, right panel | Thin at 16 px; the gold guard is barely visible. Also the sword item icon (`items/sword.png`). |
+| Mouse cursor in the game (parchment arrow) | `public/assets/ui/cursor-arrow-16.png`, `-32.png` | self-drawn (`scripts/assets/build_tools.py`) | Not a sword, so it is not mistaken for the weapon. |
+| Tools: hoe, watering can, axe, pickaxe | `public/assets/items/<id>.png` | self-drawn in the sword cursor's palette (`scripts/assets/build_tools.py`) | |
 | Homestead house, 2 blossom trees, lamp post | `public/assets/homestead/*.png` | `lighting/homestead-day-night-new.jpg` (day half) | Cut at 1/8 so the door matches the heroine's height. |
 | Lit window (night overlay) | `public/assets/homestead/window-lit.png` | same file, night half | The rest of the night look comes from lighting. |
 | Homestead tiles: grass, grass with flowers, path | `images/biomes/homestead-tiles-16.png` | same file (colors only) | Hand-drawn in the scene's colors (`HOMESTEAD_TILES` in `build_sprites.py`); seamless, nothing touches the tile border. |
@@ -31,11 +33,10 @@ All in `public/assets/_temp/`, each folder with its license. Frame numbers are a
 | --- | --- | --- |
 | Crops with 5 growth stages (20 crops) | `_temp/josehzz-farming-crops/crops.png` | 6 per crop: 0 = harvest item, 5→1 = seed → mature |
 | Tilled soil / garden beds | `_temp/kenney-tiny-farm/tilemap.png` | 0, 1, 12, 13, 24, 25, 36, 37, 48–51, 60–63 |
-| Tools: watering can, sickle, axe | `_temp/kenney-tiny-farm/tilemap.png` | 84, 88, 87 |
-| Tools: pickaxe; bow | `_temp/kenney-tiny-town/tilemap.png` | 115; 118 |
+| Tool: bow | `_temp/kenney-tiny-town/tilemap.png` | 118 |
 | Fences | `_temp/kenney-tiny-town/tilemap.png` | 44–47, 56–59, 68–71, 80–82 |
 | Discipline buildings ×5 (5 upgrade levels each) | `_temp/kenney-tiny-town/tilemap.png` | walls, roofs, doors 48–91 — assembled in the maps (stage 5–6) |
-| Sword, staffs | `_temp/kenney-tiny-dungeon/tilemap.png` | 103–107, 129–131 |
+| Staffs | `_temp/kenney-tiny-dungeon/tilemap.png` | 129–131 |
 
 House interior: the owner's art (`images/interior/interior-surfaces-new.jpg`,
 `interior-objects-new.jpg` → `public/assets/interior/`, `scripts/assets/build_interior.py`): a 4×4-tile
