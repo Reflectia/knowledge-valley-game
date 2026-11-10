@@ -1,5 +1,5 @@
 {
-  "_comment": "Exam bosses (spec §4), one per pack. Combat is the v0.1 light combat with bigger numbers. sprite = the owner's boss art (32×32) when it exists; until then placeholder = a biome enemy drawn ×2. Names, texts and trophies are drafts for the owner to edit (docs/gemini-prompt-bosses.md).",
+  "_comment": "Exam bosses (spec §4), one per pack. Combat is the v0.1 light combat with bigger numbers. Art: public/assets/bosses/<pack>.png (scripts/assets/build_bosses.py); placeholder = the biome enemy drawn ×2 for a pack without art. Names, texts and trophies are drafts for the owner to edit (docs/gemini-prompt-bosses.md).",
   "shield": {
     "_comment": "Each knowledge-shield charge (an on-time lab) blocks one boss hit.",
     "hitsPerCharge": 1
