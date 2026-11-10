@@ -105,7 +105,7 @@ export const ASSETS: Record<string, Asset> = {
   ),
   // Tools in the sword cursor's style (scripts/assets/build_tools.py); the sword is that cursor.
   ...Object.fromEntries(TOOL_ICONS.map((id) => [`item-${id}`, img(pub(`items/${id}.png`))])),
-  // Exam trophies and bosses, cut from the owner's sheets (scripts/assets/build_bosses.py).
+  // Exam trophies and bosses, drawn after the owner's sheets (scripts/assets/draw_bosses.py).
   ...Object.fromEntries(BIOMES.map((id) => [`item-trophy-${id}`, img(pub(`items/trophy-${id}.png`))])),
   ...Object.fromEntries(BOSS_ART.map((id) => [bossKey(id), img(pub(`bosses/${id}.png`))])),
   ...Object.fromEntries(

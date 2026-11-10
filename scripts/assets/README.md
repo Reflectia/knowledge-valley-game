@@ -9,7 +9,7 @@ Requires Python 3.10+ with Pillow and numpy (`pip install pillow numpy`). Run fr
 | `build_sprites.py [enemies items portraits start homestead]` | Everything else; no arguments = all |
 | `build_tools.py` | Tool icons (hoe, watering can, axe, pickaxe; sword = sword cursor) and the in-game arrow cursor |
 | `build_mentors.py [--review]` | Mentor world sprites 16×32 (`public/assets/mentors/`), hand-drawn after the portraits |
-| `build_bosses.py [--review DIR]` | Exam bosses 32×32 (`public/assets/bosses/`) and trophies 16×16 (`items/trophy-<pack>.png`), found on the magenta sheets |
+| `draw_bosses.py [--review DIR]` | Exam bosses 32×32 (`public/assets/bosses/`) and trophies 16×16 (`items/trophy-<pack>.png`), hand-drawn in simple shapes after the owner's sheets |
 | `build_biome_tiles.py` | Biome tilesets (`images/biomes/`): sampled surfaces, hand-drawn props |
 | `preview.py` | `docs/assets-preview.png`: old design-system PNG next to the new cut |
 | `pixelize.py` | Shared pipeline (background removal, k-means palette, block majority downscale, grid sampling) |

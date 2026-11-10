@@ -40,4 +40,4 @@ Date: 2026-11-04.
 15. **Knowledge shield = one blocked boss hit per on-time lab** (spec §4 «щит знань на старті»). Shown as pips over the boss's health bar.
 16. **A defeat by the boss is the ordinary defeat** (home, part of the resources lost, the day ends), so «переграти наступного дня» needs no extra rule.
 17. **The victory is saved at once with the labs** (`labs.exams`); the trophy goes into the bag and is paid once, also after a closed tab (`world.trophies`). Boss coins and XP follow the world, like enemy loot.
-18. **Boss names, texts and trophies are drafts** (`bosses.json`, `items.json`) for the owner to edit; the art prompt is `docs/gemini-prompt-bosses.md`. The owner's art arrived the same day (2026-11-10); the top-row variant of each boss is used.
+18. **Boss names, texts and trophies are drafts** (`bosses.json`, `items.json`) for the owner to edit; the art prompt is `docs/gemini-prompt-bosses.md`. The owner's art arrived the same day (2026-11-10); cut from the sheets it was too noisy at 32×32 / 16×16, so the bosses and trophies are redrawn by hand in simple shapes after it (`scripts/assets/draw_bosses.py`).

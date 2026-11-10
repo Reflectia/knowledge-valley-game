@@ -95,9 +95,9 @@ future packs without art.
 
 Exam bosses (stage 11) and their trophies use the owner's Gemini sheets
 (`images/enemies/bosses-new.jfif`, `images/items/trophies-new.jfif`, prompt in `docs/gemini-prompt-bosses.md`),
-cut by `python scripts/assets/build_bosses.py` into `public/assets/bosses/<pack>.png` (32×32) and
-`public/assets/items/trophy-<pack>.png` (16×16). The boss sheet has two variants of every boss; the top
-row is used (`ROW` in the script switches one boss to the bottom row). A pack missing from `BOSS_ART`
+redrawn by hand in simple shapes by `python scripts/assets/draw_bosses.py` into
+`public/assets/bosses/<pack>.png` (32×32) and `public/assets/items/trophy-<pack>.png` (16×16): cut straight
+from the sheets, their fine detail turned into noise at this size (owner's request, 2026-11-10). A pack missing from `BOSS_ART`
 (`src/game/assets/manifest.ts`) falls back to its biome enemy drawn ×2 (`placeholder` in `bosses.json`).
 
 Still missing, no placeholder yet: house interior tiles.
