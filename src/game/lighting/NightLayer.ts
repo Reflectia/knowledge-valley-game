@@ -53,6 +53,8 @@ export function createGlowOverlay(
   overlayKey: string,
   rgb: [number, number, number],
   color: number,
+  /** Only pixels inside this area (sprite pixels) can glow, when the glass color is used elsewhere too. */
+  area?: { x: number; y: number; w: number; h: number },
 ): { x: number; y: number; w: number; h: number } | null {
   const src = scene.textures.get(sourceKey).getSourceImage() as HTMLImageElement;
   const tex = scene.textures.exists(overlayKey)
@@ -68,7 +70,11 @@ export function createGlowOverlay(
   let x1 = -1;
   let y1 = -1;
   for (let i = 0; i < d.length; i += 4) {
-    const hit = d[i + 3] > 0 && d[i] === rgb[0] && d[i + 1] === rgb[1] && d[i + 2] === rgb[2];
+    const p = i / 4;
+    const x = p % src.width;
+    const y = Math.floor(p / src.width);
+    const inArea = !area || (x >= area.x && x < area.x + area.w && y >= area.y && y < area.y + area.h);
+    const hit = inArea && d[i + 3] > 0 && d[i] === rgb[0] && d[i + 1] === rgb[1] && d[i + 2] === rgb[2];
     if (!hit) {
       d[i + 3] = 0;
       continue;
@@ -76,9 +82,6 @@ export function createGlowOverlay(
     d[i] = (color >> 16) & 255;
     d[i + 1] = (color >> 8) & 255;
     d[i + 2] = color & 255;
-    const p = i / 4;
-    const x = p % src.width;
-    const y = Math.floor(p / src.width);
     x0 = Math.min(x0, x);
     y0 = Math.min(y0, y);
     x1 = Math.max(x1, x);

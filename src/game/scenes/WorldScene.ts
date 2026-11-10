@@ -319,7 +319,17 @@ export class WorldScene extends Phaser.Scene {
       this.addBlocker(x - fw / 2, y - fh, fw, fh);
     }
     if (p.lamp) {
-      const glass = createGlowOverlay(this, key, `${key}-lit`, LAMP_GLASS_RGB, LIGHT.warm);
+      // Sprites other than the lamp post name their glass color and where the lantern is.
+      const rgb = p.glassRgb ? (String(p.glassRgb).split(',').map(Number) as [number, number, number]) : LAMP_GLASS_RGB;
+      const area = p.glassArea ? String(p.glassArea).split(',').map(Number) : null;
+      const glass = createGlowOverlay(
+        this,
+        key,
+        `${key}-lit`,
+        rgb,
+        LIGHT.warm,
+        area ? { x: area[0], y: area[1], w: area[2], h: area[3] } : undefined,
+      );
       this.nightOverlays.push(this.add.image(x, y, `${key}-lit`).setOrigin(ox, oy).setDepth(DEPTH.lit));
       const left = x - img.width * ox;
       const top = y - img.height * oy;

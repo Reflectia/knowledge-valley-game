@@ -5,7 +5,8 @@
 // Object types used by the game (layer "objects"):
 //   spawn      point  name = spawn id
 //   exit       rect   target (map), spawn (spawn id in target), requiresPack (optional)
-//   sprite     point  key (texture), footW/footH (collision at the sprite's base), lamp (bool)
+//   sprite     point  key (texture), footW/footH (collision at the sprite's base), lamp (bool),
+//                     glassRgb "r,g,b" and glassArea "x,y,w,h" (lamp glass other than the lamp post's)
 //   collision  rect   blocked area
 //   light      point  kind = window | lamp
 //   overlay    point  key (texture shown only at night, top-left anchored)
@@ -230,7 +231,16 @@ function homestead() {
   const sx = 312;
   const sy = 13 * T;
   m.obj('shop', 'shop', sx - 24, sy - 40, 48, 40);
-  m.obj('sprite', 'shop-stall', sx, sy, 0, 0, { key: 'shop-stall', footW: 48, footH: 10 });
+  // The lantern under the right end of the awning glows at night. Its glass shares the cream
+  // of the awning stripes, so only that color inside the lantern's area lights up.
+  m.obj('sprite', 'shop-stall', sx, sy, 0, 0, {
+    key: 'shop-stall',
+    footW: 48,
+    footH: 10,
+    lamp: true,
+    glassRgb: '250,234,190',
+    glassArea: '41,23,5,4',
+  });
 
   // Exits to the five locations and the spawn points for coming back.
   m.obj('exit', 'to-forest', 24 * T, 0, 2 * T, 6, { target: 'forest', spawn: 'from-homestead', requiresPack: 'forest' });
