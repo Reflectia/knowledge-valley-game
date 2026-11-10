@@ -4,8 +4,8 @@ Source: images/previews/Biomes/<biome>-palette-tiles-stages-new.jpg. Each sheet 
 palette swatches, four sample tiles (ground, path, special surface, prop on the ground), and five
 revival stages. Only the sample tiles are used: revival stages are a filter in the game.
 
-Output: public/assets/tiles/<biome>-tileset-16.png, 80x16, same layout as the design-system
-tilesets: 0 ground, 1 path, 2 special surface, 3 prop on the ground, 4 the prop on transparency.
+Output: images/biomes/<biome>-tileset-16.png (the folder with every tile the game uses), 80x16:
+0 ground, 1 path, 2 special surface, 3 prop on the ground, 4 the prop on transparency.
 
 - Ground, path and special surface are drawn on a 16x16 art grid: each cell takes the median color
   of its inner area.
@@ -25,7 +25,7 @@ from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[2]
 SRC = ROOT / "images" / "previews" / "Biomes"
-OUT = ROOT / "public" / "assets" / "tiles"
+OUT = ROOT / "images" / "biomes"
 BIOMES = ["forest", "tower", "market", "forge", "library"]
 
 

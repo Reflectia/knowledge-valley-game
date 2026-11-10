@@ -218,7 +218,11 @@ def homestead() -> None:
         pal = HOMESTEAD_PATH_PAL if name == "path" else HOMESTEAD_GRASS_PAL
         im = Image.fromarray(np.array([[(*pal[c], 255) for c in r] for r in rows], np.uint8), "RGBA")
         sheet.alpha_composite(im, (16 * i, 0))
-    save(sheet, "homestead/homestead-tiles-16.png")
+    # All tiles the game uses live in images/biomes/.
+    tiles_path = IMG / "biomes/homestead-tiles-16.png"
+    tiles_path.parent.mkdir(parents=True, exist_ok=True)
+    sheet.save(tiles_path)
+    print(f"  {'images/biomes/homestead-tiles-16.png':40s} {sheet.width}x{sheet.height}")
     meta["tiles"] = {"order": list(HOMESTEAD_TILES)}
 
     # Lit window for the night; same box on the night half (offset 1295 display px).

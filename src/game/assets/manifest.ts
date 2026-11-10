@@ -8,7 +8,7 @@
  * - `temp: true` marks third-party placeholders listed in ASSETS-TODO.md.
  */
 
-// Design-system PNGs (images/), bundled by Vite and used as fallbacks.
+// PNGs in images/, bundled by Vite: design-system fallbacks and the location tiles (images/biomes/).
 // images/previews/ is for viewing only and must never reach the game.
 const designPngs = import.meta.glob<string>(['../../../images/**/*.png', '!../../../images/previews/**'], {
   eager: true,
@@ -103,16 +103,12 @@ export const ASSETS: Record<string, Asset> = {
   ),
   emblem: img(pub('portraits/emblem.png')),
 
-  // Biome tiles from the owner's biome sheets (scripts/assets/build_biome_tiles.py).
-  ...Object.fromEntries(
-    BIOMES.map((id) => [
-      `tiles-${id}`,
-      sheet(pub(`tiles/${id}-tileset-16.png`), 16, 16, 5, { fallback: designPng(`tiles/${id}-tileset-16.png`) }),
-    ]),
-  ),
+  // All tiles of the locations live in images/biomes/ (scripts/assets/build_biome_tiles.py,
+  // homestead tiles: build_sprites.py homestead).
+  ...Object.fromEntries(BIOMES.map((id) => [`tiles-${id}`, sheet(designPng(`biomes/${id}-tileset-16.png`), 16, 16, 5)])),
+  'homestead-tiles': sheet(designPng('biomes/homestead-tiles-16.png'), 16, 16, 3),
 
   // Homestead, cut from homestead-day-night-new.jpg.
-  'homestead-tiles': sheet(pub('homestead/homestead-tiles-16.png'), 16, 16, 3),
   'homestead-house': img(pub('homestead/house.png')),
   // Trading stall (images/buildings/shop-stall-new.jpg, scripts/assets/build_buildings.py stall).
   'shop-stall': img(pub('homestead/shop-stall.png')),

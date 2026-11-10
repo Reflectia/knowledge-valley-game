@@ -54,7 +54,7 @@ def main() -> None:
     old_h = load(OLD / "characters/heroine-front-back-side-16x32.png")
     rows.append(("Героїня (старе | нове: 4 кадри × 3 напрямки)", row([(old_h, load(NEW / "characters/heroine.png"))])))
     home = ["house", "tree-blossom-a", "tree-blossom-b", "lamp-post", "window-lit", "homestead-tiles-16"]
-    rows.append(("Садиба (нове)", row([(None, load(NEW / f"homestead/{h}.png")) for h in home])))
+    rows.append(("Садиба (нове)", row([(None, load(OLD / "biomes/homestead-tiles-16.png" if h == "homestead-tiles-16" else NEW / f"homestead/{h}.png")) for h in home])))
     rows.append(("Курсор (нове)", row([(None, load(NEW / "ui/cursor-sword-16.png"))])))
 
     label_h = 14

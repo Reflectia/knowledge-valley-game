@@ -142,7 +142,7 @@ function homestead() {
   const W = 40;
   const H = 30;
   const m = new MapBuilder(W, H, { title: 'Садиба', kind: 'homestead' });
-  m.tilesets.push(tileset({ firstgid: 1, name: 'homestead', image: '../homestead/homestead-tiles-16.png', w: 48, h: 16, columns: 3, tilecount: 3 }));
+  m.tilesets.push(tileset({ firstgid: 1, name: 'homestead', image: '../../../images/biomes/homestead-tiles-16.png', w: 48, h: 16, columns: 3, tilecount: 3 }));
   // Kenney Tiny Town (temporary) for the garden fence. Fence pieces block walking.
   const FENCE = { tl: 44, tr: 46, bl: 80, br: 82, h: 81, left: 56, right: 58 };
   const TOWN = 4;
@@ -313,7 +313,7 @@ function location(pack, { entrance, seed, walkableSpecial }) {
   // biome tileset: 0 ground, 1 path, 2 special surface, 3 prop drawn on the ground, 4 the same prop
   // on transparency (for the decor layer). Props always block; the special surface depends on the biome.
   const collides = walkableSpecial ? [3, 4] : [2, 3, 4];
-  m.tilesets.push(tileset({ firstgid: 1, name: pack, image: `../../../images/tiles/${pack}-tileset-16.png`, w: 80, h: 16, columns: 5, tilecount: 5, collides }));
+  m.tilesets.push(tileset({ firstgid: 1, name: pack, image: `../../../images/biomes/${pack}-tileset-16.png`, w: 80, h: 16, columns: 5, tilecount: 5, collides }));
   const GROUND = 1;
   const PATH = 2;
   const SPECIAL = 3;
