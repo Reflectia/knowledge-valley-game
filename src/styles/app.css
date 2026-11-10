@@ -700,6 +700,33 @@ body[data-screen='start'] {
   image-rendering: pixelated;
 }
 
+/* ------------------------------------------------------------ story scenes (stage 12) */
+
+/* A story letter: the same paper as the mailbox letters, the emblem as its picture. */
+.story {
+  width: min(560px, 100%);
+  display: grid;
+  justify-items: center;
+  text-align: center;
+  background: var(--parchment-50);
+  box-shadow: 0 0 0 2px var(--parchment-300);
+}
+.story__picture {
+  width: 128px;
+  height: 128px;
+  image-rendering: pixelated;
+  margin-bottom: var(--space-6);
+}
+/* Room for the longest line, so the button does not jump between lines. */
+.story__line {
+  min-height: 96px;
+}
+.story .dialog-actions {
+  width: 100%;
+  justify-content: space-between;
+  align-items: center;
+}
+
 /* ------------------------------------------------------------ skills */
 
 .skills {

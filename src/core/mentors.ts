@@ -6,7 +6,10 @@
 import data from '../content/mentors.json';
 
 import { getPack } from './content';
+import type { ExamsWon } from './exam';
+import type { DisciplineProgress } from './rewards';
 import { daysBetween } from './rules';
+import { arcComplete, type ArcBeat } from './story';
 import type { Curriculum, Discipline, ISODate, Lab } from './types';
 
 export interface MentorContent {
@@ -18,6 +21,10 @@ export interface MentorContent {
   allDone: string[];
   welcome: { title: string; body: string; sign: string };
   reminder: { title: string; body: string; sign: string };
+  /** Semester arc (src/core/story.ts): lines per beat. */
+  arc: Record<ArcBeat, string[]>;
+  /** The letter that ends the arc. */
+  arcLetter: { title: string; body: string; sign: string };
 }
 
 export const MENTORS: Record<string, MentorContent> = Object.fromEntries(
@@ -53,6 +60,8 @@ export interface TalkContext {
   /** Rotates idle lines (e.g. the game day). */
   day: number;
   firstMeeting: boolean;
+  /** The arc beat to tell in this talk (story.nextArcBeat), if any. */
+  beat?: ArcBeat | null;
 }
 
 /**
@@ -60,7 +69,7 @@ export interface TalkContext {
  * labs, the level ceiling, everything done, a greeting the first time, else a
  * thought of the day. Returns 1–2 lines and the done count to remember.
  */
-export function mentorLines(pack: string, ctx: TalkContext): { lines: string[]; done: number } {
+export function mentorLines(pack: string, ctx: TalkContext): { lines: string[]; done: number; told?: ArcBeat } {
   const m = MENTORS[pack];
   const d = disciplineOfPack(ctx.curriculum, pack);
   const location = getPack(pack).location.name.uk;
@@ -73,8 +82,14 @@ export function mentorLines(pack: string, ctx: TalkContext): { lines: string[]; 
   const dueToday = labs.find((l) => !l.doneDate && l.deadline === ctx.today);
   const lines: string[] = [];
   if (ctx.firstMeeting) lines.push(fill(m.greet[0], base));
+  const beat = ctx.beat ? m.arc?.[ctx.beat] : undefined;
+  let told: ArcBeat | undefined;
   if (dueToday) {
     lines.push(...m.deadline.map((t) => fill(t, { ...base, lab: dueToday.labNo })));
+  } else if (beat) {
+    // A step of the semester arc: it already says the place has changed, so it stands for the praise too.
+    lines.push(...beat.map((t) => fill(t, base)));
+    told = ctx.beat!;
   } else if (done.length > ctx.seenDone) {
     const last = done.sort((a, b) => (b.doneDate! > a.doneDate! ? 1 : -1))[0];
     lines.push(fill(m.praise[0], { ...base, lab: last.labNo }));
@@ -87,15 +102,15 @@ export function mentorLines(pack: string, ctx: TalkContext): { lines: string[]; 
   } else {
     lines.push(fill(m.greet[1] ?? m.idle[0], base));
   }
-  return { lines: lines.slice(0, 3), done: done.length };
+  return { lines: lines.slice(0, 3), done: done.length, told };
 }
 
 // ------------------------------------------------------------------ mail
 
 export interface Letter {
-  /** `welcome:<disciplineKey>` or `reminder:<labKey>`: one letter each. */
+  /** `welcome:<disciplineKey>`, `reminder:<labKey>` or `arc:<disciplineKey>`: one letter each. */
   id: string;
-  kind: 'welcome' | 'reminder';
+  kind: 'welcome' | 'reminder' | 'arc';
   pack: string;
   sentOn: ISODate;
   title: string;
@@ -107,11 +122,18 @@ export interface Letter {
 /** Days before a deadline when the reminder letter arrives (spec §6). */
 export const REMINDER_DAYS = 3;
 
+/** What the letters need to know about the arcs: progress per discipline and the exams won. */
+export interface ArcState {
+  progress: Record<string, DisciplineProgress>;
+  exams: ExamsWon;
+}
+
 /**
  * New letters for today: a welcome from each mentor whose discipline is in the plan,
- * and a reminder for every unfinished lab whose deadline is 1–3 days away.
+ * a reminder for every unfinished lab whose deadline is 1–3 days away, and the letter
+ * that ends a mentor's semester arc (spec §4: the exam victory ends the arc).
  */
-export function dueLetters(c: Curriculum, today: ISODate, existing: Letter[]): Letter[] {
+export function dueLetters(c: Curriculum, today: ISODate, existing: Letter[], arcs?: ArcState): Letter[] {
   const have = new Set(existing.map((l) => l.id));
   const out: Letter[] = [];
   for (const d of Object.values(c.disciplines)) {
@@ -133,6 +155,14 @@ export function dueLetters(c: Curriculum, today: ISODate, existing: Letter[]): L
     if (!m) continue;
     const vars = { lab: lab.labNo, discipline: d.name, days: left, date: dayMonth(lab.deadline) };
     out.push({ id, kind: 'reminder', pack: d.pack, sentOn: today, title: fill(m.reminder.title, vars), body: fill(m.reminder.body, vars), sign: m.reminder.sign, read: false });
+  }
+  if (arcs) {
+    for (const d of Object.values(c.disciplines)) {
+      const m = MENTORS[d.pack];
+      const id = `arc:${d.key}`;
+      if (!m?.arcLetter || have.has(id) || !arcComplete(d, arcs.progress[d.key], today, arcs.exams)) continue;
+      out.push({ id, kind: 'arc', pack: d.pack, sentOn: today, title: m.arcLetter.title, body: m.arcLetter.body, sign: m.arcLetter.sign, read: false });
+    }
   }
   return out;
 }

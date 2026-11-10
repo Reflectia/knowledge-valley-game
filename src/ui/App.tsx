@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { connectAudio, setInGame, sfx } from '@/audio';
-import { needsExportReminder } from '@/core/rules';
+import { needsExportReminder, todayIso } from '@/core/rules';
+import { nextScene, SCENES } from '@/core/story';
 import type { RewardEvent, UiScale } from '@/core/types';
 
 import { Overlay } from './components/common';
@@ -25,6 +26,7 @@ import { ShopScreen } from './screens/ShopScreen';
 import { SkillTreeScreen } from './screens/SkillTreeScreen';
 import { SleepDialog } from './screens/SleepDialog';
 import { StartMenu } from './screens/StartMenu';
+import { StoryScene } from './screens/StoryScene';
 
 type Screen = 'start' | 'create' | 'game';
 type Modal = null | 'journal' | 'menu' | 'settings' | 'import' | 'inventory' | 'shop' | 'mail' | 'skills';
@@ -60,6 +62,11 @@ export function App() {
   const dialog = useGame((s) => s.dialog);
   const curriculum = useGame((s) => s.labs.curriculum);
   const examVictory = useGame((s) => s.examVictory);
+  const progress = useGame((s) => s.progress);
+  const exams = useGame((s) => s.labs.exams);
+  const mentorSeen = useGame((s) => s.labs.mentorSeen);
+  const storySeen = useGame((s) => s.labs.story);
+  const heroName = useGame((s) => s.world.state.player.name);
   const day = useGame((s) => s.world.state.day);
 
   const [screen, setScreen] = useState<Screen>('start');
@@ -78,6 +85,20 @@ export function App() {
   const showVictory = screen === 'game' && examVictory !== null && !showRewards;
   const showSleep = screen === 'game' && sleepRequest !== null && !showRewards && !showVictory;
   const showDialog = screen === 'game' && dialog !== null && !showRewards && !showSleep && !showVictory;
+  // Act 1 story scenes wait until nothing else is on screen (spec §2).
+  const scene = useMemo(
+    () =>
+      nextScene({
+        curriculum,
+        progress: progress.disciplines,
+        today: todayIso(),
+        exams: exams ?? {},
+        met: Object.keys(mentorSeen ?? {}),
+        seen: storySeen ?? [],
+      }),
+    [curriculum, progress, exams, mentorSeen, storySeen],
+  );
+  const showStory = screen === 'game' && ready && scene !== null && !modal && !showRewards && !showVictory && !showSleep && !showDialog;
 
   // Sound: volumes follow the settings; menus play the homestead theme, the game the place's.
   useEffect(() => connectAudio(api), [api]);
@@ -101,7 +122,7 @@ export function App() {
           showToast({ icon: 'mail', title: t('mail.newTitle'), text: t('mail.more', { count: fresh.length }), onClick: () => setModal('mail') }, 6000);
         }
       });
-  }, [screen, curriculum, day, api, t]);
+  }, [screen, curriculum, day, exams, api, t]);
 
   // The sword cursor belongs to the start menu (app.css); elsewhere the parchment arrow.
   useEffect(() => {
@@ -144,8 +165,8 @@ export function App() {
   }, [uiScaleSetting]);
 
   useEffect(() => {
-    setUiBlocking(screen !== 'game' || modal !== null || showRewards || showVictory || showSleep || showDialog);
-  }, [screen, modal, showRewards, showVictory, showSleep, showDialog, setUiBlocking]);
+    setUiBlocking(screen !== 'game' || modal !== null || showRewards || showVictory || showSleep || showDialog || showStory);
+  }, [screen, modal, showRewards, showVictory, showSleep, showDialog, showStory, setUiBlocking]);
 
   // Keyboard: J journal, Esc menu / close, 1–9 toolbar slots (spec §8 controls).
   useEffect(() => {
@@ -153,11 +174,11 @@ export function App() {
       if (e.key === 'Escape') {
         if (showDialog && !modal) api.getState().closeDialog();
         else if (modal) setModal(null);
-        else if (screen === 'game' && !showRewards && !showVictory && !showSleep) setModal('menu');
+        else if (screen === 'game' && !showRewards && !showVictory && !showSleep && !showStory) setModal('menu');
         return;
       }
       if (screen !== 'game' || isTyping(e)) return;
-      if (showRewards || showVictory || showSleep || showDialog) return;
+      if (showRewards || showVictory || showSleep || showDialog || showStory) return;
       if (e.code === 'KeyJ') setModal((m) => (m === 'journal' ? null : m ?? 'journal'));
       else if (e.code === 'KeyI') setModal((m) => (m === 'inventory' ? null : m ?? 'inventory'));
       else if (e.code === 'KeyK') setModal((m) => (m === 'skills' ? null : m ?? 'skills'));
@@ -175,7 +196,7 @@ export function App() {
       window.removeEventListener('keydown', onKey);
       window.removeEventListener('wheel', onWheel);
     };
-  }, [screen, modal, showRewards, showVictory, showSleep, showDialog, selectSlot, api]);
+  }, [screen, modal, showRewards, showVictory, showSleep, showDialog, showStory, selectSlot, api]);
 
   useEffect(() => {
     if (saveError) showToast({ icon: 'warn', title: t('toast.saveErrorTitle'), text: t('toast.saveErrorText', { reason: saveError }) }, 8000);
@@ -285,6 +306,9 @@ export function App() {
             api.getState().takeRewards();
           }}
         />
+      )}
+      {showStory && scene && (
+        <StoryScene key={scene} scene={SCENES[scene]} name={heroName} onDone={() => void api.getState().seeStory(scene)} />
       )}
       {showVictory && <ExamVictory victory={examVictory} onClose={() => api.getState().closeExamVictory()} />}
       {showSleep && (

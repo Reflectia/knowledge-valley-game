@@ -6,8 +6,9 @@ import { deriveProgress, pruneShown, reconcile, rewardKey, type DerivedProgress 
 import { BALANCE } from '@/core/content';
 import { applyDefeat, applyLoot, ENEMY_DEFS, rollLoot, type DefeatLoss } from '@/core/combat';
 import { bossFor, examState, payTrophies } from '@/core/exam';
+import { nextArcBeat, toldWith } from '@/core/story';
 import { growNight } from '@/core/homestead';
-import { dueLetters, mentorLines, type Letter } from '@/core/mentors';
+import { disciplineOfPack, dueLetters, mentorLines, type Letter } from '@/core/mentors';
 import { effectsOf, learn, NO_EFFECTS, type Effects } from '@/core/skills';
 import { atCeiling, gainXp, todayIso } from '@/core/rules';
 import {
@@ -123,6 +124,8 @@ export interface GameState {
    */
   winExam(disciplineKey: string): Promise<boolean>;
   closeExamVictory(): void;
+  /** A story scene has been shown; saved at once so it never repeats. */
+  seeStory(id: string): Promise<void>;
   maxEnergy(): number;
   maxHealth(): number;
   /** Advance the clock by real milliseconds (paused while a window is open). */
@@ -297,8 +300,8 @@ export function createGameStore(saves: SaveStore, now: () => Date = () => new Da
       },
 
       async checkMail() {
-        const { labs } = get();
-        const fresh = dueLetters(labs.curriculum, todayIso(now()), labs.mail ?? []);
+        const { labs, progress } = get();
+        const fresh = dueLetters(labs.curriculum, todayIso(now()), labs.mail ?? [], { progress: progress.disciplines, exams: labs.exams ?? {} });
         if (fresh.length === 0) return [];
         const next = { ...labs, mail: [...(labs.mail ?? []), ...fresh] };
         set({ labs: next });
@@ -317,9 +320,15 @@ export function createGameStore(saves: SaveStore, now: () => Date = () => new Da
       talkTo(pack) {
         const { labs, world, progress } = get();
         const seen = labs.mentorSeen ?? {};
-        const { lines, done } = mentorLines(pack, {
+        const today = todayIso(now());
+        // The next step of the mentor's semester arc, told once.
+        const d = disciplineOfPack(labs.curriculum, pack);
+        const arcSeen = labs.arcSeen ?? {};
+        const beat = d ? nextArcBeat(d, progress.disciplines[d.key], today, labs.exams ?? {}, arcSeen[d.key] ?? []) : null;
+        const { lines, done, told: beatTold } = mentorLines(pack, {
+          beat,
           curriculum: labs.curriculum,
-          today: todayIso(now()),
+          today,
           name: world.state.player.name,
           atCeiling: atCeiling(world.state.player, progress.ceiling),
           seenDone: seen[pack] ?? 0,
@@ -327,7 +336,8 @@ export function createGameStore(saves: SaveStore, now: () => Date = () => new Da
           firstMeeting: seen[pack] === undefined,
         });
         if (lines.length === 0) return;
-        const next = { ...labs, mentorSeen: { ...seen, [pack]: done } };
+        const told = d && beatTold ? { ...arcSeen, [d.key]: [...new Set([...(arcSeen[d.key] ?? []), ...toldWith(beatTold)])] } : arcSeen;
+        const next = { ...labs, mentorSeen: { ...seen, [pack]: done }, arcSeen: told };
         set({ dialog: { pack, lines }, labs: next });
         void persist(() => saves.saveLabs(next));
       },
@@ -377,6 +387,14 @@ export function createGameStore(saves: SaveStore, now: () => Date = () => new Da
       },
 
       closeExamVictory: () => set({ examVictory: null }),
+
+      async seeStory(id) {
+        const { labs } = get();
+        if ((labs.story ?? []).includes(id)) return;
+        const next = { ...labs, story: [...(labs.story ?? []), id] };
+        set({ labs: next });
+        await persist(() => saves.saveLabs(next));
+      },
 
       tickClock(realMs) {
         const s = get();

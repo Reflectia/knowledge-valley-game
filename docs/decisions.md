@@ -41,3 +41,10 @@ Date: 2026-11-04.
 16. **A defeat by the boss is the ordinary defeat** (home, part of the resources lost, the day ends), so «переграти наступного дня» needs no extra rule.
 17. **The victory is saved at once with the labs** (`labs.exams`); the trophy goes into the bag and is paid once, also after a closed tab (`world.trophies`). Boss coins and XP follow the world, like enemy loot.
 18. **Boss names, texts and trophies are drafts** (`bosses.json`, `items.json`) for the owner to edit; the art prompt is `docs/gemini-prompt-bosses.md`. The owner's art arrived the same day (2026-11-10); cut from the sheets it was too noisy at 32×32 / 16×16, so the bosses and trophies are redrawn by hand in simple shapes after it (`scripts/assets/draw_bosses.py`).
+
+## Mentor arcs and act 1 (stage 12)
+
+19. **A mentor's semester arc follows the discipline** (`src/core/story.ts`): beats at revival stages 2–5, when the exam boss is ready, and the ending — after the exam victory, or when every lab is done for a discipline without an exam. One beat per talk; labs entered all at once jump to the latest stage beat instead of reciting every stage. A deadline day keeps its reminder and the beat waits.
+20. **The arc ending also comes as a letter** (`arcLetter` in `mentors.json`), so it is not missed. Each ending gives the heroine a piece of the relative's old map — the thread into act 2.
+21. **Act 1 has four story scenes** (`src/content/story.json`): the arrival letter (the first time in the game), meeting every mentor of the plan, the first fully revived location and the end of act 1 (every semester-1 arc complete). Each is shown once, saved with the labs, as a story letter (MentorLetter README) with the valley emblem.
+22. **The relative has no name** (the spec gives none): «твоя далека родичка-чарівниця». All arc and scene texts are drafts for the owner to edit.

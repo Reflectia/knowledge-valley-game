@@ -33,6 +33,10 @@ export interface LabsRecord {
   mentorSeen: Record<string, number>;
   /** Exam bosses beaten (stage 11). Saved at once, like the labs: a victory is never lost. */
   exams: ExamsWon;
+  /** Mentor arc beats already told, per discipline (stage 12, src/core/story.ts). */
+  arcSeen: Record<string, string[]>;
+  /** Story scenes already shown (act 1: arrival, mentorsMet, firstBloom, act1End). */
+  story: string[];
 }
 
 export interface WorldRecord {
@@ -84,7 +88,7 @@ export function defaultSettings(now = new Date()): Settings {
 }
 
 export function newLabs(now = new Date()): LabsRecord {
-  return { curriculum: EMPTY_CURRICULUM, settings: defaultSettings(now), skills: [], mail: [], mentorSeen: {}, exams: {} };
+  return { curriculum: EMPTY_CURRICULUM, settings: defaultSettings(now), skills: [], mail: [], mentorSeen: {}, exams: {}, arcSeen: {}, story: [] };
 }
 
 // ----------------------------------------------------------------- migrations
@@ -139,6 +143,9 @@ export function migrate(
   file.labs.mentorSeen ??= {};
   // Stage 11: exam bosses beaten.
   file.labs.exams ??= {};
+  // Stage 12: mentor arcs and story scenes.
+  file.labs.arcSeen ??= {};
+  file.labs.story ??= [];
   return file;
 }
 
