@@ -15,6 +15,7 @@ import { GameMenu } from './screens/GameMenu';
 import { Hud } from './screens/Hud';
 import { ImportScreen } from './screens/ImportScreen';
 import { DialogBox } from './screens/DialogBox';
+import { ExamVictory } from './screens/ExamVictory';
 import { InventoryScreen } from './screens/InventoryScreen';
 import { MailScreen } from './screens/MailScreen';
 import { Journal } from './screens/Journal';
@@ -58,6 +59,7 @@ export function App() {
   const selectedItem = useGame((s) => s.world.state.toolbar[s.selectedSlot] ?? null);
   const dialog = useGame((s) => s.dialog);
   const curriculum = useGame((s) => s.labs.curriculum);
+  const examVictory = useGame((s) => s.examVictory);
   const day = useGame((s) => s.world.state.day);
 
   const [screen, setScreen] = useState<Screen>('start');
@@ -72,8 +74,10 @@ export function App() {
   // Rewards wait for the game screen; a batch is shown as one scene.
   const rewards: RewardEvent[] = screen === 'game' ? pending : [];
   const showRewards = rewards.length > 0;
-  const showSleep = screen === 'game' && sleepRequest !== null && !showRewards;
-  const showDialog = screen === 'game' && dialog !== null && !showRewards && !showSleep;
+  // An exam victory comes right after the boss falls, before anything else.
+  const showVictory = screen === 'game' && examVictory !== null && !showRewards;
+  const showSleep = screen === 'game' && sleepRequest !== null && !showRewards && !showVictory;
+  const showDialog = screen === 'game' && dialog !== null && !showRewards && !showSleep && !showVictory;
 
   // Sound: volumes follow the settings; menus play the homestead theme, the game the place's.
   useEffect(() => connectAudio(api), [api]);
@@ -140,8 +144,8 @@ export function App() {
   }, [uiScaleSetting]);
 
   useEffect(() => {
-    setUiBlocking(screen !== 'game' || modal !== null || showRewards || showSleep || showDialog);
-  }, [screen, modal, showRewards, showSleep, showDialog, setUiBlocking]);
+    setUiBlocking(screen !== 'game' || modal !== null || showRewards || showVictory || showSleep || showDialog);
+  }, [screen, modal, showRewards, showVictory, showSleep, showDialog, setUiBlocking]);
 
   // Keyboard: J journal, Esc menu / close, 1–9 toolbar slots (spec §8 controls).
   useEffect(() => {
@@ -149,11 +153,11 @@ export function App() {
       if (e.key === 'Escape') {
         if (showDialog && !modal) api.getState().closeDialog();
         else if (modal) setModal(null);
-        else if (screen === 'game' && !showRewards && !showSleep) setModal('menu');
+        else if (screen === 'game' && !showRewards && !showVictory && !showSleep) setModal('menu');
         return;
       }
       if (screen !== 'game' || isTyping(e)) return;
-      if (showRewards || showSleep || showDialog) return;
+      if (showRewards || showVictory || showSleep || showDialog) return;
       if (e.code === 'KeyJ') setModal((m) => (m === 'journal' ? null : m ?? 'journal'));
       else if (e.code === 'KeyI') setModal((m) => (m === 'inventory' ? null : m ?? 'inventory'));
       else if (e.code === 'KeyK') setModal((m) => (m === 'skills' ? null : m ?? 'skills'));
@@ -171,7 +175,7 @@ export function App() {
       window.removeEventListener('keydown', onKey);
       window.removeEventListener('wheel', onWheel);
     };
-  }, [screen, modal, showRewards, showSleep, showDialog, selectSlot, api]);
+  }, [screen, modal, showRewards, showVictory, showSleep, showDialog, selectSlot, api]);
 
   useEffect(() => {
     if (saveError) showToast({ icon: 'warn', title: t('toast.saveErrorTitle'), text: t('toast.saveErrorText', { reason: saveError }) }, 8000);
@@ -282,6 +286,7 @@ export function App() {
           }}
         />
       )}
+      {showVictory && <ExamVictory victory={examVictory} onClose={() => api.getState().closeExamVictory()} />}
       {showSleep && (
         <SleepDialog
           reason={sleepRequest}

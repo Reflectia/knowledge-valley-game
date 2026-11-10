@@ -409,6 +409,16 @@ body[data-screen='start'] {
 .journal__semesters {
   margin-bottom: var(--space-6);
 }
+/* Exam boss line under the discipline (stage 11): the icon says the state, not only the color. */
+.journal__exam {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+.journal__exam--ready,
+.journal__exam--won {
+  color: var(--ink);
+}
 .journal__form {
   grid-column: 1 / -1;
 }

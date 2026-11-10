@@ -3,6 +3,7 @@ import type { StoreApi } from 'zustand/vanilla';
 
 import { setNight, setPlace, sfx, type Sfx } from '@/audio';
 import { getPack } from '@/core/content';
+import { readyBossIn, shieldHits } from '@/core/exam';
 import { addItem, cropFrame, decorAt, harvest, isRipe, pickUpDecor, placeDecor, plant, till, water } from '@/core/homestead';
 import { getItem, ITEMS } from '@/core/items';
 import { MENTORS, visitorsToday } from '@/core/mentors';
@@ -18,7 +19,7 @@ import { LIGHT, LIGHT_RADIUS, type Light } from '../lighting/lightmap';
 import { NightLayer, createGlowOverlay } from '../lighting/NightLayer';
 import { revivalMatrix } from '../lighting/revival';
 import { buildingTiles, PACK_STYLE, wallRows } from '../world/buildings';
-import { Combat } from '../world/Combat';
+import { Combat, type BossSpawn } from '../world/Combat';
 
 /** Lantern glass color in lamp-post.png (set by scripts/assets/build_sprites.py). */
 const LAMP_GLASS_RGB: [number, number, number] = [58, 66, 78];
@@ -144,6 +145,7 @@ export class WorldScene extends Phaser.Scene {
     const objects = this.map.getObjectLayer('objects')?.objects ?? [];
     const spawns = new Map<string, { x: number; y: number }>();
     const exits: { rect: Phaser.Geom.Rectangle; target: MapId; spawn: string; requiresPack?: string }[] = [];
+    let bossSpot: { x: number; y: number } | null = null;
 
     for (const o of objects) {
       const p = props(o);
@@ -193,6 +195,9 @@ export class WorldScene extends Phaser.Scene {
         case 'mentor':
           this.mentorSpot = { x, y };
           break;
+        case 'boss':
+          bossSpot = { x, y };
+          break;
         case 'visit':
           this.visitSpots.push({ x, y });
           break;
@@ -237,6 +242,7 @@ export class WorldScene extends Phaser.Scene {
         pack,
         entrance: spawns.get('from-homestead') ?? spawn,
         locked: this.gates.filter((g) => g.body).map((g) => g.rect),
+        boss: bossSpot ? this.examBoss(pack, bossSpot) : null,
         notice: (key) => this.notice(key),
         leaving: () => this.leaving,
       });
@@ -340,6 +346,14 @@ export class WorldScene extends Phaser.Scene {
         color: LIGHT.warm,
       });
     }
+  }
+
+  /** The exam boss waiting in this location today (spec §4), with its knowledge shield. */
+  private examBoss(pack: string, at: { x: number; y: number }): BossSpawn | null {
+    const s = this.store.getState();
+    const d = readyBossIn(pack, s.labs.curriculum, s.progress.disciplines, todayIso(), s.labs.exams ?? {});
+    if (!d) return null;
+    return { disciplineKey: d.key, pack, x: at.x, y: at.y, shield: shieldHits(s.progress.disciplines[d.key]) };
   }
 
   private packOfMap(): string | null {
@@ -468,7 +482,8 @@ export class WorldScene extends Phaser.Scene {
     const pack = this.packOfMap();
     if (!pack) return;
     const { stage } = this.revivalOf(pack);
-    showToast({ icon: 'spark', title: loc(getPack(pack).location.name), text: i18n.t('world.revival', { stage }) });
+    const boss = this.combat?.hasBoss() ? i18n.t('exam.waiting') : '';
+    showToast({ icon: 'spark', title: loc(getPack(pack).location.name), text: [i18n.t('world.revival', { stage }), boss].filter(Boolean).join(' ') });
   }
 
   // ------------------------------------------------------------------ actions

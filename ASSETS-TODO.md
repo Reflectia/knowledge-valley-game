@@ -93,4 +93,10 @@ glasshouse is unused); library has two variants of levels 1–2 — the lower on
 The Tiny Town building tiles (`src/game/world/buildings.ts`) remain only as a fallback for
 future packs without art.
 
-Still missing, no placeholder yet: exam bosses 32×32 (v0.2), house interior tiles.
+Exam bosses (stage 11): no art yet. Each boss is its biome enemy drawn ×2 at runtime
+(`placeholder` in `src/content/bosses.json`); when `public/assets/bosses/<pack>.png` (32×32) exists,
+add the pack to `BOSS_ART` in `src/game/assets/manifest.ts`. Trophies are temporary self-drawn golden
+cups (`scripts/assets/build_trophies.py` → `public/assets/items/trophy-<pack>.png`). The Gemini prompt for
+both is `docs/gemini-prompt-bosses.md`.
+
+Still missing, no placeholder yet: house interior tiles.

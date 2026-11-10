@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { getPack } from '@/core/content';
+import { examState, type ExamsWon } from '@/core/exam';
 import { isOnTime, rarityFor, todayIso } from '@/core/rules';
 import type { Lab } from '@/core/types';
 
@@ -13,6 +14,9 @@ import { loc } from '@/i18n';
 
 type Edit = { key: string; mode: 'date' | 'score' } | null;
 
+/** A stable empty record for the selector (a new {} each render would loop). */
+const NO_EXAMS: ExamsWon = {};
+
 /** Labs on the left page; the rest go to the right page (JournalPage README: 32 px rhythm). */
 const LEFT_PAGE_LABS = 2;
 
@@ -21,6 +25,7 @@ export function Journal({ onClose, onImport }: { onClose: () => void; onImport: 
   const { t } = useTranslation();
   const curriculum = useGame((s) => s.labs.curriculum);
   const progress = useGame((s) => s.progress);
+  const won = useGame((s) => s.labs.exams ?? NO_EXAMS);
 
   const semesters = useMemo(
     () => [...new Set(Object.values(curriculum.disciplines).map((d) => d.semester))].sort((a, b) => b - a),
@@ -53,6 +58,7 @@ export function Journal({ onClose, onImport }: { onClose: () => void; onImport: 
     .sort((a, b) => a.labNo - b.labNo);
   const p = progress.disciplines[current.key];
   const pack = getPack(current.pack);
+  const exam = examState(current, p, todayIso(), won);
 
   return (
     <div className="journal-wrap">
@@ -92,6 +98,20 @@ export function Journal({ onClose, onImport }: { onClose: () => void; onImport: 
                 ? t('journal.building', { name: loc(pack.building.name), level: p.buildingLevel })
                 : t('journal.buildingNone', { name: loc(pack.building.name) })}
             </p>
+            {exam !== 'none' && (
+              <p className={`dv-page__sub journal__exam journal__exam--${exam}`}>
+                <Ico name={exam === 'won' ? 'check' : exam === 'ready' ? 'warn' : 'clock'} />
+                {exam === 'won'
+                  ? t('exam.status.won', { date: dayMonth(won[current.key].date) })
+                  : exam === 'ready'
+                    ? t('exam.status.ready', { place: loc(pack.location.name) })
+                    : exam === 'date'
+                      ? current.examDate
+                        ? t('exam.status.date', { date: dayMonth(current.examDate) })
+                        : t('exam.status.noDate')
+                      : t('exam.status.labs')}
+              </p>
+            )}
             <LabList labs={labs.slice(0, LEFT_PAGE_LABS)} />
           </article>
           <article className="dv-page journal__page">

@@ -13,6 +13,7 @@
 //   interact   rect   action = sleep | journal
 //   gate       rect   minStage (fog zone, opens at that revival stage)
 //   mentor     point  where the mentor stands (stage 7)
+//   boss       point  where the exam boss waits, deep in the last zone (stage 11)
 //   garden     rect   tiles that can be tilled with the hoe
 //   building   rect   plot for a discipline building (pack); the building grows with labs
 //   shop       rect   the shop stall (click to open the shop)
@@ -425,6 +426,20 @@ function location(pack, { entrance, seed, walkableSpecial }) {
     const b2 = Math.floor(L * 0.72);
     m.obj('gate', 'zone-2', ...rectAcross(b1, b2 - 1, 0, S - 1), { minStage: 3 });
     m.obj('gate', 'zone-3', ...rectAcross(b2, L - 1, 0, S - 1), { minStage: 5 });
+  }
+  // The exam boss waits at the end of the path, in the last zone (it opens when every lab is
+  // done, like the boss itself). A small clearing keeps props out of the fight.
+  {
+    const bossD = L - 5;
+    const bossS = pathS(bossD);
+    for (let dd = -2; dd <= 2; dd++) {
+      for (let ss = -2; ss <= 2; ss++) {
+        const [x, y] = toXY(bossD + dd, bossS + ss);
+        if (decor.get(x, y)) decor.set(x, y, 0);
+      }
+    }
+    const [x, y] = toXY(bossD, bossS);
+    m.obj('boss', 'boss', x * T + 8, y * T + 14);
   }
   save(pack, m);
 }
