@@ -193,6 +193,44 @@ PROPS = {
 }
 
 
+# Hand-drawn surfaces that replace a sampled one (the sample read as noise once tiled).
+# Nothing touches the tile border, so they repeat without seams.
+SURFACES = {
+    # library ground: calm olive moss with a few fallen leaves
+    ("library", "ground"): {
+        "pal": {
+            '.': (112, 104, 58), 'k': (98, 91, 50), 'm': (124, 116, 66),
+            'y': (214, 160, 54), 'Y': (240, 196, 92), 'o': (190, 108, 44), 'O': (222, 140, 64),
+            'r': (146, 66, 40), 'R': (178, 88, 52), 'd': (84, 64, 36),
+        },
+        "rows": [
+            "................",
+            "....k.......m...",
+            "..........yy....",
+            ".m.......yYy....",
+            "..........yd....",
+            "................",
+            "...k........k...",
+            "................",
+            "...........m....",
+            "..m.............",
+            "...rr....k......",
+            "..rRr...........",
+            "...rd.......m...",
+            "........k.......",
+            ".k..............",
+            "........m.......",
+        ],
+    },
+}
+
+
+def hand_surface(spec):
+    rows, pal = spec["rows"], spec["pal"]
+    assert len(rows) == 16 and all(len(r) == 16 for r in rows)
+    return np.array([[pal[c] for c in r] for r in rows], np.uint8)
+
+
 def hand_prop(spec):
     rows, pal, bg = spec["rows"], spec["pal"], spec["bg"]
     assert len(rows) == 16 and all(len(r) == 16 for r in rows)
@@ -319,6 +357,8 @@ def build(biome):
     ground = seamless_noise(ground, seed + 1)
     path = seamless_bricks(path, seed + 2) if biome in BRICK_PATHS else seamless_noise(path, seed + 2)
     special = seamless_noise(special, seed + 3)
+    if (biome, "ground") in SURFACES:
+        ground = hand_surface(SURFACES[(biome, "ground")])
     opaque = lambda t: np.dstack([t, np.full((16, 16), 255, np.uint8)])
     if biome in PROPS:
         prop_rgba, alone = hand_prop(PROPS[biome])
