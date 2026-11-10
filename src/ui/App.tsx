@@ -19,7 +19,7 @@ import { InventoryScreen } from './screens/InventoryScreen';
 import { MailScreen } from './screens/MailScreen';
 import { Journal } from './screens/Journal';
 import { RewardScene } from './screens/RewardScene';
-import { SettingsScreen } from './screens/SettingsScreen';
+import { SettingsScreen, type SettingsTab } from './screens/SettingsScreen';
 import { ShopScreen } from './screens/ShopScreen';
 import { SkillTreeScreen } from './screens/SkillTreeScreen';
 import { SleepDialog } from './screens/SleepDialog';
@@ -62,6 +62,11 @@ export function App() {
 
   const [screen, setScreen] = useState<Screen>('start');
   const [modal, setModal] = useState<Modal>(null);
+  const [settingsTab, setSettingsTab] = useState<SettingsTab>('sound');
+  const openSettings = (tab: SettingsTab = 'sound') => {
+    setSettingsTab(tab);
+    setModal('settings');
+  };
   const [scale, setScale] = useState(() => resolveScale(uiScaleSetting));
 
   // Rewards wait for the game screen; a batch is shown as one scene.
@@ -173,7 +178,7 @@ export function App() {
     api.getState().beginSession();
     if (needsExportReminder(api.getState().labs.settings, new Date())) {
       showToast(
-        { icon: 'upload', title: t('toast.exportTitle'), text: t('toast.exportText'), onClick: () => setModal('settings') },
+        { icon: 'upload', title: t('toast.exportTitle'), text: t('toast.exportText'), onClick: () => openSettings('save') },
         8000,
       );
     }
@@ -182,7 +187,7 @@ export function App() {
   return (
     <div className="dv dv-ui app-ui" data-scale={scale}>
       {screen === 'start' && (
-        <StartMenu onContinue={enterGame} onNewGame={() => setScreen('create')} onSettings={() => setModal('settings')} />
+        <StartMenu onContinue={enterGame} onNewGame={() => setScreen('create')} onSettings={() => openSettings()} />
       )}
       {screen === 'create' && (
         <CreateCharacter
@@ -214,7 +219,7 @@ export function App() {
             onClose={() => setModal(null)}
             onJournal={() => setModal('journal')}
             onImport={() => setModal('import')}
-            onSettings={() => setModal('settings')}
+            onSettings={() => openSettings()}
             onTitle={() => {
               setModal(null);
               setScreen('start');
@@ -224,7 +229,11 @@ export function App() {
       )}
       {modal === 'settings' && (
         <Overlay dim>
-          <SettingsScreen onClose={() => setModal(null)} onImportPlan={screen === 'game' ? () => setModal('import') : undefined} />
+          <SettingsScreen
+            initialTab={settingsTab}
+            onClose={() => setModal(null)}
+            onImportPlan={screen === 'game' ? () => setModal('import') : undefined}
+          />
         </Overlay>
       )}
       {modal === 'import' && <ImportScreen onClose={() => setModal(null)} />}

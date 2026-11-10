@@ -11,11 +11,21 @@ import { downloadText } from '../format';
 import { LanguageToggle } from './StartMenu';
 
 type Tab = 'sound' | 'game' | 'save';
+export type SettingsTab = Tab;
 
 /** Settings (spec §8 screen 11): volume, language, rarity thresholds, save export/import. */
-export function SettingsScreen({ onClose, onImportPlan }: { onClose: () => void; onImportPlan?: () => void }) {
+export function SettingsScreen({
+  onClose,
+  onImportPlan,
+  initialTab = 'sound',
+}: {
+  onClose: () => void;
+  onImportPlan?: () => void;
+  /** The export reminder opens «Збереження» directly. */
+  initialTab?: SettingsTab;
+}) {
   const { t } = useTranslation();
-  const [tab, setTab] = useState<Tab>('sound');
+  const [tab, setTab] = useState<Tab>(initialTab);
   const tabs: { id: Tab; icon: string }[] = [
     { id: 'sound', icon: 'sound' },
     { id: 'game', icon: 'gear' },

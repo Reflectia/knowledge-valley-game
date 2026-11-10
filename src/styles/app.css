@@ -349,15 +349,24 @@ body {
 .toasts .dv-toast {
   pointer-events: auto;
 }
-/* A notice with an action is a <button>: keep the toast look. */
-button.dv-toast {
+/* A notice with an action: the text is a button (keeps the toast look), × closes it. */
+.dv-toast__action {
   appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-6);
   margin: 0;
+  padding: 0;
+  border: 0;
   font: inherit;
+  color: inherit;
   text-align: left;
-  background-color: transparent;
+  background: none;
 }
-.dv-toast.is-clickable:hover .dv-toast__title {
+.dv-toast__close {
+  flex: none;
+}
+.dv-toast__action:hover .dv-toast__title {
   text-decoration: underline;
 }
 
