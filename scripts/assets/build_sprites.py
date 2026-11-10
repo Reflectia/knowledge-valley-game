@@ -111,6 +111,75 @@ def start_menu() -> None:
 # --------------------------------------------------------------------------- homestead
 
 
+HOMESTEAD_GRASS_PAL = {
+    '.': (91, 156, 64), 'v': (53, 103, 66), 'm': (70, 125, 62), 'l': (135, 195, 77),
+    'p': (214, 148, 178), 'c': (240, 232, 176), 'y': (226, 206, 96),
+}
+HOMESTEAD_PATH_PAL = {
+    '.': (157, 111, 65), 'd': (138, 94, 56), 'e': (118, 84, 58),
+    'S': (180, 174, 142), 's': (155, 151, 121), 'o': (100, 78, 60),
+}
+HOMESTEAD_TILES = {
+    # plain grass with a few tufts
+    "grass": [
+        "................",
+        "...........l....",
+        "..v.............",
+        ".vmv............",
+        "........m.......",
+        "................",
+        ".............v..",
+        "............vmv.",
+        "....l...........",
+        "................",
+        "......v.........",
+        ".....vmv.....l..",
+        "................",
+        "..m.............",
+        "..........v.....",
+        "................",
+    ],
+    # the same grass with three small flowers (scattered between plain grass)
+    "grass-flowers": [
+        "................",
+        "................",
+        "...p............",
+        "..pyp.......v...",
+        "...p.......vmv..",
+        "................",
+        "........c.......",
+        ".......cyc......",
+        "..l.....c.......",
+        "................",
+        "............p...",
+        "...v.......pyp..",
+        "..vmv.......p...",
+        "................",
+        "......l.........",
+        "................",
+    ],
+    # dirt path with two pebbles
+    "path": [
+        "................",
+        "....d.......e...",
+        "..........SS....",
+        ".........Ssso...",
+        "..e.......oo....",
+        "................",
+        "......d.........",
+        "..............d.",
+        ".d..........e...",
+        "................",
+        "...Ss...........",
+        "...so....d......",
+        "................",
+        "..........e.....",
+        "......d.........",
+        "..............e.",
+    ],
+}
+
+
 def homestead() -> None:
     """Objects and tiles for the homestead, cut from the day half at 1/8 scale.
 
@@ -141,18 +210,16 @@ def homestead() -> None:
         save(im, f"homestead/{name}.png")
         meta[name] = {"w": im.width, "h": im.height}
 
-    # Tiles 16×16 (no background removal).
-    tiles = {
-        "grass": box(1100, 30, 1220, 150),
-        "grass-flowers": box(150, 1255, 270, 1375),
-        "path": box(300, 1095, 420, 1215),
-    }
-    sheet = Image.new("RGBA", (16 * len(tiles), 16))
-    for i, (name, b) in enumerate(tiles.items()):
-        im = pixelize(src, Region(b, remove_bg=False), (16, 16), colors=8, scale=(b[2] - b[0]) / 16)
+    # Tiles 16×16, hand-drawn in the scene's colors: cut from the scene they were not seamless
+    # and read as noise once repeated. Nothing touches the tile border, so they repeat cleanly.
+    sheet = Image.new("RGBA", (16 * len(HOMESTEAD_TILES), 16))
+    for i, (name, rows) in enumerate(HOMESTEAD_TILES.items()):
+        assert len(rows) == 16 and all(len(r) == 16 for r in rows), name
+        pal = HOMESTEAD_PATH_PAL if name == "path" else HOMESTEAD_GRASS_PAL
+        im = Image.fromarray(np.array([[(*pal[c], 255) for c in r] for r in rows], np.uint8), "RGBA")
         sheet.alpha_composite(im, (16 * i, 0))
     save(sheet, "homestead/homestead-tiles-16.png")
-    meta["tiles"] = {"order": list(tiles)}
+    meta["tiles"] = {"order": list(HOMESTEAD_TILES)}
 
     # Lit window for the night; same box on the night half (offset 1295 display px).
     day_window = box(230, 615, 372, 768)
