@@ -70,6 +70,8 @@ SHEETS: dict[str, dict] = {
     },
     "library": {
         "blank": [(1320, 590, 1640, 692)],  # a cloud between levels 3 and 4
+        # level 3's box catches bits of level 2's drawing (a brown blob and a dark line, top left)
+        "drop_strays": True,
         "levels": [
             (45, 1170, 595, 1434),  # lower variant of the site
             (622, 980, 995, 1434),  # stone hut (the lower variant of level 2)
@@ -132,6 +134,35 @@ def defringe(idx: np.ndarray, palette: np.ndarray) -> np.ndarray:
     return out
 
 
+def drop_stray_bits(idx: np.ndarray, palette: np.ndarray, max_size: int = 20, max_lum: float = 120) -> np.ndarray:
+    """Small dark clusters detached from the building: bits of a neighbouring drawing caught by
+    the crop box (library level 3). Light detached bits are kept: sparkles and smoke puffs."""
+    solid = idx >= 0
+    seen = np.zeros(idx.shape, bool)
+    out = idx.copy()
+    h, w = idx.shape
+    for y in range(h):
+        for x in range(w):
+            if not solid[y, x] or seen[y, x]:
+                continue
+            stack, comp = [(y, x)], []
+            seen[y, x] = True
+            while stack:
+                cy, cx = stack.pop()
+                comp.append((cy, cx))
+                for ny in (cy - 1, cy, cy + 1):
+                    for nx in (cx - 1, cx, cx + 1):
+                        if 0 <= ny < h and 0 <= nx < w and solid[ny, nx] and not seen[ny, nx]:
+                            seen[ny, nx] = True
+                            stack.append((ny, nx))
+            if len(comp) > max_size:
+                continue
+            ys, xs = zip(*comp)
+            if palette[idx[ys, xs]].mean() < max_lum:
+                out[ys, xs] = -1
+    return out
+
+
 def build(pack: str) -> None:
     sheet = SHEETS[pack]
     src = np.asarray(Image.open(SRC / f"building-{pack}-new.jpg").convert("RGB")).copy()
@@ -148,6 +179,8 @@ def build(pack: str) -> None:
         idx = majority_downscale(labels, fg, max(1, round(w / scale)), max(1, round(h / scale)), 0.5, palette, 2.0)
         idx = defringe(idx, palette)
         idx = drop_specks(idx, 4)
+        if sheet.get("drop_strays"):  # only where checked: other packs have detached flags and decor
+            idx = drop_stray_bits(idx, palette)
         im = to_image(idx, palette)
         im = im.crop(im.getbbox())
         OUT.mkdir(parents=True, exist_ok=True)
