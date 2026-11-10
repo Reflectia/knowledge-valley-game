@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { sfx } from '@/audio';
 import { uniqueItem } from '@/core/content';
 import { setToolbarSlot } from '@/core/homestead';
 import { ITEMS, isConsumable, type ItemKind } from '@/core/items';
@@ -17,6 +18,7 @@ const GROUPS: { kind: ItemKind; key: string }[] = [
   { kind: 'crop', key: 'crops' },
   { kind: 'resource', key: 'resources' },
   { kind: 'furniture', key: 'furniture' },
+  { kind: 'potion', key: 'potions' },
 ];
 
 /**
@@ -30,6 +32,8 @@ export function InventoryScreen({ onClose }: { onClose: () => void }) {
   const uniques = useGame((s) => s.progress.uniques);
   const curriculum = useGame((s) => s.labs.curriculum);
   const editWorld = useGame((s) => s.editWorld);
+  const drink = useGame((s) => s.drink);
+  const [drinkNote, setDrinkNote] = useState<string | null>(null);
   const [picked, setPicked] = useState<string | null>(null);
   const [hover, setHover] = useState<string | null>(null);
 
@@ -112,6 +116,20 @@ export function InventoryScreen({ onClose }: { onClose: () => void }) {
               <p className="dv-tooltip__text">{shownItem.text}</p>
               {shownItem.sell && <p className="dv-tooltip__hint">{t('inventory.sell', { price: shownItem.sell })}</p>}
               {shownItem.kind === 'furniture' && <p className="dv-tooltip__hint">{t('inventory.place')}</p>}
+              {shownItem.kind === 'potion' && shown === picked && (
+                <button
+                  type="button"
+                  className="dv-btn dv-btn--primary inventory__drink"
+                  onClick={() => {
+                    const reason = drink(shownItem.id);
+                    setDrinkNote(reason ? t(`alchemy.fail.${reason}`) : t('alchemy.drank', { name: shownItem.name }));
+                    if (!reason) sfx('spell');
+                  }}
+                >
+                  {t('alchemy.drink')}
+                </button>
+              )}
+              {shownItem.kind === 'potion' && drinkNote && <p className="dv-tooltip__hint">{drinkNote}</p>}
             </>
           )}
           {shownUnique && (() => {

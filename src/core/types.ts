@@ -128,6 +128,10 @@ export interface WorldState {
   decor: Placed[];
   /** Discipline keys whose exam trophy is already in the world (exam.payTrophies). */
   trophies?: string[];
+  /** Alchemy recipes found in the locations (potion ids; the base ones are always known). */
+  recipes?: string[];
+  /** Potion effects that last until sleep (alchemy.Buff). Cleared every night. */
+  buffs?: string[];
 }
 
 /** One reward moment for the reward scene (single or batched retroactive). */

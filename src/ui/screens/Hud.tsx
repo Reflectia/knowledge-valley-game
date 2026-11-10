@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 
+import { BUFFS, POTIONS, type Buff } from '@/core/alchemy';
 import { DEFAULT_TITLE, packByBranch } from '@/core/content';
 import { atCeiling, xpToNext } from '@/core/rules';
 import { clockText } from '@/core/time';
@@ -47,6 +48,7 @@ export function Hud({
   const maxEnergy = useGame((s) => s.maxEnergy());
   const maxHealth = useGame((s) => s.maxHealth());
   const inventory = useGame((s) => s.world.state.inventory);
+  const buffs = useGame((s) => s.world.state.buffs);
 
   const capped = atCeiling(player, progress.ceiling);
   const need = xpToNext(player.level);
@@ -128,6 +130,20 @@ export function Hud({
           <span className="dv-levels">{pips}</span>
         </div>
         {capped && <p className="dv-caption hud__hint">{t('hud.ceilingHint')}</p>}
+        {buffs && buffs.length > 0 && (
+          // Potions that work until sleep (stage 13): the potion icon, its effect in the tooltip.
+          <ul className="hud__buffs" aria-label={t('alchemy.active')}>
+            {buffs.map((b) => {
+              const potion = POTIONS.find((p) => p.effect.buff === b);
+              const info = BUFFS[b as Buff];
+              return (
+                <li key={b} tabIndex={0} data-tip={`${info?.name}: ${info?.text}`} aria-label={`${info?.name}: ${info?.text}`}>
+                  {potion && <ItemIcon id={potion.id} />}
+                </li>
+              );
+            })}
+          </ul>
+        )}
       </section>
 
       <div className="hud__buttons">

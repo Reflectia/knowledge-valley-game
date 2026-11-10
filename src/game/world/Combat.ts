@@ -3,6 +3,7 @@ import type { StoreApi } from 'zustand/vanilla';
 
 import { sfx } from '@/audio';
 import { ENEMY_DEFS, enemiesFor, PLAYER_COMBAT, SPAWN, SPELL, WEAPONS, weaponDamage } from '@/core/combat';
+import { hasBuff, potion } from '@/core/alchemy';
 import { BOSS_LEASH, bossFor, type BossDef } from '@/core/exam';
 import { getItem } from '@/core/items';
 import { activeSkills } from '@/core/skills';
@@ -346,7 +347,10 @@ export class Combat {
       return;
     }
     defeated.keys.add(enemy.key);
-    const loot = this.o.store.getState().defeatEnemy(enemy.id);
+    const loot = this.o.store.getState().defeatEnemy(enemy.id, Math.random, this.o.pack);
+    if (loot.recipe) {
+      showToast({ icon: 'book', title: i18n.t('alchemy.found'), text: getItem(potion(loot.recipe)!.id).name }, 5000);
+    }
     const items = loot.items.map((i) => getItem(i).name).join(', ');
     showToast(
       {
@@ -376,7 +380,9 @@ export class Combat {
     const h = this.o.heroine;
     const origin = { x: h.x, y: h.y - 10 };
     const a = Phaser.Math.Angle.Between(origin.x, origin.y, target.x, target.y);
-    const dmg = weaponDamage(tool, this.o.store.getState().effects);
+    const s = this.o.store.getState();
+    // The strength potion: +2 to every weapon until sleep.
+    const dmg = weaponDamage(tool, s.effects) + (hasBuff(s.world.state, 'strength') ? 2 : 0);
     if (w.kind === 'melee') {
       sfx('swing');
       this.swing(tool, origin, a);
@@ -428,19 +434,22 @@ export class Combat {
     }
     const now = this.scene.time.now;
     if (now < this.nextSpell) return;
-    if (s.world.state.player.energy < SPELL.energy) {
+    // The star infusion: the spell is free and stronger until sleep.
+    const star = hasBuff(s.world.state, 'star');
+    const cost = star ? 0 : SPELL.energy;
+    if (s.world.state.player.energy < cost) {
       this.o.notice('world.fail.tired');
       return;
     }
     this.nextSpell = now + SPELL.cooldown;
-    s.spendEnergy(SPELL.energy);
+    if (cost > 0) s.spendEnergy(cost);
     sfx('spell');
     const h = this.o.heroine;
     const c = { x: h.x, y: h.y - 8 };
     const ring = this.scene.add.circle(c.x, c.y, 4).setStrokeStyle(2, 0x9fe3d2).setDepth(h.y + 40); // rune-glow
     this.scene.tweens.add({ targets: ring, radius: SPELL.radius, alpha: 0, duration: 260, onComplete: () => ring.destroy() });
     for (const e of [...this.enemies]) {
-      if (Phaser.Math.Distance.Between(c.x, c.y, e.sprite.x, e.sprite.y - 6) <= SPELL.radius) this.damage(e, SPELL.damage, c);
+      if (Phaser.Math.Distance.Between(c.x, c.y, e.sprite.x, e.sprite.y - 6) <= SPELL.radius) this.damage(e, SPELL.damage + (star ? 2 : 0), c);
     }
   }
 }

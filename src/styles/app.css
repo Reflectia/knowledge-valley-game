@@ -837,3 +837,74 @@ body[data-screen='start'] {
 .import__spacer {
   flex: 1;
 }
+
+/* ------------------------------------------------------------ alchemy (stage 13) */
+
+.alchemy {
+  width: min(760px, 100%);
+}
+.alchemy__list {
+  list-style: none;
+  margin: var(--space-4) 0 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-4);
+  max-height: 480px;
+  overflow: auto;
+}
+.alchemy__recipe {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--space-6);
+  padding: var(--space-4) var(--space-6);
+  background: var(--parchment-50);
+  box-shadow: 0 0 0 2px var(--parchment-300);
+}
+.alchemy__text p {
+  margin: 0;
+}
+.alchemy__name {
+  font-weight: 700;
+}
+.alchemy__needs {
+  list-style: none;
+  margin: var(--space-2) 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-6);
+}
+.alchemy__needs li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+/* A missing ingredient is marked by a line through, not only by its colour. */
+.alchemy__needs li.is-missing span {
+  color: var(--ink-muted);
+  text-decoration: line-through;
+}
+.alchemy__unknown {
+  width: 32px;
+  text-align: center;
+  font: 24px/32px var(--font-display);
+  color: var(--ink-muted);
+}
+.alchemy__recipe.is-unknown {
+  grid-template-columns: auto 1fr;
+}
+.alchemy__message {
+  min-height: 24px;
+  margin: var(--space-4) 0 0;
+}
+.inventory__drink {
+  margin-top: var(--space-4);
+}
+.hud__buffs {
+  list-style: none;
+  margin: var(--space-2) 0 0;
+  padding: 0;
+  display: flex;
+  gap: var(--space-2);
+}

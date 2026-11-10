@@ -1,7 +1,7 @@
 /** Item, crop and shop catalog from src/content/items.json (content as data). */
 import catalog from '../content/items.json';
 
-export type ItemKind = 'tool' | 'seed' | 'crop' | 'resource' | 'furniture';
+export type ItemKind = 'tool' | 'seed' | 'crop' | 'resource' | 'furniture' | 'potion';
 export type ToolKind = 'hoe' | 'water' | 'axe' | 'pickaxe' | 'sword' | 'staff' | 'bow';
 export type Placement = 'indoor' | 'outdoor' | 'any';
 

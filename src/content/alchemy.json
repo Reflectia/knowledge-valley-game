@@ -1,0 +1,102 @@
+{
+  "_comment": "Alchemy (spec §5, Science branch «Алхімія: зілля, нові рецепти, заклинання»; §4 exploration gives recipes). Brewed at the «Алхімічна лабораторія» on the homestead once the skill «Алхімія» is learned. `base` recipes are known at once; the others are found in their location (a chance per defeated enemy there). Effects: energy/health/xp now; buff lasts until sleep. Names, texts and numbers are drafts for the owner to edit. Brewing costs energy and gives XP like any action (balance.json actions.brew).",
+  "findChance": 0.25,
+  "buffs": {
+    "growth": {
+      "name": "Ріст",
+      "text": "Уночі політі рослини підростуть на день більше."
+    },
+    "strength": {
+      "name": "Сила",
+      "text": "Зброя б'є на 2 сильніше."
+    },
+    "speed": {
+      "name": "Легкі ноги",
+      "text": "Ходиш на третину швидше."
+    },
+    "star": {
+      "name": "Зоряна іскра",
+      "text": "«Іскра знань» не витрачає енергії й б'є на 2 сильніше."
+    }
+  },
+  "potions": [
+    {
+      "id": "potion-energy",
+      "base": true,
+      "effect": {
+        "energy": 40
+      },
+      "recipe": {
+        "turnip": 2,
+        "forest-moss": 1
+      }
+    },
+    {
+      "id": "potion-health",
+      "base": true,
+      "effect": {
+        "health": 50
+      },
+      "recipe": {
+        "strawberry": 1,
+        "library-stardust": 1
+      }
+    },
+    {
+      "id": "potion-growth",
+      "pack": "forest",
+      "effect": {
+        "buff": "growth"
+      },
+      "recipe": {
+        "potato": 1,
+        "forest-moss": 2
+      }
+    },
+    {
+      "id": "potion-wisdom",
+      "pack": "tower",
+      "effect": {
+        "xp": 20
+      },
+      "recipe": {
+        "sunflower": 1,
+        "tower-crystal": 2
+      }
+    },
+    {
+      "id": "potion-speed",
+      "pack": "market",
+      "effect": {
+        "buff": "speed"
+      },
+      "recipe": {
+        "strawberry": 1,
+        "market-token": 2
+      }
+    },
+    {
+      "id": "potion-strength",
+      "pack": "forge",
+      "effect": {
+        "buff": "strength"
+      },
+      "recipe": {
+        "tomato": 1,
+        "forge-ore": 2
+      }
+    },
+    {
+      "id": "potion-star",
+      "pack": "library",
+      "effect": {
+        "buff": "star"
+      },
+      "recipe": {
+        "sunflower": 1,
+        "library-stardust": 2,
+        "tower-crystal": 1
+      }
+    }
+  ]
+}

@@ -91,6 +91,10 @@ export interface Effects {
   blueprints: boolean;
   toolEnergy: number;
   swordBonus: number;
+  /** Science «Алхімія»: the alchemy lab brews potions (stage 13). */
+  alchemy: boolean;
+  /** Extra growth per watered night (the growth potion). */
+  growthBonus: number;
 }
 
 export const NO_EFFECTS: Effects = {
@@ -105,6 +109,8 @@ export const NO_EFFECTS: Effects = {
   blueprints: false,
   toolEnergy: 0,
   swordBonus: 0,
+  alchemy: false,
+  growthBonus: 0,
 };
 
 /** Combined effects of the active skills. */
@@ -126,6 +132,7 @@ export function effectsOf(learned: string[], points: Record<string, number>): Ef
       if (e.blueprints) fx.blueprints = true;
       if (e.toolEnergy) fx.toolEnergy += e.toolEnergy;
       if (e.swordBonus) fx.swordBonus += e.swordBonus;
+      if (e.alchemy) fx.alchemy = true;
     }
   }
   return fx;

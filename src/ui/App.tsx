@@ -11,6 +11,7 @@ import { HoverTip } from './components/HoverTip';
 import { Toasts, showToast } from './components/Toasts';
 import { itemCursor } from './itemCursor';
 import { useGame, useGameApi } from './GameContext';
+import { AlchemyScreen } from './screens/AlchemyScreen';
 import { CreateCharacter } from './screens/CreateCharacter';
 import { GameMenu } from './screens/GameMenu';
 import { Hud } from './screens/Hud';
@@ -29,7 +30,7 @@ import { StartMenu } from './screens/StartMenu';
 import { StoryScene } from './screens/StoryScene';
 
 type Screen = 'start' | 'create' | 'game';
-type Modal = null | 'journal' | 'menu' | 'settings' | 'import' | 'inventory' | 'shop' | 'mail' | 'skills';
+type Modal = null | 'journal' | 'menu' | 'settings' | 'import' | 'inventory' | 'shop' | 'mail' | 'skills' | 'alchemy';
 
 /** UI scale ×2 / ×3 / ×4 (design system: ui-scale-default / -1080 / -1440). */
 function resolveScale(setting: UiScale): 2 | 3 | 4 {
@@ -154,6 +155,7 @@ export function App() {
       if (r === 'journal') setModal('journal');
       else if (r === 'shop') setModal('shop');
       else if (r === 'mail') setModal('mail');
+      else if (r === 'alchemy') setModal('alchemy');
     }
   }, [uiRequest, screen, api]);
 
@@ -292,6 +294,11 @@ export function App() {
             setModal('journal');
           }}
         />
+      )}
+      {modal === 'alchemy' && (
+        <Overlay>
+          <AlchemyScreen onClose={() => setModal(null)} />
+        </Overlay>
       )}
       {modal === 'shop' && (
         <Overlay>

@@ -48,3 +48,10 @@ Date: 2026-11-04.
 20. **The arc ending also comes as a letter** (`arcLetter` in `mentors.json`), so it is not missed. Each ending gives the heroine a piece of the relative's old map — the thread into act 2.
 21. **Act 1 has four story scenes** (`src/content/story.json`): the arrival letter (the first time in the game), meeting every mentor of the plan, the first fully revived location and the end of act 1 (every semester-1 arc complete). Each is shown once, saved with the labs, as a story letter (MentorLetter README) with the valley emblem.
 22. **The relative has no name** (the spec gives none): «твоя далека родичка-чарівниця». All arc and scene texts are drafts for the owner to edit.
+
+## Alchemy (stage 13)
+
+23. **The alchemy lab is the Science building** («Алхімічна лабораторія» on the homestead). With the skill «Алхімія» (the last Science skill) and the heroine next to it, it opens the brewing window; otherwise it shows the building as before.
+24. **Seven potions** (`src/content/alchemy.json`): energy and health are known at once; each location hides one more recipe (growth, wisdom/XP, speed, strength, star spell), found with a 25 % chance per enemy defeated there — spec §4 «дослідження локацій → рецепти». Brewing costs 2 energy and gives 2 XP like other actions.
+25. **A potion works at once or until sleep.** Buffs (growth, speed, strength, star) show as potion icons under the level in the HUD and are cleared every night; the same buff cannot be drunk twice a day. Potions are drunk from the bag («Випити») or with E / the left button when held on the toolbar. They are not lost in a defeat.
+26. **«Заклинання» from the spec** is the star infusion: «Іскра знань» costs no energy and hits harder until sleep. Names, recipes and numbers are drafts for the owner.

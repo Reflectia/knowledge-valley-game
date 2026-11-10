@@ -24,7 +24,7 @@
     "science": [
       { "id": "vigor", "cost": 1, "name": "Настій бадьорості", "text": "+15 здоров'я.", "effect": { "maxHealth": 15 } },
       { "id": "spark", "cost": 2, "name": "Іскра знань", "text": "Заклинання на праву кнопку миші.", "effect": { "spell": "spark" }, "later": "combat" },
-      { "id": "alchemy", "cost": 2, "name": "Алхімія", "text": "Зілля й нові рецепти.", "effect": { "alchemy": true }, "later": "v0.2" }
+      { "id": "alchemy", "cost": 2, "name": "Алхімія", "text": "Алхімічна лабораторія варить зілля; рецепти знаходяться в локаціях.", "effect": { "alchemy": true } }
     ]
   }
 }

@@ -60,6 +60,10 @@
     "mine": {
       "energy": 3,
       "xp": 2
+    },
+    "brew": {
+      "energy": 2,
+      "xp": 2
     }
   }
 }

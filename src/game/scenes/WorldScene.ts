@@ -2,7 +2,8 @@ import Phaser from 'phaser';
 import type { StoreApi } from 'zustand/vanilla';
 
 import { setNight, setPlace, sfx, type Sfx } from '@/audio';
-import { getPack } from '@/core/content';
+import { hasBuff } from '@/core/alchemy';
+import { getPack, packByBranch } from '@/core/content';
 import { readyBossIn, shieldHits } from '@/core/exam';
 import { addItem, cropFrame, decorAt, harvest, isRipe, pickUpDecor, placeDecor, plant, till, water } from '@/core/homestead';
 import { getItem, ITEMS } from '@/core/items';
@@ -188,6 +189,10 @@ export class WorldScene extends Phaser.Scene {
           break;
         case 'building':
           this.plots.push({ rect: new Phaser.Geom.Rectangle(x, y, w, h), pack: String(p.pack), objects: [] });
+          // The Science building is the alchemy lab (stage 13): it can be used, not only looked at.
+          if (String(p.pack) === packByBranch('science')?.id) {
+            this.interacts.push({ rect: new Phaser.Geom.Rectangle(x, y, w, h), action: `alchemy:${String(p.pack)}` });
+          }
           break;
         case 'shop':
           this.interacts.push({ rect: new Phaser.Geom.Rectangle(x, y, w, h), action: 'shop' });
@@ -588,6 +593,10 @@ export class WorldScene extends Phaser.Scene {
     // 1) Things to interact with (bed, journal, shop) under the cursor.
     for (const it of this.interacts) {
       if (!Phaser.Geom.Rectangle.Contains(it.rect, world.x, world.y)) continue;
+      if (it.action.startsWith('alchemy:')) {
+        this.useAlchemyLab(it.action.slice(8), it.rect);
+        return;
+      }
       if (!this.inReachRect(it.rect)) {
         this.notice('world.tooFar');
         return;
@@ -649,6 +658,15 @@ export class WorldScene extends Phaser.Scene {
     if (weapon && (ITEMS[weapon]?.tool === 'sword' || ITEMS[weapon]?.tool === 'staff' || ITEMS[weapon]?.tool === 'bow')) {
       if (this.combat) this.combat.attack(weapon, world);
       else this.notice('combat.noEnemies');
+      return true;
+    }
+    if (weapon && ITEMS[weapon]?.kind === 'potion') {
+      const reason = s.drink(weapon);
+      if (reason) this.notice(`alchemy.fail.${reason}`);
+      else {
+        sfx('spell');
+        showToast({ icon: 'spark', title: i18n.t('alchemy.drank', { name: getItem(weapon).name }), text: getItem(weapon).text });
+      }
       return true;
     }
     const plot = this.mapId === 'homestead' ? s.world.state.plots[key] : undefined;
@@ -762,6 +780,22 @@ export class WorldScene extends Phaser.Scene {
     if (this.mapId === 'homestead' && this.store.getState().world.state.plots[`${tx},${ty}`]) return false;
     const bodies = this.physics.overlapRect(tx * T + 1, ty * T + 1, T - 2, T - 2, true, true);
     return bodies.length === 0;
+  }
+
+  /** The alchemy lab: brew with the skill, near enough; otherwise it is a building like the others. */
+  private useAlchemyLab(pack: string, rect: Phaser.Geom.Rectangle): void {
+    const s = this.store.getState();
+    const d = Object.values(s.labs.curriculum.disciplines).find((x) => x.pack === pack);
+    const level = d ? (s.progress.disciplines[d.key]?.buildingLevel ?? 0) : 0;
+    if (level === 0 || !this.inReachRect(rect)) {
+      this.buildingInfo(pack);
+      return;
+    }
+    if (!s.effects.alchemy) {
+      showToast({ icon: 'book', title: loc(getPack(pack).building.name), text: i18n.t('alchemy.needSkill') });
+      return;
+    }
+    s.requestUi('alchemy');
   }
 
   private buildingInfo(pack: string): void {
@@ -958,7 +992,9 @@ export class WorldScene extends Phaser.Scene {
     } else if (moving) {
       this.facing = dx < 0 ? 'left' : dx > 0 ? 'right' : dy < 0 ? 'up' : 'down';
       const len = Math.hypot(dx, dy);
-      this.heroine.setVelocity((dx / len) * SPEED, (dy / len) * SPEED);
+      // The speed potion: a third faster until sleep.
+      const speed = SPEED * (hasBuff(this.store.getState().world.state, 'speed') ? 4 / 3 : 1);
+      this.heroine.setVelocity((dx / len) * speed, (dy / len) * speed);
       if (this.time.now - this.lastStep > STEP_MS) {
         this.lastStep = this.time.now;
         sfx('step');

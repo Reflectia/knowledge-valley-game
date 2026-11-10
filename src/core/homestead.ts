@@ -127,7 +127,7 @@ export function growNight(w: WorldState, fx: Effects = NO_EFFECTS): WorldState {
       golem -= 1;
     }
     const grows = p.crop && watered && !isRipe(p);
-    const step = grows ? (fx.firstNightBoost && p.growth === 0 ? 2 : 1) : 0;
+    const step = grows ? (fx.firstNightBoost && p.growth === 0 ? 2 : 1) + (fx.growthBonus ?? 0) : 0;
     const days = p.crop ? CROPS[p.crop].days : 0;
     plots[key] = { ...p, growth: Math.min(days || Infinity, p.growth + step), wateredToday: false };
   }

@@ -69,6 +69,7 @@ const sheet = (
 export const ENEMIES = ['beetle', 'deadline', 'ghost', 'magpie', 'moth', 'slime', 'sprout', 'wisp'] as const;
 export const ITEMS = ['book', 'potion', 'seed', 'staff'] as const;
 export const TOOL_ICONS = ['sword', 'hoe', 'watering-can', 'axe', 'pickaxe'] as const;
+export const POTION_ICONS = ['energy', 'health', 'growth', 'wisdom', 'speed', 'strength', 'star'] as const;
 export const BIOMES = ['forest', 'tower', 'market', 'forge', 'library'] as const;
 
 /** Discipline buildings with the owner's art (scripts/assets/build_buildings.py); a pack without art uses temporary tiles. */
@@ -108,6 +109,8 @@ export const ASSETS: Record<string, Asset> = {
   // Exam trophies and bosses, drawn after the owner's sheets (scripts/assets/draw_bosses.py).
   ...Object.fromEntries(BIOMES.map((id) => [`item-trophy-${id}`, img(pub(`items/trophy-${id}.png`))])),
   ...Object.fromEntries(BOSS_ART.map((id) => [bossKey(id), img(pub(`bosses/${id}.png`))])),
+  // Potions: the owner's potion with the liquid recoloured (scripts/assets/build_potions.py).
+  ...Object.fromEntries(POTION_ICONS.map((id) => [`item-potion-${id}`, img(pub(`items/potion-${id}.png`))])),
   ...Object.fromEntries(
     BIOMES.map((id) => [
       `portrait-${id}`,

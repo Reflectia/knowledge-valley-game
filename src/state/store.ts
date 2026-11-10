@@ -5,6 +5,7 @@ import { markDone, setScore, unmarkDone } from '@/core/curriculum';
 import { deriveProgress, pruneShown, reconcile, rewardKey, type DerivedProgress } from '@/core/rewards';
 import { BALANCE } from '@/core/content';
 import { applyDefeat, applyLoot, ENEMY_DEFS, rollLoot, type DefeatLoss } from '@/core/combat';
+import { brew as brewPotion, drink as drinkPotion, findRecipe, hasBuff } from '@/core/alchemy';
 import { bossFor, examState, payTrophies } from '@/core/exam';
 import { nextArcBeat, toldWith } from '@/core/story';
 import { growNight } from '@/core/homestead';
@@ -30,7 +31,7 @@ export const DAY_START_MINUTES = DAY.startMinutes;
 export type SleepReason = 'bed' | 'late' | 'tired' | 'defeat';
 
 /** A window the world asks the UI to open (the journal on the desk, the shop stall, the mailbox). */
-export type UiRequest = 'journal' | 'shop' | 'mail';
+export type UiRequest = 'journal' | 'shop' | 'mail' | 'alchemy';
 
 /** A mentor talking: lines shown one by one in the dialog box. */
 export interface Dialog {
@@ -116,8 +117,15 @@ export interface GameState {
   closeDialog(): void;
   /** An enemy hits the heroine. At zero health she is defeated (spec §4). */
   damagePlayer(amount: number): void;
-  /** An enemy is defeated: XP (up to the ceiling) and loot. Returns the loot. */
-  defeatEnemy(enemy: string, rng?: () => number): { coins: number; items: string[] };
+  /**
+   * An enemy is defeated: XP (up to the ceiling) and loot. In a location, with alchemy known, it may
+   * leave the location's recipe. Returns the loot and the recipe found.
+   */
+  defeatEnemy(enemy: string, rng?: () => number, pack?: string): { coins: number; items: string[]; recipe?: string };
+  /** Brew a potion at the alchemy lab (costs a little energy). Returns a reason on failure. */
+  brew(id: string): string | null;
+  /** Drink a potion from the bag. Returns a reason on failure. */
+  drink(id: string): string | null;
   /**
    * The exam boss of a discipline is beaten (spec §4): the victory is saved at once, the trophy
    * goes to the bag, plus coins and XP. Does nothing unless the boss is ready today.
@@ -357,13 +365,25 @@ export function createGameStore(saves: SaveStore, now: () => Date = () => new Da
         set({ world: { ...world, state: after }, lastDefeat: lost, sleepRequest: 'defeat', dialog: null });
       },
 
-      defeatEnemy(enemy, rng = Math.random) {
-        const { world, progress } = get();
+      defeatEnemy(enemy, rng = Math.random, pack) {
+        const { world, progress, effects } = get();
         const loot = rollLoot(enemy, rng);
-        const next = applyLoot(world.state, loot);
+        let next = applyLoot(world.state, loot);
         const player = gainXp(next.player, ENEMY_DEFS[enemy]?.xp ?? 0, progress.ceiling);
+        const recipe = pack && effects.alchemy ? findRecipe(next, pack, rng) : null;
+        if (recipe) next = { ...next, recipes: [...(next.recipes ?? []), recipe] };
         set({ world: { ...world, state: { ...next, player } } });
-        return loot;
+        return recipe ? { ...loot, recipe } : loot;
+      },
+
+      brew(id) {
+        if (!get().effects.alchemy) return 'noAlchemy';
+        return get().act('brew', (w) => brewPotion(w, id));
+      },
+
+      drink(id) {
+        const s = get();
+        return s.editWorld((w) => drinkPotion(w, id, { maxEnergy: s.maxEnergy(), maxHealth: s.maxHealth(), ceiling: s.progress.ceiling }));
       },
 
       async winExam(key) {
@@ -419,9 +439,13 @@ export function createGameStore(saves: SaveStore, now: () => Date = () => new Da
       async sleep() {
         const { world } = get();
         // Night: the golem helps, watered crops grow, the soil dries.
-        const grown = growNight(world.state, get().effects);
+        // The growth potion adds a day to every watered crop tonight.
+        const fx = get().effects;
+        const grown = growNight(world.state, hasBuff(world.state, 'growth') ? { ...fx, growthBonus: fx.growthBonus + 1 } : fx);
         const state = {
           ...grown,
+          // Potion effects last until sleep.
+          buffs: [],
           day: world.state.day + 1,
           player: { ...grown.player, energy: get().maxEnergy(), health: get().maxHealth() },
         };

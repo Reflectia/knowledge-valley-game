@@ -454,6 +454,76 @@
       "icon": {
         "texture": "item-trophy-library"
       }
+    },
+    {
+      "id": "potion-energy",
+      "kind": "potion",
+      "name": "Зілля бадьорості",
+      "text": "+40 енергії. Пахне ранковою росою.",
+      "sell": 30,
+      "icon": {
+        "texture": "item-potion-energy"
+      }
+    },
+    {
+      "id": "potion-health",
+      "kind": "potion",
+      "name": "Цілюще зілля",
+      "text": "+50 здоров'я. Трохи щипає, зате допомагає.",
+      "sell": 35,
+      "icon": {
+        "texture": "item-potion-health"
+      }
+    },
+    {
+      "id": "potion-growth",
+      "kind": "potion",
+      "name": "Зілля росту",
+      "text": "Цієї ночі політі рослини підростуть на день більше.",
+      "sell": 40,
+      "icon": {
+        "texture": "item-potion-growth"
+      }
+    },
+    {
+      "id": "potion-wisdom",
+      "kind": "potion",
+      "name": "Еліксир мудрості",
+      "text": "+20 досвіду (до стелі рівня).",
+      "sell": 45,
+      "icon": {
+        "texture": "item-potion-wisdom"
+      }
+    },
+    {
+      "id": "potion-speed",
+      "kind": "potion",
+      "name": "Зілля легких ніг",
+      "text": "До сну ходиш на третину швидше.",
+      "sell": 35,
+      "icon": {
+        "texture": "item-potion-speed"
+      }
+    },
+    {
+      "id": "potion-strength",
+      "kind": "potion",
+      "name": "Зілля сили",
+      "text": "До сну зброя б'є на 2 сильніше.",
+      "sell": 40,
+      "icon": {
+        "texture": "item-potion-strength"
+      }
+    },
+    {
+      "id": "potion-star",
+      "kind": "potion",
+      "name": "Зоряний настій",
+      "text": "До сну «Іскра знань» не витрачає енергії й б'є сильніше.",
+      "sell": 45,
+      "icon": {
+        "texture": "item-potion-star"
+      }
     }
   ],
   "crops": [

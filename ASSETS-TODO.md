@@ -100,4 +100,7 @@ redrawn by hand in simple shapes by `python scripts/assets/draw_bosses.py` into
 from the sheets, their fine detail turned into noise at this size (owner's request, 2026-11-10). A pack missing from `BOSS_ART`
 (`src/game/assets/manifest.ts`) falls back to its biome enemy drawn ×2 (`placeholder` in `bosses.json`).
 
+Potions (stage 13): seven icons are the owner's potion sprite (`items/potion.png`) with the liquid
+recoloured per potion by `python scripts/assets/build_potions.py` → `public/assets/items/potion-<id>.png`.
+
 Still missing, no placeholder yet: house interior tiles.
