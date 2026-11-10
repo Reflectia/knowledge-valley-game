@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { getPack } from '@/core/content';
@@ -122,8 +122,21 @@ function LabList({ labs }: { labs: Lab[] }) {
 function LabRow({ lab, edit, onEdit }: { lab: Lab; edit: 'date' | 'score' | null; onEdit: (m: 'date' | 'score' | null) => void }) {
   const { t } = useTranslation();
   const thresholds = useGame((s) => s.labs.settings.rarityThresholds);
+  const row = useRef<HTMLDivElement>(null);
+  const wasEditing = useRef(false);
+  // When a form closes, its buttons are gone: put focus back on the lab's action (WCAG 2.4.3),
+  // unless something else (the reward window) already has it.
+  useEffect(() => {
+    if (wasEditing.current && !edit) {
+      const active = document.activeElement;
+      if (!active || active === document.body || !active.isConnected || row.current?.contains(active)) {
+        row.current?.querySelector<HTMLElement>('.dv-lab__actions button')?.focus();
+      }
+    }
+    wasEditing.current = !!edit;
+  }, [edit]);
   return (
-    <div className="dv-lab">
+    <div className="dv-lab" ref={row}>
       <span className="dv-lab__name">
         {t('common.lab', { n: lab.labNo })}
         {lab.title ? ` · ${lab.title}` : ''}
@@ -214,7 +227,7 @@ function DateForm({ lab, onDone }: { lab: Lab; onDone: () => void }) {
       <label className="dv-field">
         <span className="dv-field__label">{t('journal.doneDate')}</span>
         <span className="dv-field__row">
-          <input className="dv-input dv-input--date" type="date" value={date} required onChange={(e) => setDate(e.target.value)} />
+          <input className="dv-input dv-input--date" type="date" value={date} required autoFocus onChange={(e) => setDate(e.target.value)} />
         </span>
         <span className="dv-field__help">{help}</span>
       </label>
