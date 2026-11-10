@@ -1,5 +1,6 @@
 {
   "_comment": "Item catalog. icon = { sheet, frame } in a manifest sprite sheet, or { texture }. Names and prices are drafts for the owner to edit. Most art is temporary (ASSETS-TODO.md).",
+  "uniqueText": "Унікальна річ за оцінену лабораторну. Постав її в будинку — так збирається твоя виставка.",
   "items": [
     {
       "id": "hoe",

@@ -908,3 +908,11 @@ body[data-screen='start'] {
   display: flex;
   gap: var(--space-2);
 }
+
+/* A unique item on display in the house: still listed, faded; its name says «на виставці». */
+.inventory .dv-slot.is-placed img {
+  opacity: 0.45;
+}
+.inventory button.dv-slot {
+  cursor: pointer;
+}

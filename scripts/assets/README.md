@@ -10,6 +10,7 @@ Requires Python 3.10+ with Pillow and numpy (`pip install pillow numpy`). Run fr
 | `build_tools.py` | Tool icons (hoe, watering can, axe, pickaxe; sword = sword cursor) and the in-game arrow cursor |
 | `build_mentors.py [--review]` | Mentor world sprites 16×32 (`public/assets/mentors/`), hand-drawn after the portraits |
 | `draw_bosses.py [--review DIR]` | Exam bosses 32×32 (`public/assets/bosses/`) and trophies 16×16 (`items/trophy-<pack>.png`), hand-drawn in simple shapes after the owner's sheets |
+| `draw_uniques.py [--review DIR]` | Unique lab items 16×16 (`public/assets/uniques/`), hand-drawn after their names |
 | `build_potions.py` | Potion icons 16×16 (`items/potion-<id>.png`): the owner's potion with the liquid recoloured |
 | `build_biome_tiles.py` | Biome tilesets (`images/biomes/`): sampled surfaces, hand-drawn props |
 | `preview.py` | `docs/assets-preview.png`: old design-system PNG next to the new cut |

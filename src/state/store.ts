@@ -6,7 +6,7 @@ import { deriveProgress, pruneShown, reconcile, rewardKey, type DerivedProgress 
 import { BALANCE } from '@/core/content';
 import { applyDefeat, applyLoot, ENEMY_DEFS, rollLoot, type DefeatLoss } from '@/core/combat';
 import { brew as brewPotion, drink as drinkPotion, findRecipe, hasBuff } from '@/core/alchemy';
-import { bossFor, examState, payTrophies } from '@/core/exam';
+import { bossFor, examState, payTrophies, syncUniques } from '@/core/exam';
 import { nextArcBeat, toldWith } from '@/core/story';
 import { growNight } from '@/core/homestead';
 import { disciplineOfPack, dueLetters, mentorLines, type Letter } from '@/core/mentors';
@@ -188,7 +188,7 @@ export function createGameStore(saves: SaveStore, now: () => Date = () => new Da
       const labs = { ...incoming, shownRewards: silent ? [...new Set([...shown, ...r.events.map(rewardKey)])] : shown };
       const progress = deriveProgress(labs.curriculum, thresholds);
       // Trophies of won exams: paid once, also after a reload (the world is saved at night).
-      const state = payTrophies(r.world, labs.exams ?? {});
+      const state = syncUniques(payTrophies(r.world, labs.exams ?? {}), progress.uniques);
       set((s) => ({
         labs,
         world: { state, ledger: r.ledger },
@@ -468,7 +468,7 @@ export function createGameStore(saves: SaveStore, now: () => Date = () => new Da
         const progress = deriveProgress(file.labs.curriculum, file.labs.settings.rarityThresholds);
         set({
           labs: file.labs,
-          world: file.world,
+          world: { ...file.world, state: syncUniques(file.world.state, progress.uniques) },
           progress,
           effects: effectsOf(file.labs.skills ?? [], progress.skillPoints),
           pendingRewards: [],

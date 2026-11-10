@@ -7,6 +7,7 @@ import { PACKS, getPack, packByBranch, uniqueItem } from '@/core/content';
 import { RARITIES, type Curriculum, type Rarity, type RewardEvent } from '@/core/types';
 
 import { Ico, Overlay, assetUrl } from '../components/common';
+import { uniqueIconUrl } from '../components/ItemIcon';
 import { useGame } from '../GameContext';
 import { scoreText } from '../format';
 import { loc } from '@/i18n';
@@ -46,7 +47,7 @@ export function RewardScene({ events, onTake }: { events: RewardEvent[]; onTake:
 function ItemSlot({ itemId, rarity, large = false }: { itemId: string; rarity: Rarity; large?: boolean }) {
   const { t } = useTranslation();
   const item = uniqueItem(itemId);
-  const icon = item ? assetUrl(item.pack.uniqueIcon) : assetUrl('item-book');
+  const icon = item ? uniqueIconUrl(itemId, item.pack.uniqueIcon) : assetUrl('item-book');
   return (
     // Focusable so keyboard players can read the name in the tooltip too.
     <span

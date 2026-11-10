@@ -111,3 +111,18 @@ describe('winning an exam in the game store', () => {
     expect(file.labs.exams).toEqual({});
   });
 });
+
+describe('unique lab items in the bag', () => {
+  it('are in the bag while not on display, never twice', async () => {
+    const { syncUniques } = await import('./exam');
+    const earned = [{ itemId: 'forest-unique-1' }, { itemId: 'forest-unique-2' }];
+    const w = syncUniques(newWorld(), earned);
+    expect(w.inventory['forest-unique-1']).toBe(1);
+    expect(syncUniques(w, earned)).toBe(w);
+    const shown = { ...w, inventory: { ...w.inventory }, decor: [{ uid: 1, item: 'forest-unique-1', map: 'house', x: 3, y: 3 }] };
+    delete shown.inventory['forest-unique-1'];
+    expect(syncUniques(shown, earned).inventory['forest-unique-1']).toBeUndefined();
+    // a lab no longer graded takes its item out of the bag
+    expect(syncUniques(w, [earned[1]]).inventory['forest-unique-1']).toBeUndefined();
+  });
+});

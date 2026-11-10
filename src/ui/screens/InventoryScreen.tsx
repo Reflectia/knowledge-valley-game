@@ -6,8 +6,8 @@ import { uniqueItem } from '@/core/content';
 import { setToolbarSlot } from '@/core/homestead';
 import { ITEMS, isConsumable, type ItemKind } from '@/core/items';
 
-import { ItemIcon } from '../components/ItemIcon';
-import { Ico, Panel, assetUrl } from '../components/common';
+import { ItemIcon, uniqueIconUrl } from '../components/ItemIcon';
+import { Ico, Panel } from '../components/common';
 import { useGame } from '../GameContext';
 import { scoreText } from '../format';
 import { loc } from '@/i18n';
@@ -39,15 +39,20 @@ export function InventoryScreen({ onClose }: { onClose: () => void }) {
 
   const owned = Object.entries(inventory).filter(([id, n]) => n > 0 && ITEMS[id]);
   const shown = hover ?? picked;
-  const shownItem = shown && !shown.startsWith('u:') ? ITEMS[shown] : undefined;
-  const shownUnique = shown?.startsWith('u:') ? uniques.find((u) => `u:${u.labKey}` === shown) : undefined;
+  // A unique item is shown with its lab and rarity: hovered by its lab, picked by its item id.
+  const shownUnique = shown?.startsWith('u:')
+    ? uniques.find((u) => `u:${u.labKey}` === shown)
+    : shown && ITEMS[shown]?.unique
+      ? uniques.find((u) => u.itemId === shown)
+      : undefined;
+  const shownItem = shown && !shown.startsWith('u:') && !ITEMS[shown]?.unique ? ITEMS[shown] : undefined;
 
   return (
     <Panel title={t('inventory.title')} onClose={onClose} labelledBy="inventory-title" className="inventory">
       <div className="inventory__body">
         <div className="inventory__groups">
           {GROUPS.map((g) => {
-            const items = owned.filter(([id]) => ITEMS[id].kind === g.kind);
+            const items = owned.filter(([id]) => ITEMS[id].kind === g.kind && !ITEMS[id].unique);
             if (!items.length) return null;
             return (
               <section key={g.kind} className="inventory__group">
@@ -82,26 +87,28 @@ export function InventoryScreen({ onClose }: { onClose: () => void }) {
               <div className="inventory__grid">
                 {uniques.map((u) => {
                   const info = uniqueItem(u.itemId);
+                  // In the bag it can go to the toolbar and be placed in the house; on display it stays there.
+                  const inBag = (inventory[u.itemId] ?? 0) > 0;
                   return (
-                    <span
+                    <button
                       key={u.labKey}
-                      className={`dv-slot dv-slot--${u.rarity}`}
-                      // Focusable so the keyboard can read it too (the info panel shows it).
-                      tabIndex={0}
-                      role="img"
-                      aria-label={`${loc(info?.name) ?? ''}, ${t(`rarity.${u.rarity}`)}`}
+                      type="button"
+                      className={`dv-slot dv-slot--${u.rarity}${picked === u.itemId ? ' is-selected' : ''}${inBag ? '' : ' is-placed'}`}
+                      aria-label={`${loc(info?.name) ?? ''}, ${t(`rarity.${u.rarity}`)}${inBag ? '' : `, ${t('inventory.onDisplay')}`}`}
+                      aria-pressed={picked === u.itemId}
                       data-tip={loc(info?.name)}
                       data-tip-rarity={u.rarity}
+                      onClick={() => inBag && setPicked(picked === u.itemId ? null : u.itemId)}
                       onMouseEnter={() => setHover(`u:${u.labKey}`)}
                       onMouseLeave={() => setHover(null)}
                       onFocus={() => setHover(`u:${u.labKey}`)}
                       onBlur={() => setHover(null)}
                     >
-                      {info && <img src={assetUrl(info.pack.uniqueIcon)} alt={loc(info.name)} />}
+                      {info && <img src={uniqueIconUrl(u.itemId, info.pack.uniqueIcon)} alt="" />}
                       <span className="dv-slot__badge">
                         <Ico name={`r-${u.rarity}`} />
                       </span>
-                    </span>
+                    </button>
                   );
                 })}
               </div>
@@ -141,6 +148,9 @@ export function InventoryScreen({ onClose }: { onClose: () => void }) {
                 <p className="dv-tooltip__title">{loc(info?.name)}</p>
                 <p className={`dv-tooltip__meta dv-rarity--${shownUnique.rarity}`}>
                   <Ico name={`r-${shownUnique.rarity}`} /> {t(`rarity.${shownUnique.rarity}`)}
+                </p>
+                <p className="dv-tooltip__hint">
+                  {(inventory[shownUnique.itemId] ?? 0) > 0 ? t('inventory.placeUnique') : t('inventory.onDisplayHint')}
                 </p>
                 {lab && (
                   <p className="dv-tooltip__hint">

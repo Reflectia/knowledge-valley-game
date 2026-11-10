@@ -109,6 +109,10 @@ export const ASSETS: Record<string, Asset> = {
   // Exam trophies and bosses, drawn after the owner's sheets (scripts/assets/draw_bosses.py).
   ...Object.fromEntries(BIOMES.map((id) => [`item-trophy-${id}`, img(pub(`items/trophy-${id}.png`))])),
   ...Object.fromEntries(BOSS_ART.map((id) => [bossKey(id), img(pub(`bosses/${id}.png`))])),
+  // Unique lab items, hand-drawn after their names (scripts/assets/draw_uniques.py).
+  ...Object.fromEntries(
+    BIOMES.flatMap((pack) => [1, 2, 3, 4, 5].map((i) => [`item-${pack}-unique-${i}`, img(pub(`uniques/${pack}-unique-${i}.png`))])),
+  ),
   // Potions: the owner's potion with the liquid recoloured (scripts/assets/build_potions.py).
   ...Object.fromEntries(POTION_ICONS.map((id) => [`item-potion-${id}`, img(pub(`items/potion-${id}.png`))])),
   ...Object.fromEntries(

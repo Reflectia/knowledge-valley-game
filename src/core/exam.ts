@@ -9,6 +9,7 @@
 import data from '../content/bosses.json';
 
 import { addItem } from './homestead';
+import { ITEMS } from './items';
 import type { DisciplineProgress } from './rewards';
 import type { Curriculum, Discipline, DisciplineKey, ISODate, WorldState } from './types';
 
@@ -75,6 +76,30 @@ export function readyBossIn(
 /** Hits the knowledge shield blocks in a boss fight: one per on-time lab. */
 export function shieldHits(p: DisciplineProgress | undefined): number {
   return (p?.shieldCharges ?? 0) * data.shield.hitsPerCharge;
+}
+
+/**
+ * Unique lab items in the bag: every earned item (rewards.deriveProgress `uniques`) that is not
+ * on display in the house. Recomputed from the labs, so a re-graded or undone lab never
+ * duplicates an item, and one taken off display comes back to the bag.
+ */
+export function syncUniques(world: WorldState, earned: { itemId: string }[]): WorldState {
+  const want = new Map<string, number>();
+  for (const u of earned) want.set(u.itemId, (want.get(u.itemId) ?? 0) + 1);
+  for (const d of world.decor) if (want.has(d.item)) want.set(d.item, want.get(d.item)! - 1);
+  const inventory = { ...world.inventory };
+  let changed = false;
+  const ids = new Set([...want.keys(), ...Object.keys(inventory).filter((id) => ITEMS[id]?.unique)]);
+  for (const id of ids) {
+    const n = Math.max(0, want.get(id) ?? 0);
+    if ((inventory[id] ?? 0) === n) continue;
+    changed = true;
+    if (n > 0) inventory[id] = n;
+    else delete inventory[id];
+  }
+  if (!changed) return world;
+  const toolbar = world.toolbar.map((t) => (t && ITEMS[t]?.unique && !inventory[t] ? null : t));
+  return { ...world, inventory, toolbar };
 }
 
 /**

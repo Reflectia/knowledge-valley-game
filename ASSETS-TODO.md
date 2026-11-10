@@ -71,9 +71,9 @@ hand after the portraits (`public/assets/mentors/<pack>.png`, `scripts/assets/bu
 elf druid, mechanical owl, fox merchant, dwarf smith, old astronomer. Front view only, no walk frames. The mailbox (flag down / up) is
 self-drawn (`mailbox.png`).
 
-Unique items (5 per pack) have no art of their own yet: the game shows one item sprite per pack
-(`uniqueIcon` in `src/content/packs/*.json`: forest → seed, tower → staff, market → potion,
-forge → staff, library → book) inside the rarity frame. 25 item sprites 16×16 are needed.
+Unique items (5 per pack) are hand-drawn 16×16 after their names by `python scripts/assets/draw_uniques.py`
+→ `public/assets/uniques/<pack>-unique-<n>.png`. `uniqueIcon` in `src/content/packs/*.json` is only the
+fallback for a pack without drawings.
 
 Combat: enemies use the owner's sprites (`enemies/*.png`). The bow icon is Tiny Town (temporary);
 the staff is the owner's staff sprite. The spark and arrow projectiles are drawn in code from

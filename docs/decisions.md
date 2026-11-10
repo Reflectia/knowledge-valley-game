@@ -55,3 +55,9 @@ Date: 2026-11-04.
 24. **Seven potions** (`src/content/alchemy.json`): energy and health are known at once; each location hides one more recipe (growth, wisdom/XP, speed, strength, star spell), found with a 25 % chance per enemy defeated there — spec §4 «дослідження локацій → рецепти». Brewing costs 2 energy and gives 2 XP like other actions.
 25. **A potion works at once or until sleep.** Buffs (growth, speed, strength, star) show as potion icons under the level in the HUD and are cleared every night; the same buff cannot be drunk twice a day. Potions are drunk from the bag («Випити») or with E / the left button when held on the toolbar. They are not lost in a defeat.
 26. **«Заклинання» from the spec** is the star infusion: «Іскра знань» costs no energy and hits harder until sleep. Names, recipes and numbers are drafts for the owner.
+
+## Unique lab items (after stage 13)
+
+27. **Unique items go on display in the house** (owner's choice, 2026-11-10): «Облаштування → виставка трофеїв» in the spec. Each earned unique is a placeable indoor item: pick it in the bag, put it on the toolbar, place it on the floor with the right button / Q, take it back the same way. The bag still lists every unique with its rarity; one on display is faded and says so.
+28. **Uniques stay derived from the labs.** The bag holds every earned unique that is not on display (`exam.syncUniques`), so a re-graded or undone lab never duplicates an item.
+29. **Each of the 25 uniques has its own 16×16 drawing** after its name (`scripts/assets/draw_uniques.py`); a future pack without drawings falls back to its `uniqueIcon`.

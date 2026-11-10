@@ -24,6 +24,11 @@ function Icon({ icon, scale, label }: { icon: ItemIconDef; scale: number; label?
   return null;
 }
 
+/** Picture of a unique lab item: its own drawing, or the pack's placeholder for a pack without art. */
+export function uniqueIconUrl(itemId: string, fallback: string): string {
+  return assetUrl(ASSETS[`item-${itemId}`] ? `item-${itemId}` : fallback);
+}
+
 /** The 16×16 icon of a catalog item, drawn ×2 (or `scale`); seeds get their crop in the corner. */
 export function ItemIcon({ id, scale = 2 }: { id: string; scale?: number }) {
   const item = ITEMS[id];
