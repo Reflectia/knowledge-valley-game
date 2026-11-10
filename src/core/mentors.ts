@@ -10,7 +10,6 @@ import { daysBetween } from './rules';
 import type { Curriculum, Discipline, ISODate, Lab } from './types';
 
 export interface MentorContent {
-  sprite: number;
   greet: string[];
   idle: string[];
   praise: string[];

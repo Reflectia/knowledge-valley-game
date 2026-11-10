@@ -1,7 +1,6 @@
 {
-  "_comment": "Mentor lines and letters per theme pack (drafts for the owner to edit). Lines are 1–2 short sentences (DialogBox, body-lg). Placeholders: {{name}} heroine, {{lab}} lab number, {{discipline}} discipline name, {{date}} ДД.ММ, {{days}} days left, {{location}}. The world sprite is temporary (Tiny Dungeon frame).",
+  "_comment": "Mentor lines and letters per theme pack (drafts for the owner to edit). Lines are 1–2 short sentences (DialogBox, body-lg). Placeholders: {{name}} heroine, {{lab}} lab number, {{discipline}} discipline name, {{date}} ДД.ММ, {{days}} days left, {{location}}. The world sprite is public/assets/mentors/<pack>.png (scripts/assets/build_mentors.py).",
   "forest": {
-    "sprite": 112,
     "greet": ["Ти прийшла, {{name}}! Ліс чекав на тебе — навіть мох нашорошив вуха.", "Тут усе росте від знань. І ти теж."],
     "idle": [
       "Модель — як дерево: спершу коріння, потім гілки, а листя саме з'явиться.",
@@ -24,7 +23,6 @@
     }
   },
   "tower": {
-    "sprite": 84,
     "greet": ["Ух-ух. Нова відвідувачка: {{name}}. Імовірність успіху — висока.", "Вежа холодна, але знання тут теплі."],
     "idle": [
       "Обчислено: дві чашки чаю дорівнюють одній зрозумілій нейромережі.",
@@ -47,7 +45,6 @@
     }
   },
   "market": {
-    "sprite": 88,
     "greet": ["О, покупниця! Ні, краще — партнерка. Ласкаво прошу, {{name}}.", "На ярмарку все має ціну. Окрім гарно спланованого часу — той безцінний."],
     "idle": [
       "Пріоритет — це коли знаєш, що роби спершу. Решта — дрібна монета.",
@@ -70,7 +67,6 @@
     }
   },
   "forge": {
-    "sprite": 87,
     "greet": ["Гм. Ще одна архітекторка? Добре. {{name}}, бери молоток.", "Тут ми будуємо так, щоб стояло. І код, і стіни."],
     "idle": [
       "Без фундаменту і найкраща вежа — купа цегли з амбіціями.",
@@ -93,7 +89,6 @@
     }
   },
   "library": {
-    "sprite": 100,
     "greet": ["Зорі казали, що ти прийдеш, {{name}}. Вони рідко помиляються.", "Бібліотека пам'ятає всі питання. Відповіді шукаємо разом."],
     "idle": [
       "Гіпотеза — це зоря, якої ще не нанесли на карту.",

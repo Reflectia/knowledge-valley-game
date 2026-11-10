@@ -830,7 +830,7 @@ export class WorldScene extends Phaser.Scene {
 
   /**
    * Mentors: the location's mentor at their clearing; on a deadline day the mentor
-   * of that discipline visits the homestead (spec §6). Temporary Tiny Dungeon figures.
+   * of that discipline visits the homestead (spec §6). 16×32 figures drawn after the portraits.
    */
   private renderMentors(): void {
     for (const o of this.mentorObjects) {
@@ -841,13 +841,12 @@ export class WorldScene extends Phaser.Scene {
     this.mentorTalk = [];
     const s = this.store.getState();
     const place = (pack: string, x: number, y: number) => {
-      const m = MENTORS[pack];
-      if (!m) return;
-      const img = this.add.image(x, y, 'temp-dungeon', m.sprite).setOrigin(0.5, 1).setDepth(y);
+      if (!MENTORS[pack] || !this.textures.exists(`mentor-${pack}`)) return;
+      const img = this.add.image(x, y, `mentor-${pack}`).setOrigin(0.5, 1).setDepth(y);
       // A small bob so mentors read as alive.
       this.tweens.add({ targets: img, y: y - 1, duration: 600, yoyo: true, repeat: -1, ease: 'Stepped' });
       this.mentorObjects.push(img, this.addBlocker(x - 5, y - 5, 10, 5));
-      this.mentorTalk.push({ pack, rect: new Phaser.Geom.Rectangle(x - 8, y - 18, 16, 18) });
+      this.mentorTalk.push({ pack, rect: new Phaser.Geom.Rectangle(x - 8, y - 32, 16, 32) });
     };
     const pack = this.packOfMap();
     if (pack && this.mentorSpot) place(pack, this.mentorSpot.x, this.mentorSpot.y);

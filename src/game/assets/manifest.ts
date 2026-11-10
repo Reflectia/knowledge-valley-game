@@ -102,6 +102,8 @@ export const ASSETS: Record<string, Asset> = {
     ]),
   ),
   emblem: img(pub('portraits/emblem.png')),
+  // Mentors in the world, 16×32, drawn after the portraits (scripts/assets/build_mentors.py).
+  ...Object.fromEntries(BIOMES.map((id) => [`mentor-${id}`, img(pub(`mentors/${id}.png`))])),
 
   // All tiles of the locations live in images/biomes/ (scripts/assets/build_biome_tiles.py,
   // homestead tiles: build_sprites.py homestead).
